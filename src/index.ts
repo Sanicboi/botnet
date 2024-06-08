@@ -7,7 +7,8 @@ import OpenAI from "openai";
 import { Bot } from "./entity/Bot";
 import { User } from "./entity/User";
 import TgBot from "node-telegram-bot-api";
-import redis from "redis";
+import {Queue, Worker} from "bullmq";
+
 import { text } from "stream/consumers";
 const openAi = new OpenAI({
   apiKey: process.env.OPENAI_KEY,
@@ -40,7 +41,7 @@ AppDataSource.initialize()
     const bots = await botRepo.find({
       take: 10,
     });
-    const manager = new TgBot(process.env.BOT_KEY, {
+    const manager = new TgBot("7347879515:AAGfiiuwBzlgFHHASnBnjxkwNPUooFXO3Qc", {
       polling: true,
     });
 
@@ -74,11 +75,11 @@ AppDataSource.initialize()
           notTalked[i].threadId = thread.id;
           notTalked[i].botid = bot.id;
           await userRepo.save(notTalked[i]);
-          await publisherOut.publish("outgoing", JSON.stringify({
+          await queueOut.add("out", {
             bot: client.session.save(),
             text: startMessage,
             user: notTalked[i].usernameOrPhone
-          }));
+          });
           await client.sendMessage(notTalked[i].usernameOrPhone, {
             message: startMessage,
           });
@@ -105,30 +106,18 @@ AppDataSource.initialize()
       }
     });
 
-    const publisherIn = redis.createClient({
-      socket: {
-        host: "redis",
-      },
+    const queueIn = new Queue('in', {
+      connection: {
+        host: 'redis'
+      }
     });
-    const publisherOut = redis.createClient({
-      socket: {
-        host: "redis",
-      },
+    const queueOut = new Queue('out', {
+      connection: {
+          host: "redis",
+      }
     });
-    const channelIn = "incoming";
-    const channelOut = "outcoming";
-    const subscriberIn = redis.createClient({
-      socket: {
-        host: "redis",
-      },
-    });
-    const subscriberOut = redis.createClient({
-      socket: {
-        host: "redis",
-      },
-    });
-    subscriberOut.subscribe("outcoming", async (channel, m: string) => {
-      const msg: OutcomingReq = JSON.parse(m);
+    const workerOut = new Worker('out', async (job) => {
+      const msg: OutcomingReq = job.data;
       const client = clients.get(msg.bot);
       try {
         await client.sendMessage(msg.user, {
@@ -138,10 +127,19 @@ AppDataSource.initialize()
         console.error("ERROR SENDING MESSAGE ", error);
       }
       await wait(30);
+    }, {
+      connection: {
+        host: 'redis'
+      },
+      limiter: {
+        duration: 30000,
+        max: 1
+      }
     });
-    subscriberIn.subscribe("incoming", async (channel, m: string) => {
+
+    const workerIn = new Worker('in', async (job) => {
       // ОБРАБОТАТЬ ВХОДЯЩЕЕ СООБЩЕНИЕ С ТАЙМИНГОМ
-      const msg: IncomingReq = JSON.parse(m);
+      const msg: IncomingReq = job.data;
       const client = clients.get(msg.bot);
       try {
         const dialogs = await client.getDialogs();
@@ -199,25 +197,22 @@ AppDataSource.initialize()
                   ],
                 }
               );
-              await publisherOut.publish(
-                "outcoming",
-                JSON.stringify({
+              await queueOut.add('j',
+                {
                   bot: client.session.save(),
                   user: user.usernameOrPhone,
                   text: "Благодарю. Ждем Вас на мероприятии.",
-                })
-              );
+                });
             } else {
               const msgs = await run.finalMessages();
               for (let msg of msgs) {
-                await publisherOut.publish(
-                  "outgoing",
-                  JSON.stringify({
+                await queueOut.add('j',
+                  {
                     bot: client.session.save(),
                     //@ts-ignore
                     text: msg.content[0].text.value,
                     user: user.usernameOrPhone,
-                  })
+                  }
                 );
               }
             }
@@ -227,6 +222,14 @@ AppDataSource.initialize()
       }
 
       await wait(30);
+    }, {
+      connection: {
+        host: "redis"
+      },
+      limiter: {
+        duration: 30000,
+        max: 1
+      }
     });
     const appId = +process.env.TG_ID;
     const appHash = process.env.TG_HASH;
@@ -256,13 +259,13 @@ AppDataSource.initialize()
           },
         });
         client.addEventHandler(async (event) => {
-          await publisherIn.publish(
-            "incoming",
-            JSON.stringify({
+          await queueIn.add(
+            "in",
+            {
               text: event.message.text,
               userId: event.message.senderId.toJSON(),
               bot: client.session.save(),
-            })
+            }
           );
         }, new NewMessage());
         clients.set(bot.token, client);
