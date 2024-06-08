@@ -1,8 +1,14 @@
 version: '3.0'
 services:
   bots:
+    restart: always
     build: .
-    env_file: .
+    env_file: .env
+
+  signup:
+    restart: always
+    build: .
+    command: "npm run serve"
     ports:
       - "80:80"
   db:

@@ -5,8 +5,6 @@ export class Bot {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-    @Column()
-    phone: string;
 
     @Column({nullable: true})
     token: string;
