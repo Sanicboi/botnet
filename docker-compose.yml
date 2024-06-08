@@ -5,12 +5,12 @@ services:
     build: .
     env_file: .env
 
-  signup:
-    restart: always
-    build: .
-    command: "npm run serve"
-    ports:
-      - "80:80"
+  # signup:
+  #   restart: always
+  #   build: .
+  #   command: "npm run serve"
+  #   ports:
+  #     - "80:80"
   db:
     image: "postgres:14.5"
     ports:

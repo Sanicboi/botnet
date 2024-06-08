@@ -24,7 +24,9 @@ AppDataSource.initialize()
   .then(async () => {
     const userRepo = AppDataSource.getRepository(User);
     const botRepo = AppDataSource.getRepository(Bot);
-    const bots = await botRepo.find();
+    const bots = await botRepo.find({
+      take: 10
+    });
     const manager = new TgBot(process.env.BOT_KEY, {
       polling: true,
     });
@@ -34,6 +36,56 @@ AppDataSource.initialize()
         msg.chat.id,
         "Я - менеджер ботов компании Legat Business"
       );
+    });
+
+    manager.onText(/\/send/, async (msg) => {
+      const notTalked = await userRepo.find({
+        where: {
+          botid: null,
+        },
+      });
+      let free = notTalked.length;
+
+      for (const bot of bots) {
+        const client = clients.get(bot.token);
+        for (let i = 0; i < 15 && free > 0; i++) {
+          
+          const thread = await openAi.beta.threads.create({
+            messages: [
+              {
+                content: startMessage,
+                role: "assistant",
+              },
+            ],
+          });
+
+          notTalked[i].threadId = thread.id;
+          notTalked[i].botid = bot.id;
+          await userRepo.save(notTalked[i]);
+          await client.sendMessage(notTalked[i].usernameOrPhone, {
+            message: startMessage,
+          });
+          free--;
+          setTimeout(async () => {
+            try {
+              const updated = await userRepo.findOneBy({
+                usernameOrPhone: notTalked[i].usernameOrPhone,
+              });
+              if (!updated.replied) {
+                await client.sendMessage(notTalked[i].usernameOrPhone, {
+                  message: startMessage2,
+                });
+                await openAi.beta.threads.messages.create(updated.threadId, {
+                  content: startMessage2,
+                  role: "assistant",
+                });
+              }
+            } catch (error) {
+              console.error("ERROR SENDING AFTER 30MIN");
+            }
+          }, 1000 * 60 * 30);
+        }
+      }
     });
 
     const appId = +process.env.TG_ID;
@@ -46,6 +98,7 @@ AppDataSource.initialize()
         const client = new TelegramClient(session, appId, appHash, {
           useWSS: true,
         });
+        client.floodSleepThreshold = 1;
         await client.start({
           phoneNumber: async () => {
             //@ts-ignore
@@ -136,7 +189,7 @@ AppDataSource.initialize()
                 }
               });
           } catch (error) {
-            console.error("ERROR PROCESSING MESSAGE");
+            console.error("ERROR PROCESSING MESSAGE " + error);
           }
         }, new NewMessage());
         clients.set(bot.token, client);
@@ -144,55 +197,6 @@ AppDataSource.initialize()
         console.log("ERROR SETTING UP CLIENT!");
       }
 
-      cron.schedule("35 9 * * *", async () => {
-        const notTalked = await userRepo.find({
-          where: {
-            botid: null,
-          },
-        });
-        let free = notTalked.length;
-
-        for (const bot of bots) {
-          const client = clients.get(bot.token);
-          for (let i = 0; i < 15 && free > 0; i++) {
-            
-            const thread = await openAi.beta.threads.create({
-              messages: [
-                {
-                  content: startMessage,
-                  role: "assistant",
-                },
-              ],
-            });
-
-            notTalked[i].threadId = thread.id;
-            notTalked[i].botid = bot.id;
-            await userRepo.save(notTalked[i]);
-            await client.sendMessage(notTalked[i].usernameOrPhone, {
-              message: startMessage,
-            });
-            free--;
-            setTimeout(async () => {
-              try {
-                const updated = await userRepo.findOneBy({
-                  usernameOrPhone: notTalked[i].usernameOrPhone,
-                });
-                if (!updated.replied) {
-                  await client.sendMessage(notTalked[i].usernameOrPhone, {
-                    message: startMessage2,
-                  });
-                  await openAi.beta.threads.messages.create(updated.threadId, {
-                    content: startMessage2,
-                    role: "assistant",
-                  });
-                }
-              } catch (error) {
-                console.error("ERROR SENDING AFTER 30MIN");
-              }
-            }, 1000 * 60 * 30);
-          }
-        }
-      });
     }
   })
   .catch((error) => console.log(error));
