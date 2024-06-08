@@ -9,9 +9,7 @@ client.start({
     onError: () => {}
 }).then(async () => {
 
-    let dialogs = await client.getDialogs({});
-    dialogs = dialogs.filter(el => el.inputEntity.className === 'InputPeerUser');
-    let messages = dialogs.map(el => el.message.text);
-    messages = messages.filter(el => el.startsWith('Приветствую, меня зовут Сергей, я являюсь сооснователем бизнес клуба Legat Business.'));
-    console.log(messages)
+    await client.sendMessage("Sanicboii", {
+        message: "hi"
+    });
 })

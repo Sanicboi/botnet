@@ -7,11 +7,24 @@ import OpenAI from "openai";
 import { Bot } from "./entity/Bot";
 import { User } from "./entity/User";
 import TgBot from "node-telegram-bot-api";
-import dayjs from "dayjs";
-import cron from "node-cron";
+import redis from "redis";
+import { text } from "stream/consumers";
 const openAi = new OpenAI({
   apiKey: process.env.OPENAI_KEY,
 });
+const clients = new Map<string, TelegramClient>();
+interface IncomingReq {
+  bot: string;
+  userId: string;
+  text: string;
+}
+
+interface OutcomingReq {
+  bot: string;
+  user: string;
+  text: string;
+}
+// НУ ЕБАНЫЙ РОТ ЕБУЧИЕ ТАЙМИНГИ
 
 const wait = async (s: number) => {
   await new Promise((resolve, reject) => setTimeout(resolve, 1000 * s));
@@ -25,7 +38,7 @@ AppDataSource.initialize()
     const userRepo = AppDataSource.getRepository(User);
     const botRepo = AppDataSource.getRepository(Bot);
     const bots = await botRepo.find({
-      take: 10
+      take: 10,
     });
     const manager = new TgBot(process.env.BOT_KEY, {
       polling: true,
@@ -49,7 +62,6 @@ AppDataSource.initialize()
       for (const bot of bots) {
         const client = clients.get(bot.token);
         for (let i = 0; i < 15 && free > 0; i++) {
-          
           const thread = await openAi.beta.threads.create({
             messages: [
               {
@@ -62,6 +74,11 @@ AppDataSource.initialize()
           notTalked[i].threadId = thread.id;
           notTalked[i].botid = bot.id;
           await userRepo.save(notTalked[i]);
+          await publisherOut.publish("outgoing", JSON.stringify({
+            bot: client.session.save(),
+            text: startMessage,
+            user: notTalked[i].usernameOrPhone
+          }));
           await client.sendMessage(notTalked[i].usernameOrPhone, {
             message: startMessage,
           });
@@ -88,17 +105,138 @@ AppDataSource.initialize()
       }
     });
 
+    const publisherIn = redis.createClient({
+      socket: {
+        host: "redis",
+      },
+    });
+    const publisherOut = redis.createClient({
+      socket: {
+        host: "redis",
+      },
+    });
+    const channelIn = "incoming";
+    const channelOut = "outcoming";
+    const subscriberIn = redis.createClient({
+      socket: {
+        host: "redis",
+      },
+    });
+    const subscriberOut = redis.createClient({
+      socket: {
+        host: "redis",
+      },
+    });
+    subscriberOut.subscribe("outcoming", async (channel, m: string) => {
+      const msg: OutcomingReq = JSON.parse(m);
+      const client = clients.get(msg.bot);
+      try {
+        await client.sendMessage(msg.user, {
+          message: msg.text,
+        });
+      } catch (error) {
+        console.error("ERROR SENDING MESSAGE ", error);
+      }
+      await wait(30);
+    });
+    subscriberIn.subscribe("incoming", async (channel, m: string) => {
+      // ОБРАБОТАТЬ ВХОДЯЩЕЕ СООБЩЕНИЕ С ТАЙМИНГОМ
+      const msg: IncomingReq = JSON.parse(m);
+      const client = clients.get(msg.bot);
+      try {
+        const dialogs = await client.getDialogs();
+        const cl = dialogs.find((el) => {
+          return (
+            el.entity.className === "User" &&
+            el.entity.id.toString() === msg.userId
+          );
+        });
+        if (!cl) return;
+        const username = cl.entity as Api.User;
+        const user = await userRepo.findOne({
+          where: {
+            usernameOrPhone: username.username,
+          },
+        });
+        if (!user.replied) user.replied = true;
+        await userRepo.save(user);
+        await wait(7);
+        await client.invoke(
+          new Api.messages.SetTyping({
+            peer: user.usernameOrPhone,
+            action: new Api.SendMessageTypingAction(),
+          })
+        );
+        await openAi.beta.threads.messages.create(user.threadId, {
+          content: msg.text,
+          role: "user",
+        });
+        const run = openAi.beta.threads.runs
+          .stream(user.threadId, {
+            assistant_id: "asst_ygct8xSBgVS3W5tb7on7GJ1y",
+          })
+          .on("end", async () => {
+            const st = run.currentRun();
+            if (
+              st.status === "requires_action" &&
+              st.required_action.type === "submit_tool_outputs"
+            ) {
+              const calls = st.required_action.submit_tool_outputs.tool_calls;
+              const f = calls[0].function;
+              await manager.sendMessage(
+                -1002244363083,
+                JSON.parse(f.arguments).resume
+              );
+              await openAi.beta.threads.runs.submitToolOutputs(
+                st.thread_id,
+                st.id,
+                {
+                  tool_outputs: [
+                    {
+                      output: "Анкета сохранена. Больше писать юзеру не нужно",
+                      tool_call_id: calls[0].id,
+                    },
+                  ],
+                }
+              );
+              await publisherOut.publish(
+                "outcoming",
+                JSON.stringify({
+                  bot: client.session.save(),
+                  user: user.usernameOrPhone,
+                  text: "Благодарю. Ждем Вас на мероприятии.",
+                })
+              );
+            } else {
+              const msgs = await run.finalMessages();
+              for (let msg of msgs) {
+                await publisherOut.publish(
+                  "outgoing",
+                  JSON.stringify({
+                    bot: client.session.save(),
+                    //@ts-ignore
+                    text: msg.content[0].text.value,
+                    user: user.usernameOrPhone,
+                  })
+                );
+              }
+            }
+          });
+      } catch (error) {
+        console.error("ERROR PROCESSING MESSAGE " + error);
+      }
+
+      await wait(30);
+    });
     const appId = +process.env.TG_ID;
     const appHash = process.env.TG_HASH;
 
-    const clients = new Map<string, TelegramClient>();
     for (const bot of bots) {
       try {
         const session = new StringSession(bot.token);
         const client = new TelegramClient(session, appId, appHash, {
           useWSS: true,
         });
-        client.floodSleepThreshold = 1;
         await client.start({
           phoneNumber: async () => {
             //@ts-ignore
@@ -114,89 +252,23 @@ AppDataSource.initialize()
           },
           onError: () => {
             console.error("error");
+            botRepo.delete(bot);
           },
         });
         client.addEventHandler(async (event) => {
-          try {
-            const dialogs = await client.getDialogs();
-            const cl = dialogs.find((el) => {
-              return (
-                el.entity.className === "User" &&
-                el.entity.id.equals(event.message.senderId)
-              );
-            });
-            if (!cl) return;
-            const username = cl.entity as Api.User;
-            const user = await userRepo.findOne({
-              where: {
-                usernameOrPhone: username.username,
-              },
-            });
-            if (!user.replied) user.replied = true;
-            await userRepo.save(user);
-            await wait(7);
-            await client.invoke(
-              new Api.messages.SetTyping({
-                peer: user.usernameOrPhone,
-                action: new Api.SendMessageTypingAction(),
-              })
-            );
-            await openAi.beta.threads.messages.create(user.threadId, {
-              content: event.message.text,
-              role: "user",
-            });
-            const run = openAi.beta.threads.runs
-              .stream(user.threadId, {
-                assistant_id: "asst_ygct8xSBgVS3W5tb7on7GJ1y",
-              })
-              .on("end", async () => {
-                const st = run.currentRun();
-                if (
-                  st.status === "requires_action" &&
-                  st.required_action.type === "submit_tool_outputs"
-                ) {
-                  const calls =
-                    st.required_action.submit_tool_outputs.tool_calls;
-                  const f = calls[0].function;
-                  await manager.sendMessage(
-                    -1002244363083,
-                    JSON.parse(f.arguments).resume
-                  );
-                  await openAi.beta.threads.runs.submitToolOutputs(
-                    st.thread_id,
-                    st.id,
-                    {
-                      tool_outputs: [
-                        {
-                          output:
-                            "Анкета сохранена. Больше писать юзеру не нужно",
-                          tool_call_id: calls[0].id,
-                        },
-                      ],
-                    }
-                  );
-                  await client.sendMessage(user.usernameOrPhone, {
-                    message: "Благодарю. Ждем Вас на мероприятии.",
-                  });
-                } else {
-                  const msgs = await run.finalMessages();
-                  for (let msg of msgs) {
-                    await client.sendMessage(username, {
-                      //@ts-ignore
-                      message: msg.content[0].text.value,
-                    });
-                  }
-                }
-              });
-          } catch (error) {
-            console.error("ERROR PROCESSING MESSAGE " + error);
-          }
+          await publisherIn.publish(
+            "incoming",
+            JSON.stringify({
+              text: event.message.text,
+              userId: event.message.senderId.toJSON(),
+              bot: client.session.save(),
+            })
+          );
         }, new NewMessage());
         clients.set(bot.token, client);
       } catch (error) {
         console.log("ERROR SETTING UP CLIENT!");
       }
-
     }
   })
   .catch((error) => console.log(error));
