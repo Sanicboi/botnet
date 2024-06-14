@@ -188,7 +188,6 @@ AppDataSource.initialize()
         const client = new TelegramClient(session, appId, appHash, {
           useWSS: true,
         });
-        await wait(300);
         await client.start({
           phoneNumber: async () => {
             //@ts-ignore

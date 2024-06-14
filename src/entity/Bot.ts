@@ -8,4 +8,7 @@ export class Bot {
 
     @Column({nullable: true})
     token: string;
+
+    @Column({default: false})
+    blocked: boolean;
 }
