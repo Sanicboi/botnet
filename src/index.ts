@@ -12,7 +12,7 @@ import {Queue, Worker} from "bullmq";
 import { text } from "stream/consumers";
 import { Determiner } from "./determiner";
 const openAi = new OpenAI({
-  apiKey: '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',
+  apiKey: process.env.OPENAI_KEY,
 });
 const determiner = new Determiner(openAi)
 const clients = new Map<string, TelegramClient>();
