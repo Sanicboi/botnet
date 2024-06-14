@@ -39,7 +39,7 @@ export class Determiner {
         const run = this.openai.beta.threads.runs.stream(user.threadId, {
             assistant_id: 'asst_ygct8xSBgVS3W5tb7on7GJ1y'
         }).on('end', async () => {
-            const msgs = await run.finalMessages();
+            let msgs = await run.finalMessages();
             const finalRun = await run.finalRun();
             for (const m of msgs) {
                 await outQueue.add('send', {
@@ -58,14 +58,22 @@ export class Determiner {
                     user: user.usernameOrPhone,
                     text: messages[n]
                 });
-                await this.openai.beta.threads.runs.submitToolOutputs(finalRun.thread_id, finalRun.id, {
+                msgs = await this.openai.beta.threads.runs.submitToolOutputsStream(finalRun.thread_id, finalRun.id, {
                     tool_outputs: [
                         {
                             output: 'Сообщение отправлено',
                             tool_call_id: finalRun.required_action.submit_tool_outputs.tool_calls[0].id
                         }
                     ]
-                });
+                }).finalMessages();
+                for (const m of msgs) {
+                    await outQueue.add('send', {
+                        bot: bot,
+                        user: user.usernameOrPhone,
+                        // @ts-ignore
+                        text: m.content[0].text.value
+                    })
+                }
                 await this.openai.beta.threads.messages.create(finalRun.thread_id, {
                     content: messages[n],
                     role: 'assistant'
