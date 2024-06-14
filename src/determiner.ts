@@ -59,7 +59,7 @@ export class Determiner {
                     user: user.usernameOrPhone,
                     text: messages[n]
                 });
-                this.openai.beta.threads.runs.submitToolOutputsStream(finalRun.thread_id, finalRun.id, {
+                await this.openai.beta.threads.runs.submitToolOutputsStream(finalRun.thread_id, finalRun.id, {
                     tool_outputs: [
                         {
                             output: 'Сообщение отправлено. Жди ответа клиента.',
@@ -76,7 +76,7 @@ export class Determiner {
                         content: messages[n],
                         role: 'assistant'
                     });
-                });
+                }).finalMessages();
                 
             }
         });
