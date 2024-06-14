@@ -53,26 +53,31 @@ export class Determiner {
                 // Отправь сообщение!
                 const data: {number: number} = JSON.parse(finalRun.required_action.submit_tool_outputs.tool_calls[0].function.arguments);
                 const n = data.number - 1;
+                let newmsgs: OpenAI.Beta.Threads.Message[] = [];
                 await outQueue.add('send', {
                     bot: bot,
                     user: user.usernameOrPhone,
                     text: messages[n]
                 });
-                msgs = await this.openai.beta.threads.runs.submitToolOutputsStream(finalRun.thread_id, finalRun.id, {
+                this.openai.beta.threads.runs.submitToolOutputsStream(finalRun.thread_id, finalRun.id, {
                     tool_outputs: [
                         {
                             output: 'Сообщение отправлено. Жди ответа клиента.',
                             tool_call_id: finalRun.required_action.submit_tool_outputs.tool_calls[0].id
                         }
                     ]
-                }).finalMessages();
-                for (const m of msgs) {
-                    await this.openai.beta.threads.messages.del(finalRun.thread_id, m.id);
-                }
-                await this.openai.beta.threads.messages.create(finalRun.thread_id, {
-                    content: messages[n],
-                    role: 'assistant'
+                }).on("messageDone", (e) => {
+                    newmsgs.push(e);
+                }).on('end',async () => {
+                    for (const m of newmsgs) {
+                        await this.openai.beta.threads.messages.del(finalRun.thread_id, m.id);
+                    }
+                    await this.openai.beta.threads.messages.create(finalRun.thread_id, {
+                        content: messages[n],
+                        role: 'assistant'
+                    });
                 });
+                
             }
         });
     }
