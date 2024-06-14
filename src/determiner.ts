@@ -61,7 +61,7 @@ export class Determiner {
                 msgs = await this.openai.beta.threads.runs.submitToolOutputsStream(finalRun.thread_id, finalRun.id, {
                     tool_outputs: [
                         {
-                            output: 'Сообщение отправлено',
+                            output: 'Сообщение отправлено. Жди ответа клиента.',
                             tool_call_id: finalRun.required_action.submit_tool_outputs.tool_calls[0].id
                         }
                     ]
