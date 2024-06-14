@@ -67,12 +67,7 @@ export class Determiner {
                     ]
                 }).finalMessages();
                 for (const m of msgs) {
-                    await outQueue.add('send', {
-                        bot: bot,
-                        user: user.usernameOrPhone,
-                        // @ts-ignore
-                        text: m.content[0].text.value
-                    })
+                    await this.openai.beta.threads.messages.del(finalRun.thread_id, m.id);
                 }
                 await this.openai.beta.threads.messages.create(finalRun.thread_id, {
                     content: messages[n],
