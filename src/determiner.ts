@@ -39,7 +39,7 @@ export class Determiner {
         });
 
         const run = this.openai.beta.threads.runs.stream(user.threadId, {
-            assistant_id: 'asst_ygct8xSBgVS3W5tb7on7GJ1y'
+            assistant_id: 'asst_SS8Ct1OvanqvxGeDRYbrM8sP'
         }).on('end', async () => {
             let msgs = await run.finalMessages();
             const finalRun = await run.finalRun();
