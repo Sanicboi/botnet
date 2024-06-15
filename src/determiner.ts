@@ -62,13 +62,14 @@ export class Determiner {
                 await this.openai.beta.threads.runs.submitToolOutputsStream(finalRun.thread_id, finalRun.id, {
                     tool_outputs: [
                         {
-                            output: 'Сообщение отправлено. Жди ответа клиента.',
+                            output: 'STOP GENERATING',
                             tool_call_id: finalRun.required_action.submit_tool_outputs.tool_calls[0].id
                         }
                     ]
                 }).on("messageDone", (e) => {
                     newmsgs.push(e);
                 }).on('end',async () => {
+                    console.log(newmsgs);
                     for (const m of newmsgs) {
                         await this.openai.beta.threads.messages.del(finalRun.thread_id, m.id);
                     }

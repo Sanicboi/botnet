@@ -118,6 +118,7 @@ AppDataSource.initialize()
     const workerOut = new Worker('out', async (job) => {
       const msg: OutcomingReq = job.data;
       const client = clients.get(msg.bot);
+      msg.text = msg.text.replaceAll(/【.+】/g, '');
       try {
         await client.sendMessage(msg.user, {
           message: msg.text,
