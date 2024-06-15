@@ -58,13 +58,14 @@ AppDataSource.initialize()
       const notTalked = await userRepo.find({
         where: {
           botid: null,
+          finished: false
         },
       });
       let free = notTalked.length;
 
       for (const bot of bots) {
         const client = clients.get(bot.token);
-        for (let i = 0; i < 5 && free > 0; i++) {
+        for (let i = 0; i < 10 && free > 0; i++) {
           const thread = await openAi.beta.threads.create({
             messages: [
               {
@@ -83,24 +84,24 @@ AppDataSource.initialize()
             user: notTalked[i].usernameOrPhone
           });
           free--;
-          setTimeout(async () => {
-            try {
-              const updated = await userRepo.findOneBy({
-                usernameOrPhone: notTalked[i].usernameOrPhone,
-              });
-              if (!updated.replied) {
-                await client.sendMessage(notTalked[i].usernameOrPhone, {
-                  message: startMessage2,
-                });
-                await openAi.beta.threads.messages.create(updated.threadId, {
-                  content: startMessage2,
-                  role: "assistant",
-                });
-              }
-            } catch (error) {
-              console.error("ERROR SENDING AFTER 30MIN");
-            }
-          }, 1000 * 60 * 30);
+          // setTimeout(async () => {
+          //   try {
+          //     const updated = await userRepo.findOneBy({
+          //       usernameOrPhone: notTalked[i].usernameOrPhone,
+          //     });
+          //     if (!updated.replied) {
+          //       await client.sendMessage(notTalked[i].usernameOrPhone, {
+          //         message: startMessage2,
+          //       });
+          //       await openAi.beta.threads.messages.create(updated.threadId, {
+          //         content: startMessage2,
+          //         role: "assistant",
+          //       });
+          //     }
+          //   } catch (error) {
+          //     console.error("ERROR SENDING AFTER 30MIN");
+          //   }
+          // }, 1000 * 60 * 30);
         }
       }
     });
@@ -168,7 +169,7 @@ AppDataSource.initialize()
             action: new Api.SendMessageTypingAction(),
           })
         );
-        await determiner.sendDetermined(msg.text, user, msg.bot, queueOut);
+        await determiner.sendDetermined(msg.text, user, msg.bot, queueOut, manager, userRepo);
       } catch (error) {
         console.error("ERROR PROCESSING MESSAGE " + error);
       }

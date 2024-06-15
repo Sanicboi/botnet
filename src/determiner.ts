@@ -3,6 +3,8 @@ import { User } from "./entity/User";
 import gramjs from 'telegram';
 import { Bot } from "./entity/Bot";
 import { Queue } from "bullmq";
+import TelegramBot from "node-telegram-bot-api";
+import { Repository } from "typeorm";
 
 
 
@@ -29,7 +31,7 @@ export class Determiner {
         this.openai = openai;
     }
 
-    public async sendDetermined(msg: string, user: User, bot: string, outQueue: Queue) {
+    public async sendDetermined(msg: string, user: User, bot: string, outQueue: Queue, manager: TelegramBot, repo: Repository<User>) {
 
         await this.openai.beta.threads.messages.create(user.threadId, {
              content: msg,
@@ -51,18 +53,14 @@ export class Determiner {
             }
             if (finalRun.status === 'requires_action' && finalRun.required_action.type === 'submit_tool_outputs') {
                 // Отправь сообщение!
-                const data: {number: number} = JSON.parse(finalRun.required_action.submit_tool_outputs.tool_calls[0].function.arguments);
-                const n = data.number - 1;
+                user.finished = true;
+                await repo.save(user);
+                await manager.sendMessage(-1002244363083, `Согласована встреча с клиентом. Токен бота: ${bot}\nКлиент:${user.usernameOrPhone}`);
                 let newmsgs: OpenAI.Beta.Threads.Message[] = [];
-                await outQueue.add('send', {
-                    bot: bot,
-                    user: user.usernameOrPhone,
-                    text: messages[n]
-                });
                 await this.openai.beta.threads.runs.submitToolOutputsStream(finalRun.thread_id, finalRun.id, {
                     tool_outputs: [
                         {
-                            output: 'STOP GENERATING',
+                            output: 'Встреча записана.',
                             tool_call_id: finalRun.required_action.submit_tool_outputs.tool_calls[0].id
                         }
                     ]
@@ -71,12 +69,13 @@ export class Determiner {
                 }).on('end',async () => {
                     console.log(newmsgs);
                     for (const m of newmsgs) {
-                        await this.openai.beta.threads.messages.del(finalRun.thread_id, m.id);
+                        await outQueue.add('send', {
+                            bot: bot,
+                            user: user.usernameOrPhone,
+                            // @ts-ignore
+                            text: m.content[0].text.value
+                        })
                     }
-                    await this.openai.beta.threads.messages.create(finalRun.thread_id, {
-                        content: messages[n],
-                        role: 'assistant'
-                    });
                 }).finalMessages();
                 
             }

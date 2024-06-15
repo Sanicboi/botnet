@@ -14,4 +14,7 @@ export class User {
 
     @Column({nullable: true})
     threadId: string;
+
+    @Column({default: false})
+    finished: boolean;
 }
