@@ -42,6 +42,9 @@ AppDataSource.initialize()
     const botRepo = AppDataSource.getRepository(Bot);
     const bots = await botRepo.find({
       take: 10,
+      where: {
+        blocked: false
+      }
     });
     const manager = new TgBot("6672883029:AAEe-3kIb6cUV1KUZxoedP_BdQ2JRTtTCpk", {
       polling: true,
@@ -66,55 +69,41 @@ AppDataSource.initialize()
       for (const bot of bots) {
         const client = clients.get(bot.token);
         for (let i = 0; i < 10 && free > 0; i++) {
-          const res = await openAi.chat.completions.create({
-            messages: [{
-              role: 'user',
-              content: `Перепиши синонимично это сообщение: ${startMessage}`
-            }],
-            model: 'gpt-4-turbo',
-            temperature: 0.5
-          });
-          const thread = await openAi.beta.threads.create({
-            messages: [
-              {
-                content: res.choices[0].message.content,
-                role: "assistant",
-              },
-            ],
-          });
-          // const msgs = await openAi.beta.threads.runs.stream(thread.id, {
-          //   assistant_id: 'asst_SS8Ct1OvanqvxGeDRYbrM8sP',
-          // }).finalMessages();
-
-          notTalked[i].threadId = thread.id;
-          notTalked[i].botid = bot.id;
-          await userRepo.save(notTalked[i]);
-          // for (const m of msgs) {
-          // }
-          await queueOut.add("out", {
-              bot: client.session.save(),
-              text: res.choices[0].message.content,
-              user: notTalked[i].usernameOrPhone
+          try {
+            const res = await openAi.chat.completions.create({
+              messages: [{
+                role: 'user',
+                content: `Перепиши синонимично это сообщение: ${startMessage}`
+              }],
+              model: 'gpt-4-turbo',
+              temperature: 0.5
             });
-          free--;
-          // setTimeout(async () => {
-          //   try {
-          //     const updated = await userRepo.findOneBy({
-          //       usernameOrPhone: notTalked[i].usernameOrPhone,
-          //     });
-          //     if (!updated.replied) {
-          //       await client.sendMessage(notTalked[i].usernameOrPhone, {
-          //         message: startMessage2,
-          //       });
-          //       await openAi.beta.threads.messages.create(updated.threadId, {
-          //         content: startMessage2,
-          //         role: "assistant",
-          //       });
-          //     }
-          //   } catch (error) {
-          //     console.error("ERROR SENDING AFTER 30MIN");
-          //   }
-          // }, 1000 * 60 * 30);
+            const thread = await openAi.beta.threads.create({
+              messages: [
+                {
+                  content: res.choices[0].message.content,
+                  role: "assistant",
+                },
+              ],
+            });
+            // const msgs = await openAi.beta.threads.runs.stream(thread.id, {
+            //   assistant_id: 'asst_SS8Ct1OvanqvxGeDRYbrM8sP',
+            // }).finalMessages();
+  
+            notTalked[i].threadId = thread.id;
+            notTalked[i].botid = bot.id;
+            await userRepo.save(notTalked[i]);
+            // for (const m of msgs) {
+            // }
+            await queueOut.add("out", {
+                bot: client.session.save(),
+                text: res.choices[0].message.content,
+                user: notTalked[i].usernameOrPhone
+              });
+            free--;
+          } catch (err) {
+            console.log('ERROR STARTING', err);
+          }
         }
       }
     });
