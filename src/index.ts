@@ -69,20 +69,26 @@ AppDataSource.initialize()
           const thread = await openAi.beta.threads.create({
             messages: [
               {
-                content: startMessage,
-                role: "assistant",
+                content: 'Начни диалог',
+                role: "user",
               },
             ],
           });
+          const msgs = await openAi.beta.threads.runs.stream(thread.id, {
+            assistant_id: 'asst_SS8Ct1OvanqvxGeDRYbrM8sP',
+          }).finalMessages();
 
           notTalked[i].threadId = thread.id;
           notTalked[i].botid = bot.id;
           await userRepo.save(notTalked[i]);
-          await queueOut.add("out", {
-            bot: client.session.save(),
-            text: startMessage,
-            user: notTalked[i].usernameOrPhone
-          });
+          for (const m of msgs) {
+            await queueOut.add("out", {
+              bot: client.session.save(),
+              //@ts-ignore
+              text: m.content[0].text.value,
+              user: notTalked[i].usernameOrPhone
+            });
+          }
           free--;
           // setTimeout(async () => {
           //   try {
