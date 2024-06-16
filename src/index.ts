@@ -42,9 +42,6 @@ AppDataSource.initialize()
     const botRepo = AppDataSource.getRepository(Bot);
     const bots = await botRepo.find({
       take: 10,
-      where: {
-        blocked: false
-      }
     });
     const manager = new TgBot("6672883029:AAEe-3kIb6cUV1KUZxoedP_BdQ2JRTtTCpk", {
       polling: true,
@@ -58,6 +55,12 @@ AppDataSource.initialize()
     });
 
     manager.onText(/\/send/, async (msg) => {
+      const nBots = await botRepo.find({
+        take: 10,
+        where: {
+          blocked: false
+        }
+      });
       const notTalked = await userRepo.find({
         where: {
           botid: null,
@@ -68,7 +71,9 @@ AppDataSource.initialize()
 
       for (const bot of bots) {
         const client = clients.get(bot.token);
-        for (let i = 0; i < 10 && free > 0; i++) {
+        let currentCount = 0;
+        let total = 0;
+        while (currentCount <= 10 && free > 0) {
           try {
             const res = await openAi.chat.completions.create({
               messages: [{
@@ -90,17 +95,19 @@ AppDataSource.initialize()
             //   assistant_id: 'asst_SS8Ct1OvanqvxGeDRYbrM8sP',
             // }).finalMessages();
   
-            notTalked[i].threadId = thread.id;
-            notTalked[i].botid = bot.id;
-            await userRepo.save(notTalked[i]);
+            notTalked[total].threadId = thread.id;
+            notTalked[total].botid = bot.id;
+            await userRepo.save(notTalked[total]);
             // for (const m of msgs) {
             // }
             await queueOut.add("out", {
                 bot: client.session.save(),
                 text: res.choices[0].message.content,
-                user: notTalked[i].usernameOrPhone
+                user: notTalked[total].usernameOrPhone
               });
             free--;
+            total++;
+            currentCount++;
           } catch (err) {
             console.log('ERROR STARTING', err);
           }
