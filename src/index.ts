@@ -66,10 +66,18 @@ AppDataSource.initialize()
       for (const bot of bots) {
         const client = clients.get(bot.token);
         for (let i = 0; i < 10 && free > 0; i++) {
+          const res = await openAi.chat.completions.create({
+            messages: [{
+              role: 'user',
+              content: `Перепиши синонимично это сообщение: ${startMessage}`
+            }],
+            model: 'gpt-4-turbo',
+            temperature: 0.5
+          });
           const thread = await openAi.beta.threads.create({
             messages: [
               {
-                content: startMessage,
+                content: res.choices[0].message.content,
                 role: "assistant",
               },
             ],
@@ -85,7 +93,7 @@ AppDataSource.initialize()
           // }
           await queueOut.add("out", {
               bot: client.session.save(),
-              text: startMessage,
+              text: res.choices[0].message.content,
               user: notTalked[i].usernameOrPhone
             });
           free--;
