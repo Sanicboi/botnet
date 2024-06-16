@@ -68,11 +68,10 @@ AppDataSource.initialize()
         },
       });
       let free = notTalked.length;
-
+      let total = 0;
       for (const bot of bots) {
         const client = clients.get(bot.token);
         let currentCount = 0;
-        let total = 0;
         while (currentCount <= 10 && free > 0) {
           try {
             const res = await openAi.chat.completions.create({
