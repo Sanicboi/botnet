@@ -11,4 +11,7 @@ export class Bot {
 
     @Column({default: false})
     blocked: boolean;
+
+    @Column({default: true})
+    send: boolean;
 }
