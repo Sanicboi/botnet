@@ -1,4 +1,4 @@
-import { TelegramClient } from "telegram";
+import { Api, TelegramClient } from "telegram";
 import { StringSession } from "telegram/sessions";
 import input from 'input';
 import fs from 'fs';
@@ -12,6 +12,7 @@ import path from "path";
     
         await client.start({
             onError(err) {
+                console.log(err);
             },
             phoneCode: async () => input.text("Code"),
             phoneNumber: async () => input.text("Number"),

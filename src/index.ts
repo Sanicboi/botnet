@@ -8,8 +8,7 @@ import { Bot } from "./entity/Bot";
 import { User } from "./entity/User";
 import TgBot from "node-telegram-bot-api";
 import {Queue, Worker} from "bullmq";
-
-import { text } from "stream/consumers";
+import input from 'input';
 import { Determiner } from "./determiner";
 const openAi = new OpenAI({
   apiKey: process.env.OPENAI_KEY,
@@ -41,7 +40,9 @@ AppDataSource.initialize()
     const userRepo = AppDataSource.getRepository(User);
     const botRepo = AppDataSource.getRepository(Bot);
     const bots = await botRepo.find({
-      take: 10,
+      where: {
+        blocked: false
+      }
     });
     const manager = new TgBot("6672883029:AAEe-3kIb6cUV1KUZxoedP_BdQ2JRTtTCpk", {
       polling: true,
@@ -56,7 +57,6 @@ AppDataSource.initialize()
 
     manager.onText(/\/send/, async (msg) => {
       const nBots = await botRepo.find({
-        take: 10,
         where: {
           blocked: false
         }
@@ -72,7 +72,7 @@ AppDataSource.initialize()
       for (const bot of bots) {
         const client = clients.get(bot.token);
         let currentCount = 0;
-        while (currentCount <= 10 && free > 0) {
+        while (currentCount <= 5 && free > 0) {
           try {
             const res = await openAi.chat.completions.create({
               messages: [{
@@ -80,7 +80,7 @@ AppDataSource.initialize()
                 content: `Перепиши синонимично это сообщение: ${startMessage}`
               }],
               model: 'gpt-4-turbo',
-              temperature: 0.5
+              temperature: 1.5
             });
             const thread = await openAi.beta.threads.create({
               messages: [
