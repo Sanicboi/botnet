@@ -10,6 +10,7 @@ import TgBot from "node-telegram-bot-api";
 import {Queue, Worker} from "bullmq";
 import input from 'input';
 import { Determiner } from "./determiner";
+import { IsNull } from "typeorm";
 const openAi = new OpenAI({
   apiKey: process.env.OPENAI_KEY,
 });
@@ -32,7 +33,7 @@ const wait = async (s: number) => {
   await new Promise((resolve, reject) => setTimeout(resolve, 1000 * s));
 };
 const startMessage =
-  "Наш клуб заинтересован в поиске для партнерства  перспективных проектов для инвестиций, а так же в партнёрстве с предпринимателями и специалистами. При сотрудничестве  мы готовы предложить вам базу наших клиентов. Я видел вас в нескольких телеграмм  сообществах. При необходимости, могу отправить дополнительную информацию о себе. Заранее благодарю за обратную связь 🤝.";
+  "Приветствую, я являюсь сооснователем бизнес клуба. Хочу с Вами познакомиться и  понять по каким вопросам к Вам можно обращаться? Мы ищем интересные проекты в которые можно инвестировать, предпринимателей и экспертов для партнерства. Готовы направить к Вам нашу аудиторию в качестве клиентов. Видел Вас в нескольких чатах сообществ в телеграмм группах. Если требуется могу прислать информацию о себе нас.";
 const startMessage2 =
   "У меня большое сообщество, думаю куда направить этот трафик. Для того чтобы наше взаимодействие было максимально продуктивным, хотелось бы уточнить где территориально работаете, с какими регионами? И готовы ли платить Агентское вознаграждение за привлечение клиентов? Если да то в каком процентном соотношении?";
 AppDataSource.initialize()
@@ -64,10 +65,11 @@ AppDataSource.initialize()
       });
       const notTalked = await userRepo.find({
         where: {
-          botid: null,
+          botid: IsNull(),
           finished: false,
         },
       });
+      console.log(notTalked);
       let free = notTalked.length;
       let total = 0;
       for (const bot of bots) {
@@ -81,7 +83,7 @@ AppDataSource.initialize()
                 content: `Перепиши синонимично это сообщение: ${startMessage}`
               }],
               model: 'gpt-4-turbo',
-              temperature: 1.5
+              temperature: 1
             });
             const thread = await openAi.beta.threads.create({
               messages: [
@@ -141,11 +143,12 @@ AppDataSource.initialize()
         host: 'redis'
       },
       limiter: {
-        duration: 3 * 60000,
+        duration: 30000,
         max: 1
       }
     });
-
+    queueIn.drain();
+    queueOut.drain();
     const workerIn = new Worker('in', async (job) => {
       // ОБРАБОТАТЬ ВХОДЯЩЕЕ СООБЩЕНИЕ С ТАЙМИНГОМ
       const msg: IncomingReq = job.data;
@@ -178,7 +181,8 @@ AppDataSource.initialize()
             action: new Api.SendMessageTypingAction(),
           })
         );
-        await determiner.sendDetermined(msg.text, user, msg.bot, queueOut, manager, userRepo);
+        const phone = (await client.getMe()).phone;
+        await determiner.sendDetermined(msg.text, user, msg.bot, queueOut, manager, userRepo, phone);
       } catch (error) {
         console.error("ERROR PROCESSING MESSAGE " + error);
       }
@@ -214,7 +218,6 @@ AppDataSource.initialize()
           },
           onError: () => {
             console.error("error");
-            botRepo.delete(bot);
           },
         });
         client.addEventHandler(async (event) => {

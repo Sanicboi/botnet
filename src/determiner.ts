@@ -31,7 +31,7 @@ export class Determiner {
         this.openai = openai;
     }
 
-    public async sendDetermined(msg: string, user: User, bot: string, outQueue: Queue, manager: TelegramBot, repo: Repository<User>) {
+    public async sendDetermined(msg: string, user: User, bot: string, outQueue: Queue, manager: TelegramBot, repo: Repository<User>, num: string) {
 
         await this.openai.beta.threads.messages.create(user.threadId, {
              content: msg,
@@ -55,7 +55,7 @@ export class Determiner {
                 // Отправь сообщение!
                 user.finished = true;
                 await repo.save(user);
-                await manager.sendMessage(-1002244363083, `Согласована встреча с клиентом. Токен бота: ${bot}\nКлиент:${user.usernameOrPhone}`);
+                await manager.sendMessage(-1002244363083, `Согласована встреча с клиентом. Номер телефона бота: ${num}\nКлиент:${user.usernameOrPhone}`);
                 let newmsgs: OpenAI.Beta.Threads.Message[] = [];
                 await this.openai.beta.threads.runs.submitToolOutputsStream(finalRun.thread_id, finalRun.id, {
                     tool_outputs: [
