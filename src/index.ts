@@ -124,6 +124,8 @@ AppDataSource.initialize()
     });
     const workerOut = new Worker('out', async (job) => {
       const msg: OutcomingReq = job.data;
+      console.log(msg.bot);
+      console.log(clients.get(msg.bot));
       const client = clients.get(msg.bot);
       msg.text = msg.text.replaceAll(/【.+】/g, '');
       try {
