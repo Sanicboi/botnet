@@ -73,7 +73,7 @@ AppDataSource.initialize()
       let free = notTalked.length;
       let total = 0;
       for (const bot of bots) {
-        const client = clients.get(bot.token);
+        const client = clients.get(bot.id);
         let currentCount = 0;
         while (currentCount <= 5 && free > 0) {
           try {
@@ -98,7 +98,7 @@ AppDataSource.initialize()
             notTalked[total].botid = bot.id;
             await userRepo.save(notTalked[total]);
             await queueOut.add("out", {
-                bot: client.session.save(),
+                bot: bot.id,
                 text: res.choices[0].message.content,
                 user: notTalked[total].usernameOrPhone
               });
@@ -222,13 +222,13 @@ AppDataSource.initialize()
               {
                 text: event.message.text,
                 userId: event.message.senderId.toJSON(),
-                bot: client.session.save(),
+                bot: bot.id,
               }
             );
           }
 
         }, new NewMessage());
-        clients.set(bot.token, client);
+        clients.set(bot.id, client);
       } catch (error) {
         console.log("ERROR SETTING UP CLIENT! " + error);
       }
