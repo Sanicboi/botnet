@@ -80,10 +80,10 @@ AppDataSource.initialize()
             const res = await openAi.chat.completions.create({
               messages: [{
                 role: 'user',
-                content: `Перепиши синонимично это сообщение: ${startMessage}`
+                content: `Перепиши синонимично это сообщение, изменив слова и порядок абзацев, но сохранив мысль: ${startMessage}`
               }],
               model: 'gpt-4-turbo',
-              temperature: 1
+              temperature: 1.2
             });
             const thread = await openAi.beta.threads.create({
               messages: [
@@ -93,15 +93,10 @@ AppDataSource.initialize()
                 },
               ],
             });
-            // const msgs = await openAi.beta.threads.runs.stream(thread.id, {
-            //   assistant_id: 'asst_SS8Ct1OvanqvxGeDRYbrM8sP',
-            // }).finalMessages();
   
             notTalked[total].threadId = thread.id;
             notTalked[total].botid = bot.id;
             await userRepo.save(notTalked[total]);
-            // for (const m of msgs) {
-            // }
             await queueOut.add("out", {
                 bot: client.session.save(),
                 text: res.choices[0].message.content,
@@ -143,7 +138,7 @@ AppDataSource.initialize()
         host: 'redis'
       },
       limiter: {
-        duration: 30000,
+        duration: 60000 * 3,
         max: 1
       }
     });

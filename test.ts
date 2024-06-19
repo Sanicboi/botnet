@@ -7,27 +7,31 @@ import { User } from "./src/entity/User";
 import { Bot } from "./src/entity/Bot";
 import fs from 'fs';
 import path from 'path';
+import { Bitrix } from "./src/Bitrix";
 
-(async () => {
-    try {
-        const session = new StringSession("1AQAOMTQ5LjE1NC4xNzUuNTUBu3by0U0940ZxwDmOGgRsIpDA8SSQtkoPbnOz2vGy2K6G94yhYSiznNFH1KXxBmjjfyb/jUaFyNaVBqMhx+zVsRrcJZAIxWTRWfSO4U2GeYbB3HAbs5RMpNQyvRm5sV4b7ciL4b4one3qfhGIHIrgpVAq0aEzDEMgNTjuGhuevEeU18zTg94FOLfu6aa563o2tTQKUS4fDgiD2unj63/5rwm+nL3QDgE7ZSJKUEZWa6cMaQ/SWGyd4HAbhDIWS2/p0nzHOPYDjepJKYBf2n0MyweCZeQ/MJ1Xms66w4zet+QGh0fVFIyr+GM4t+vCV/gSKtzF7GepA4XyyDXe29rWm24=");
-        const client = new TelegramClient(session, 28082768, "4bb35c92845f136f8eee12a04c848893", {useWSS: true});
-        await client.start({
-            onError(err) {
-                console.log(err);
-            },
-            phoneCode: async () => input.text("Code"),
-            phoneNumber: async () => input.text("Number"),
-            password: async () => input.text("Password"),
-        });
-        console.log(client.getMe());
-        await client.disconnect();
-    } catch (err) {
-        console.log(err);
-    }
+// const d = fs.
+// (async () => {
+//     try {
+//         const session = new StringSession("1AgAOMTQ5LjE1NC4xNjcuNDEBu4wKJtzHXUUiSU/5S7kv89mkXuDwjltTJpPM95FmlfNTh4/tKukgZ6I8Jc5psjwrUHnu8yWdOTzVkgTEjSoLQlm0E+WGhIZZc9SJR6kWV0gK+eVyp9F4cNLLm0r8CRWr8WMCcS9lTXSSpHOCLnJC2255MNg/sd5iOnowrjaJD8GEe6kUS42jaRsKpj5u8Pvuz2YnkNMhGTZQSt4hyV2aoWc3yeQKq0JiTFvO4fGm45m71aTNu1r5dzsXBAcqUqJh9GfGO7rUb5GdE5xviUoU3bV5P2y79/CyeYLjyoWDSRkknuzmJELWnNuphdWXRYqBaLWqhDJB5yoZ+l5rv7nmp4A=");
+//         const client = new TelegramClient(session, 28082768, "4bb35c92845f136f8eee12a04c848893", {useWSS: true});
+//         await client.start({
+//             onError(err) {
+//                 console.log(err);
+//             },
+//             phoneCode: async () => input.text("Code"),
+//             phoneNumber: async () => input.text("Number"),
+//             password: async () => input.text("Password"),
+//         });
+//         console.log(client.getMe());
+//         await client.disconnect();
+//     } catch (err) {
+//         console.log(err);
+//     }
 
-
-})()
+Bitrix.createContact('Tesusername', '88005553535', 'Тестовый Контакт').then((contact) => {
+    console.log(contact);
+});
+// })()
 
 
 // const src = new DataSource({
