@@ -11,6 +11,7 @@ import {Queue, Worker} from "bullmq";
 import input from 'input';
 import { Determiner } from "./determiner";
 import { IsNull } from "typeorm";
+import { Message } from "./entity/Message";
 const openAi = new OpenAI({
   apiKey: process.env.OPENAI_KEY,
 });
@@ -69,7 +70,6 @@ AppDataSource.initialize()
           finished: false,
         },
       });
-      console.log(notTalked);
       let free = notTalked.length;
       let total = 0;
       for (const bot of nBots) {
@@ -123,14 +123,18 @@ AppDataSource.initialize()
           host: "redis",
       }
     });
+    const msgRepo = AppDataSource.getRepository(Message);
     const workerOut = new Worker('out', async (job) => {
       const msg: OutcomingReq = job.data;
-      console.log(msg.bot);
-      console.log(clients.get(msg.bot));
-      console.log(job);
       const client = clients.get(msg.bot);
       msg.text = msg.text.replaceAll(/【.+】/g, '');
       try {
+        const m = new Message();
+        m.botphone = msg.bot;
+        m.text = msg.text;
+        m.username = msg.user;
+        await msgRepo.save(m);
+        await manager.sendMessage(-1002244363083, `Отправлено сообщение. От: ${m.botphone}. К: ${m.username}. Дата: ${m.date.toUTCString()}`);
         await client.sendMessage(msg.user, {
           message: msg.text,
         });

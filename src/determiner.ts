@@ -66,7 +66,6 @@ export class Determiner {
                 }).on("messageDone", (e) => {
                     newmsgs.push(e);
                 }).on('end',async () => {
-                    console.log(newmsgs);
                     for (const m of newmsgs) {
                         await outQueue.add('send', {
                             bot: bot,
