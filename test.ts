@@ -9,7 +9,7 @@ import fs from 'fs';
 import path from 'path';
 import { Bitrix } from "./src/Bitrix";
 
-const d = fs.readFileSync(path.join(__dirname, 'signup', 'id6.txt'), 'utf8');
+const d = fs.readFileSync(path.join(__dirname, 'signup', 'ids5.txt'), 'utf8');
 (async () => {
     const tkns = d.split('\n');
     for (const t of tkns) {
@@ -26,6 +26,7 @@ const d = fs.readFileSync(path.join(__dirname, 'signup', 'id6.txt'), 'utf8');
                 phoneNumber: async () => input.text("Number"),
                 password: async () => input.text("Password"),
             });
+            console.log((await client.getDialogs()).map(el => el.message.text));
             await client.disconnect();
         } catch (err) {
             console.log(err);
@@ -34,6 +35,7 @@ const d = fs.readFileSync(path.join(__dirname, 'signup', 'id6.txt'), 'utf8');
 
 
 })()
+
 
 
 // const src = new DataSource({

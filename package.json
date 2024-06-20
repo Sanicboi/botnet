@@ -32,6 +32,7 @@
       "start": "ts-node src/index.ts",
       "typeorm": "typeorm-ts-node-commonjs",
       "signup": "ts-node signup/index.ts",
-      "serve": "ts-node test.ts"
+      "serve": "ts-node test.ts",
+      "save-men": "ts-node setup_bots.ts"
    }
 }

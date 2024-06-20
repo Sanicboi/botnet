@@ -6,7 +6,7 @@ import { User } from "./src/entity/User";
 
 const AppDataSource = new DataSource({
     type: "postgres",
-    host: "localhost",
+    host: "194.0.194.46",
     port: 5432,
     username: "test",
     password: "test",
@@ -19,12 +19,14 @@ const AppDataSource = new DataSource({
 })
 
 AppDataSource.initialize().then(async () => {
-    const data = fs.readFileSync(path.join(__dirname, "signup", "ids.txt"), "utf8");
+    const data = fs.readFileSync(path.join(__dirname, "signup", "ids7.txt"), "utf8");
 
     const lines = data.split('\n');
     for (let token of lines) {
+        if (!token) return;
         const bot = new Bot();
         bot.token = token;
+        bot.gender = 'female';
         await AppDataSource.getRepository(Bot).save(bot);
     }
 

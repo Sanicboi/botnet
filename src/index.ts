@@ -72,7 +72,7 @@ AppDataSource.initialize()
       console.log(notTalked);
       let free = notTalked.length;
       let total = 0;
-      for (const bot of bots) {
+      for (const bot of nBots) {
         const client = clients.get(bot.id);
         let currentCount = 0;
         const toSend = bot.gender === 'male' ? 10 : 8;
