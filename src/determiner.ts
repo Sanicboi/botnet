@@ -26,7 +26,7 @@ export class Determiner {
         this.openai = openai;
     }
 
-    public async sendDetermined(msg: string, user: User, bot: string, outQueue: Queue, manager: TelegramBot, repo: Repository<User>, num: string) {
+    public async sendDetermined(msg: string, user: User, bot: string, outQueue: Queue, manager: TelegramBot, repo: Repository<User>, num: string, gender: 'male' | 'female') {
 
         await this.openai.beta.threads.messages.create(user.threadId, {
              content: msg,
@@ -34,7 +34,7 @@ export class Determiner {
         });
 
         const run = this.openai.beta.threads.runs.stream(user.threadId, {
-            assistant_id: 'asst_SS8Ct1OvanqvxGeDRYbrM8sP'
+            assistant_id: gender === 'male' ? 'asst_SS8Ct1OvanqvxGeDRYbrM8sP' : 'asst_8RgJFwUqF11WAfl4uMcOlufE'
         }).on('end', async () => {
             let msgs = await run.finalMessages();
             const finalRun = await run.finalRun();

@@ -33,9 +33,9 @@ const wait = async (s: number) => {
   await new Promise((resolve, reject) => setTimeout(resolve, 1000 * s));
 };
 const startMessage =
-  "Приветствую, я являюсь сооснователем бизнес клуба. Хочу с Вами познакомиться и  понять по каким вопросам к Вам можно обращаться? Мы ищем интересные проекты в которые можно инвестировать, предпринимателей и экспертов для партнерства. Готовы направить к Вам нашу аудиторию в качестве клиентов. Видел Вас в нескольких чатах сообществ в телеграмм группах. Если требуется могу прислать информацию о себе нас.";
+  "Приветствую, я являюсь сооснователем бизнес клуба. Хочу с Вами познакомиться и  понять по каким вопросам к Вам можно обращаться? Мы ищем интересные проекты в которые можно инвестировать, предпринимателей и экспертов для партнерства. Готовы направить к Вам нашу аудиторию в качестве клиентов. Видел Вас в нескольких чатах сообществ в телеграмм группах. Если требуется могу прислать информацию о нас.";
 const startMessage2 =
-  "У меня большое сообщество, думаю куда направить этот трафик. Для того чтобы наше взаимодействие было максимально продуктивным, хотелось бы уточнить где территориально работаете, с какими регионами? И готовы ли платить Агентское вознаграждение за привлечение клиентов? Если да то в каком процентном соотношении?";
+  "Приветствую, я являюсь менеджером бизнес клуба. Хочу с Вами познакомиться и понять по каким вопросам к Вам можно обращаться? Мы ищем интересные проекты в которые можно инвестировать, предпринимателей и экспертов для партнерства. Готовы направить к Вам нашу аудиторию в качестве клиентов. Видела Вас в нескольких чатах сообществ в телеграмм группах. Если требуется могу прислать информацию о нас.";
 AppDataSource.initialize()
   .then(async () => {
     const userRepo = AppDataSource.getRepository(User);
@@ -75,12 +75,13 @@ AppDataSource.initialize()
       for (const bot of bots) {
         const client = clients.get(bot.id);
         let currentCount = 0;
-        while (currentCount <= 5 && free > 0) {
+        const toSend = bot.gender === 'male' ? 10 : 8;
+        while (currentCount <= toSend && free > 0) {
           try {
             const res = await openAi.chat.completions.create({
               messages: [{
                 role: 'user',
-                content: `Перепиши синонимично это сообщение, изменив слова и порядок абзацев, но сохранив мысль: ${startMessage}`
+                content: `Перепиши синонимично это сообщение, изменив слова и порядок абзацев, но сохранив мысль: ${bot.gender === 'male' ? startMessage: startMessage2}`
               }],
               model: 'gpt-4-turbo',
               temperature: 1.2
@@ -179,8 +180,13 @@ AppDataSource.initialize()
             action: new Api.SendMessageTypingAction(),
           })
         );
+        const b = await botRepo.findOne({
+          where: {
+            id: msg.bot
+          }
+        });
         const phone = (await client.getMe()).phone;
-        await determiner.sendDetermined(msg.text, user, msg.bot, queueOut, manager, userRepo, phone);
+        await determiner.sendDetermined(msg.text, user, msg.bot, queueOut, manager, userRepo, phone, b.gender);
       } catch (error) {
         console.error("ERROR PROCESSING MESSAGE " + error);
       }

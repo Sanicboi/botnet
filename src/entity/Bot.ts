@@ -14,4 +14,7 @@ export class Bot {
 
     @Column({default: true})
     send: boolean;
+
+    @Column({default: 'male'})
+    gender: 'male' | 'female';
 }
