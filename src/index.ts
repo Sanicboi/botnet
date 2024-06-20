@@ -41,11 +41,7 @@ AppDataSource.initialize()
   .then(async () => {
     const userRepo = AppDataSource.getRepository(User);
     const botRepo = AppDataSource.getRepository(Bot);
-    const bots = await botRepo.find({
-      where: {
-        blocked: false
-      }
-    });
+
     const manager = new TgBot("6672883029:AAEe-3kIb6cUV1KUZxoedP_BdQ2JRTtTCpk", {
       polling: true,
     });
@@ -112,7 +108,11 @@ AppDataSource.initialize()
         }
       }
     });
-
+    const bots = await botRepo.find({
+      where: {
+        blocked: false
+      }
+    });
     const queueIn = new Queue('in', {
       connection: {
         host: 'redis'
@@ -134,7 +134,7 @@ AppDataSource.initialize()
         m.text = msg.text;
         m.username = msg.user;
         await msgRepo.save(m);
-        await manager.sendMessage(-1002244363083, `Отправлено сообщение. От: ${m.botphone}. К: ${m.username}. Дата: ${m.date.toUTCString()}`);
+        await manager.sendMessage(-1002201795929, `Отправлено сообщение. От: ${m.botphone}. К: ${m.username}. Дата: ${m.date.toUTCString()}`);
         await client.sendMessage(msg.user, {
           message: msg.text,
         });
@@ -146,7 +146,7 @@ AppDataSource.initialize()
         host: 'redis'
       },
       limiter: {
-        duration: 60000 * 3,
+        duration: 60000 * 5,
         max: 1
       }
     });
