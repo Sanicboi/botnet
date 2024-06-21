@@ -53,8 +53,9 @@ export class Determiner {
                 await manager.sendMessage(-1002244363083, `Согласована встреча с клиентом. Номер телефона бота: ${num}\nКлиент:${user.usernameOrPhone}`);
 
                 const data: Data = JSON.parse(finalRun.required_action.submit_tool_outputs.tool_calls[0].function.arguments);
-                const id = (await Bitrix.createContact(user.usernameOrPhone, data.userPhone, '')).data.result;
-                await Bitrix.createDeal(num, data.dateTime, data.segment, data.comment, id);
+                const contactId = (await Bitrix.createContact(user.usernameOrPhone, data.userPhone, '')).data.result;
+                const dealId = (await Bitrix.createDeal(num, data.dateTime, data.segment, data.comment)).data.result;
+                await Bitrix.addContact(contactId, dealId);
                 let newmsgs: OpenAI.Beta.Threads.Message[] = [];
                 await this.openai.beta.threads.runs.submitToolOutputsStream(finalRun.thread_id, finalRun.id, {
                     tool_outputs: [

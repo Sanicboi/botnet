@@ -33,6 +33,9 @@
       "typeorm": "typeorm-ts-node-commonjs",
       "signup": "ts-node signup/index.ts",
       "serve": "ts-node test.ts",
-      "save-men": "ts-node setup_bots.ts"
+      "save-men": "ts-node setup_bots.ts",
+      "nums": "ts-node checknumbers.ts",
+      "add": "ts-node createbot.ts",
+      "sleep": "ts-node sleep.ts"
    }
 }

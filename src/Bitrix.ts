@@ -1,4 +1,4 @@
-import axios, { AxiosResponse } from 'axios';
+import axios, { Axios, AxiosResponse } from 'axios';
 
 
 interface Container {
@@ -31,23 +31,42 @@ export class Bitrix {
         return res;
     }
 
+
+
     public static async dealFields(): Promise<AxiosResponse<{result: Container}>> {
         return await axios.get(process.env.WEBHOOK_URL+ 'crm.deal.fields');
     }
 
-    public static async createDeal(botPhone: string, callTime: string, segment: string, comment: string, contact: number) {
-        await axios.get(process.env.WEBHOOK_URL+'crm.deal.add', {
+    public static async createDeal(botPhone: string, callTime: string, segment: string, comment: string): Promise<AxiosResponse<{result: number}>> {
+        return await axios.get(process.env.WEBHOOK_URL+'crm.deal.add', {
             params: {
-                "UF_CRM_1718783932": botPhone,
-                "UF_CRM_1718783952": callTime,
-                "UF_CRM_1705043524805": segment,
-                "COMMENTS": comment,
-                "ASSIGNED_BY_ID": 39,
-                "CATEGORY_ID": 77,
-                "STAGE_ID": "NEW",
-                "CONTACT_IDS": [contact]
+                fields: {
+                    "UF_CRM_1718783932": botPhone,
+                    "UF_CRM_1718783952": callTime,
+                    "UF_CRM_1705043524805": segment,
+                    "COMMENTS": comment,
+                    "ASSIGNED_BY_ID": 39,
+                    "CATEGORY_ID": 77,
+                    "STAGE_ID": "NEW",
+                },
+                params: {
+                    "REGISTER_SONET_EVENT": "N"
+                }
             }
         });
+    }
+
+    public static async addContact(contactId: number, dealId: number) {
+        await axios.get(process.env.WEBHOOK_URL+'crm.deal.contact.add', {
+            params: {
+                "id": dealId,
+                fields: {
+                    "CONTACT_ID": contactId,
+                    "SORT": 0,
+                    "IS_PRIMARY": "Y"
+                }
+            }
+        })
     }
 
 }
