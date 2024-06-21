@@ -83,7 +83,7 @@
 // import Openai from 'openai';
 
 // const openai = new Openai({
-//     apiKey: 'sk-proj-ocHE8bzninKAJOjt25kfT3BlbkFJMeOo9j8u1Onl5cJLhF11',
+//     
 // })
 
 // openai.beta.threads.messages.list('thread_Ru4sC4g3cIXFpXTEvqbOXkxG').then((v) => {
