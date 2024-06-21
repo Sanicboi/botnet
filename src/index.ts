@@ -134,10 +134,10 @@ AppDataSource.initialize()
         m.text = msg.text;
         m.username = msg.user;
         await msgRepo.save(m);
-        await manager.sendMessage(-1002201795929, `Отправлено сообщение. От: ${m.botphone}. К: ${m.username}. Дата: ${m.date.toUTCString()}`);
         await client.sendMessage(msg.user, {
           message: msg.text,
         });
+        await manager.sendMessage(-1002201795929, `Отправлено сообщение. От: ${m.botphone}. К: ${m.username}. Дата: ${m.date.toUTCString()}`);
       } catch (error) {
         console.error("ERROR SENDING MESSAGE ", error);
       }
