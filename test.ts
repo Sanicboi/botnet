@@ -2,6 +2,9 @@
 // import { StringSession } from "telegram/sessions";
 // import input from 'input';
 
+import axios from "axios";
+import { Bitrix } from "./src/Bitrix";
+
 // import { DataSource } from "typeorm";
 // import { User } from "./src/entity/User";
 // import { Bot } from "./src/entity/Bot";
@@ -53,6 +56,32 @@
 //         }
 //     }
 
+process.env.WEBHOOK_URL = 'https://adamart.bitrix24.ru/rest/39/w0654aqejhhe6zdi/';
+Bitrix.createContact("Username", "Phone", "Name").then(async d => {
+    // const r = await Bitrix.createDeal("phone", "time", "segment", "comment");
+    // await Bitrix.addContact(d.data.result, r.data.result);
+    // const res = await axios.get(process.env.WEBHOOK_URL+'crm.contact.list', {
+    //     params: {
+    //         select: [
+    //             "*"
+    //         ]
+    //     }
+    // });
+    // console.log(res.data.result.map(el => el.NAME));
+    console.log(d.data);
+    let r = await axios.get(process.env.WEBHOOK_URL+'crm.contact.get', {
+        params: {
+            id: 2821
+        }
+    });
+    const re = await Bitrix.createDeal('79685232593', '16:00', 'segment', 'comment');
+    r = await axios.get(process.env.WEBHOOK_URL+'crm.deal.get', {
+        params: {
+            id: re.data.result
+        }
+    });
+    console.log(r.data);
+})
 
 // });
 

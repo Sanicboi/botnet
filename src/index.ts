@@ -1,6 +1,6 @@
 import { StringSession } from "telegram/sessions";
 import { AppDataSource } from "./data-source";
-import { Api, TelegramClient } from "telegram";
+import { Api, TelegramClient, client } from "telegram";
 import { NewMessage } from "telegram/events";
 import schedule from "node-schedule";
 import OpenAI from "openai";
@@ -42,7 +42,7 @@ AppDataSource.initialize()
     const userRepo = AppDataSource.getRepository(User);
     const botRepo = AppDataSource.getRepository(Bot);
 
-    const manager = new TgBot("6672883029:AAEe-3kIb6cUV1KUZxoedP_BdQ2JRTtTCpk", {
+    const manager = new TgBot("7347879515:AAGfiiuwBzlgFHHASnBnjxkwNPUooFXO3Qc", {
       polling: true,
     });
 
@@ -52,7 +52,7 @@ AppDataSource.initialize()
         "Я - менеджер ботов компании Legat Business"
       );
     });
-
+    
     manager.onText(/\/send/, async (msg) => {
       const nBots = await botRepo.find({
         where: {
@@ -90,7 +90,6 @@ AppDataSource.initialize()
                 },
               ],
             });
-  
             notTalked[total].threadId = thread.id;
             notTalked[total].botid = bot.id;
             await userRepo.save(notTalked[total]);

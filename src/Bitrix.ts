@@ -16,7 +16,7 @@ export class Bitrix {
     }
 
     public static async createContact(username: string, phone: string, name?: string): Promise<AxiosResponse<{result: number}>> {
-        const res = await axios.get(process.env.WEBHOOK_URL + 'crm.contact.add', {
+        const res = await axios.get(process.env.WEBHOOK_URL + 'crm.contact.add.json', {
             params: {
                 fields: {
                     "NAME": name,
@@ -24,7 +24,7 @@ export class Bitrix {
                     "UF_CRM_1718783399": username
                 },
                 params: {
-                    "REGISTER_SONET_EVENT": "N"
+                    "REGISTER_SONET_EVENT": "Y"
                 }
             }
         });
@@ -48,16 +48,17 @@ export class Bitrix {
                     "ASSIGNED_BY_ID": 39,
                     "CATEGORY_ID": 77,
                     "STAGE_ID": "NEW",
+                    "BEGINDATE": (new Date()).toISOString(),
                 },
                 params: {
-                    "REGISTER_SONET_EVENT": "N"
+                    "REGISTER_SONET_EVENT": "Y"
                 }
             }
         });
     }
 
     public static async addContact(contactId: number, dealId: number) {
-        await axios.get(process.env.WEBHOOK_URL+'crm.deal.contact.add', {
+        const r = await axios.get(process.env.WEBHOOK_URL+'crm.deal.contact.add', {
             params: {
                 "id": dealId,
                 fields: {
@@ -66,7 +67,7 @@ export class Bitrix {
                     "IS_PRIMARY": "Y"
                 }
             }
-        })
+        });
     }
 
 }

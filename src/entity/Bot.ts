@@ -17,4 +17,7 @@ export class Bot {
 
     @Column({default: 'male'})
     gender: 'male' | 'female';
+
+    @Column({default: ''})
+    phone: string;
 }

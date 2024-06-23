@@ -14,7 +14,7 @@ const src = new DataSource({
   host: "194.0.194.46",
   entities: [User, Bot, Message],
   port: 5432,
-  synchronize: false,
+  synchronize: true,
   migrations: [],
   subscribers: [],
 });

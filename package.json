@@ -36,6 +36,7 @@
       "save-men": "ts-node setup_bots.ts",
       "nums": "ts-node checknumbers.ts",
       "add": "ts-node createbot.ts",
-      "sleep": "ts-node sleep.ts"
+      "sleep": "ts-node sleep.ts",
+      "bots": "ts-node checkbot.ts"
    }
 }
