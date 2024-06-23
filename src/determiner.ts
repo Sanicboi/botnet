@@ -96,7 +96,7 @@ export class Determiner {
            const finalRun = await run.finalRun();
            for (const m of msgs) {
                 //@ts-ignore
-               await whatsApp.sendMessage(user.phone, m.content[0].text.value)
+               await whatsApp.sendMessage(user.phone, m.content[0].text.value.replaceAll(/【.+】/g, ''));
            }
            if (finalRun.status === 'requires_action' && finalRun.required_action.type === 'submit_tool_outputs') {
                // Отправь сообщение!
@@ -120,7 +120,7 @@ export class Determiner {
                }).on('end',async () => {
                    for (const m of newmsgs) {
                         // @ts-ignore
-                       await whatsApp.sendMessage(user.phone, m.content[0].text.value)
+                       await whatsApp.sendMessage(user.phone, m.content[0].text.value.replaceAll(/【.+】/g, ''))
                    }
                }).finalMessages();
            }
