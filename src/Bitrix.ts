@@ -37,7 +37,7 @@ export class Bitrix {
         return await axios.get(process.env.WEBHOOK_URL+ 'crm.deal.fields');
     }
 
-    public static async createDeal(botPhone: string, callTime: string, segment: string, comment: string): Promise<AxiosResponse<{result: number}>> {
+    public static async createDeal(botPhone: string, callTime: string, segment: string, comment: string, dialog: string): Promise<AxiosResponse<{result: number}>> {
         return await axios.get(process.env.WEBHOOK_URL+'crm.deal.add', {
             params: {
                 fields: {
@@ -49,6 +49,7 @@ export class Bitrix {
                     "CATEGORY_ID": 77,
                     "STAGE_ID": "NEW",
                     "BEGINDATE": (new Date()).toISOString(),
+                    "UF_CRM_1719146021": dialog
                 },
                 params: {
                     "REGISTER_SONET_EVENT": "Y"

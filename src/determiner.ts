@@ -13,7 +13,8 @@ interface Data {
     userPhone: string,
     dateTime: string,
     segment: string,
-    comment: string          
+    comment: string,
+    dialog: string     
 }
 
 
@@ -56,7 +57,7 @@ export class Determiner {
 
                 const data: Data = JSON.parse(finalRun.required_action.submit_tool_outputs.tool_calls[0].function.arguments);
                 const contactId = (await Bitrix.createContact(user.usernameOrPhone, data.userPhone, '')).data.result;
-                const dealId = (await Bitrix.createDeal(num, data.dateTime, data.segment, data.comment)).data.result;
+                const dealId = (await Bitrix.createDeal(num, data.dateTime, data.segment, data.comment, data.dialog)).data.result;
                 await Bitrix.addContact(contactId, dealId);
                 let newmsgs: OpenAI.Beta.Threads.Message[] = [];
                 await this.openai.beta.threads.runs.submitToolOutputsStream(finalRun.thread_id, finalRun.id, {
@@ -87,7 +88,7 @@ export class Determiner {
             content: msg,
             role: 'user'
        });
-
+       if (!user.replied) user.replied = true; 
        const run = this.openai.beta.threads.runs.stream(user.threadId, {
            assistant_id: 'asst_SS8Ct1OvanqvxGeDRYbrM8sP'
        }).on('end', async () => {
@@ -104,7 +105,7 @@ export class Determiner {
 
                const data: Data = JSON.parse(finalRun.required_action.submit_tool_outputs.tool_calls[0].function.arguments);
                const contactId = (await Bitrix.createContact(user.phone, data.userPhone, '')).data.result;
-               const dealId = (await Bitrix.createDeal('Whatsapp', data.dateTime, data.segment, data.comment)).data.result;
+               const dealId = (await Bitrix.createDeal('Whatsapp', data.dateTime, data.segment, data.comment, data.dialog)).data.result;
                await Bitrix.addContact(contactId, dealId);
                let newmsgs: OpenAI.Beta.Threads.Message[] = [];
                await this.openai.beta.threads.runs.submitToolOutputsStream(finalRun.thread_id, finalRun.id, {

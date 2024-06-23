@@ -30,7 +30,14 @@ src.initialize().then(async () => {
     for (const b of bots) {
         const session = new StringSession(b.token);
         try {
-            const client = new TelegramClient(session, 28082768, "4bb35c92845f136f8eee12a04c848893", {useWSS: true});
+            const client = new TelegramClient(session, 28082768, "4bb35c92845f136f8eee12a04c848893", {useWSS: true,
+                proxy: {
+                    ip: '5.42.107.154',
+                    port: 2020,
+                    secret: 'eec1bcb46fcddc05111e7ce92a094c1dae7777772e736f667439382e6972',
+                    MTProxy: true
+                }
+            });
             let blocked = false;
             await client.start({
                 async onError(err) {

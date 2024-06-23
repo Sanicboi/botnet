@@ -27,7 +27,6 @@ const src = new DataSource({
     const bots = await src.getRepository(Bot).find({
         where: {
             blocked: false,
-            send: true,
         }
     });
     for (const b of bots) {
@@ -47,6 +46,8 @@ const src = new DataSource({
                 b.send = false;
                 await src.getRepository(Bot).save(b);
                 console.log(`Found ${phone}`);
+            } else {
+                b.send = true;
             }
             await client.disconnect();
         } catch (err) {
