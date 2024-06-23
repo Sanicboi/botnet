@@ -66,7 +66,8 @@ export class Whatsapp {
             });
             user.threadId = thread.id;
             await userRepo.save(user);
-            await this.sendTemplates(job.data.to);
+            const res = await this.sendTemplates(job.data.to);
+            console.log(res);
             await manager.sendMessage(-1002201795929, `Отправлено сообщение WhatsApp. К: ${job.data.to}`);
         }, {
             connection: {
@@ -138,6 +139,7 @@ export class Whatsapp {
                 Authorization: `Bearer ${process.env.WAZZUP_KEY}`
             }
         });
+        return res;
     }
 
     public async schedule(to: string) {
