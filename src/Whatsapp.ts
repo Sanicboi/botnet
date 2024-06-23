@@ -64,6 +64,7 @@ export class Whatsapp {
             const user = await userRepo.findOneBy({
                 phone: job.data.to,
             });
+            console.log(user);
             user.threadId = thread.id;
             await userRepo.save(user);
             const res = await this.sendTemplates(job.data.to);
