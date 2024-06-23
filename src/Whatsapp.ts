@@ -35,6 +35,7 @@ export class Whatsapp {
         this.server = express();
         this.server.use(express.json());
         this.server.post('/api/message', async (req: express.Request<any, any, webhookBody>, res) => {
+            console.log(req.body);
             if (req.body.test === true) {
                 return res.status(200).end();
             }
