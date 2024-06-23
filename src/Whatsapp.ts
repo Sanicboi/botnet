@@ -41,6 +41,7 @@ export class Whatsapp {
                 if (req.body.test === true) {
                     return res.status(200).end();
                 }
+                if (!req.body.messages) return res.status(200).end();
                 for (const m of req.body.messages) {
                     try {
                     if (m.chatType === 'whatsapp' && m.type == 'text' && m.text && m.isEcho == false) {
