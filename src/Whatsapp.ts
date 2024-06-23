@@ -35,25 +35,26 @@ export class Whatsapp {
         this.server = express();
         this.server.use(express.json());
         this.server.post('/api/message', async (req: express.Request<any, any, {messages: webhookBody[]}>, res) => {
-            console.log(req.body);
-            //@ts-ignore
-            if (req.body.test === true) {
-                return res.status(200).end();
-            }
-            for (const m of req.body.messages) {
-                if (m.chatType === 'whatsapp' && m.type == 'text' && m.text) {
-                    const user = await userRepo.findOneBy({ 
-                        phone: m.chatId
-                    });
-                    console.log(user);
-                    if (user) {
-                        await wait(10)
-                        await determiner.answerWhatsApp(m.text, user, userRepo, this);
+            try {
+                //@ts-ignore
+                if (req.body.test === true) {
+                    return res.status(200).end();
+                }
+                for (const m of req.body.messages) {
+                    if (m.chatType === 'whatsapp' && m.type == 'text' && m.text) {
+                        const user = await userRepo.findOneBy({ 
+                            phone: m.chatId
+                        });
+                        console.log(user);
+                        if (user) {
+                            await wait(10)
+                            await determiner.answerWhatsApp(m.text, user, userRepo, this);
+                        }
                     }
                 }
+            } catch (err) {
+                console.log(err);
             }
-            
-
             return res.status(200).end();
         });
 

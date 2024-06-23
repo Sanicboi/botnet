@@ -156,7 +156,11 @@ AppDataSource.initialize()
     manager.onText(/\/whatsapp/, async () => {
       console.log("sending")
       const users = await AppDataSource.getRepository(WhatsappUser).find({
-        take: 150
+        take: 150,
+        where: {
+          finished: false,
+          threadId: IsNull()
+        }
       })
 
       for (const user of users) {

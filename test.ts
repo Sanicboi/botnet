@@ -13,7 +13,8 @@ import { Message } from "./src/entity/Message";
 import { WhatsappUser } from "./src/entity/WhatsappUser";
 import TelegramBot from "node-telegram-bot-api";
 import { Determiner } from "./src/determiner";
-
+import fs from 'fs';
+import path from "path";
 // import { DataSource } from "typeorm";
 // import { User } from "./src/entity/User";
 // import { Bot } from "./src/entity/Bot";
@@ -34,9 +35,23 @@ const src = new DataSource({
     subscribers: [],
 });
 
-const manager = new TelegramBot("7347879515:AAGfiiuwBzlgFHHASnBnjxkwNPUooFXO3Qc", {
-    polling: true,
-  });
+src.initialize().then(() => {
+    let data = fs.readFileSync(path.join(__dirname, 'signup', 'whatsapp.txt'), 'utf8');
+    data = data.replaceAll('\r', '').replaceAll(' ', '').replaceAll('+', '').replaceAll('\'', '').replaceAll('-', '');
+    console.log(data);
+    const nums = data.split('\n');
+
+    nums.forEach(async n => {
+        if (!n) return;
+        if (n.startsWith('8')) {
+            n = n.replace('8', '7');
+        }
+        const user = new WhatsappUser();
+        user.phone = n;
+        await src.getRepository(WhatsappUser).save(user);
+    });
+})
+
 // src.initialize().then(async () => {
 //     const bots = await src.getRepository(Bot).find({
 //         where: {
@@ -68,14 +83,8 @@ const manager = new TelegramBot("7347879515:AAGfiiuwBzlgFHHASnBnjxkwNPUooFXO3Qc"
 //             console.log(err);
 //         }
 //     }
-process.env.WAZZUP_KEY = '4eb2baf6770a4bebb82d875925653861';
-process.env.BASE_URL = 'http://194.0.194.46:8082'
-const openai = new OpenAI({
-    apiKey: ''
-});
-const determiner = new Determiner(openai);
-const wazzup = new Whatsapp(openai, src, manager, determiner);
-wazzup.connect().then(r => console.log(r.data));
+
+
 
 // });
 
