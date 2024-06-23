@@ -17,7 +17,8 @@ interface webhookBody {
     type: string, // need text
     status: 'sent' | 'delivered' | 'read' | 'inbound' | 'error',
     text?: string,
-    test?: boolean
+    test?: boolean,
+    isEcho: boolean
 }
 
 export class Whatsapp {
@@ -35,13 +36,15 @@ export class Whatsapp {
         this.server = express();
         this.server.use(express.json());
         this.server.post('/api/message', async (req: express.Request<any, any, {messages: webhookBody[]}>, res) => {
-            try {
+
                 //@ts-ignore
                 if (req.body.test === true) {
                     return res.status(200).end();
                 }
                 for (const m of req.body.messages) {
-                    if (m.chatType === 'whatsapp' && m.type == 'text' && m.text) {
+                    try {
+                    if (m.chatType === 'whatsapp' && m.type == 'text' && m.text && m.isEcho == false) {
+                        console.log(m.text);
                         const user = await userRepo.findOneBy({ 
                             phone: m.chatId
                         });
@@ -51,10 +54,11 @@ export class Whatsapp {
                             await determiner.answerWhatsApp(m.text, user, userRepo, this);
                         }
                     }
+                    } catch (err) {
+                        console.log(err);
+                    }
                 }
-            } catch (err) {
-                console.log(err);
-            }
+
             return res.status(200).end();
         });
 
