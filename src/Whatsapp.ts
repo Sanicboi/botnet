@@ -42,6 +42,7 @@ export class Whatsapp {
                 const user = await userRepo.findOneBy({ 
                     phone: req.body.chatId
                 });
+                console.log(user);
                 if (user) {
                     await wait(10)
                     await determiner.answerWhatsApp(req.body.text, user, userRepo, this);
