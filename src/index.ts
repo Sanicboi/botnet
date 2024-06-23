@@ -12,6 +12,8 @@ import input from 'input';
 import { Determiner } from "./determiner";
 import { IsNull } from "typeorm";
 import { Message } from "./entity/Message";
+import { Whatsapp } from "./Whatsapp";
+import { WhatsappUser } from "./entity/WhatsappUser";
 const openAi = new OpenAI({
   apiKey: process.env.OPENAI_KEY,
 });
@@ -77,7 +79,7 @@ AppDataSource.initialize()
             const res = await openAi.chat.completions.create({
               messages: [{
                 role: 'user',
-                content: `Перепиши синонимично это сообщение, изменив слова и порядок абзацев, но сохранив мысль: ${bot.gender === 'male' ? startMessage: startMessage2}`
+                content: `Перепиши синонимично это сообщение, изменив слова и порядок абзацев (замени как минимум 15 слов синонимами), но сохранив мысль: ${bot.gender === 'male' ? startMessage: startMessage2}`
               }],
               model: 'gpt-4-turbo',
               temperature: 1.2
@@ -123,6 +125,8 @@ AppDataSource.initialize()
       }
     });
     const msgRepo = AppDataSource.getRepository(Message);
+    const whatsapp = new Whatsapp(openAi, AppDataSource, manager, determiner);
+
     const workerOut = new Worker('out', async (job) => {
       const msg: OutcomingReq = job.data;
       const client = clients.get(msg.bot);
@@ -149,8 +153,15 @@ AppDataSource.initialize()
         max: 1
       }
     });
-    queueIn.drain();
-    queueOut.drain();
+    manager.onText(/\/whatsapp/, async () => {
+      const users = await AppDataSource.getRepository(WhatsappUser).find({
+        take: 150
+      })
+
+      for (const user of users) {
+        whatsapp.schedule(user.phone);
+      }
+    })
     const workerIn = new Worker('in', async (job) => {
       // ОБРАБОТАТЬ ВХОДЯЩЕЕ СООБЩЕНИЕ С ТАЙМИНГОМ
       const msg: IncomingReq = job.data;
@@ -245,6 +256,8 @@ AppDataSource.initialize()
         console.log("ERROR SETTING UP CLIENT! " + error);
       }
     }
+
+    whatsapp.listen()
   })
   .catch((error) => console.log(error));
   

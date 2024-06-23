@@ -4,6 +4,15 @@
 
 import axios from "axios";
 import { Bitrix } from "./src/Bitrix";
+import { Whatsapp } from "./src/Whatsapp";
+import OpenAI from "openai";
+import { DataSource } from "typeorm";
+import { User } from "./src/entity/User";
+import { Bot } from "./src/entity/Bot";
+import { Message } from "./src/entity/Message";
+import { WhatsappUser } from "./src/entity/WhatsappUser";
+import TelegramBot from "node-telegram-bot-api";
+import { Determiner } from "./src/determiner";
 
 // import { DataSource } from "typeorm";
 // import { User } from "./src/entity/User";
@@ -12,18 +21,22 @@ import { Bitrix } from "./src/Bitrix";
 // import path from 'path';
 // import { Bitrix } from "./src/Bitrix";
 
-// const src = new DataSource({
-//     type: 'postgres',
-//     username: 'test',
-//     password: 'test',
-//     database: 'test',
-//     host: '194.0.194.46',
-//     entities: [User, Bot],
-//     port: 5432,
-//     synchronize: false,
-//     migrations: [],
-//     subscribers: [],
-// });
+const src = new DataSource({
+    type: 'postgres',
+    username: 'test',
+    password: 'test',
+    database: 'test',
+    host: '194.0.194.46',
+    entities: [User, Bot, Message, WhatsappUser],
+    port: 5432,
+    synchronize: false,
+    migrations: [],
+    subscribers: [],
+});
+
+const manager = new TelegramBot("7347879515:AAGfiiuwBzlgFHHASnBnjxkwNPUooFXO3Qc", {
+    polling: true,
+  });
 // src.initialize().then(async () => {
 //     const bots = await src.getRepository(Bot).find({
 //         where: {
@@ -55,33 +68,14 @@ import { Bitrix } from "./src/Bitrix";
 //             console.log(err);
 //         }
 //     }
-
-process.env.WEBHOOK_URL = 'https://adamart.bitrix24.ru/rest/39/w0654aqejhhe6zdi/';
-Bitrix.createContact("Username", "Phone", "Name").then(async d => {
-    // const r = await Bitrix.createDeal("phone", "time", "segment", "comment");
-    // await Bitrix.addContact(d.data.result, r.data.result);
-    // const res = await axios.get(process.env.WEBHOOK_URL+'crm.contact.list', {
-    //     params: {
-    //         select: [
-    //             "*"
-    //         ]
-    //     }
-    // });
-    // console.log(res.data.result.map(el => el.NAME));
-    console.log(d.data);
-    let r = await axios.get(process.env.WEBHOOK_URL+'crm.contact.get', {
-        params: {
-            id: 2821
-        }
-    });
-    const re = await Bitrix.createDeal('79685232593', '16:00', 'segment', 'comment');
-    r = await axios.get(process.env.WEBHOOK_URL+'crm.deal.get', {
-        params: {
-            id: re.data.result
-        }
-    });
-    console.log(r.data);
-})
+process.env.WAZZUP_KEY = '4eb2baf6770a4bebb82d875925653861';
+process.env.BASE_URL = 'http://194.0.194.46:8082'
+const openai = new OpenAI({
+    apiKey: ''
+});
+const determiner = new Determiner(openai);
+const wazzup = new Whatsapp(openai, src, manager, determiner);
+wazzup.connect().then(r => console.log(r.data));
 
 // });
 

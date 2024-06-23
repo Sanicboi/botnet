@@ -5,6 +5,7 @@ import { Message } from "./src/entity/Message";
 import { StringSession } from "telegram/sessions";
 import { TelegramClient } from "telegram";
 import { AppDataSource } from "./src/data-source";
+import { WhatsappUser } from "./src/entity/WhatsappUser";
 
 const src = new DataSource({
     type: "postgres",
@@ -12,7 +13,7 @@ const src = new DataSource({
     password: "test",
     database: "test",
     host: "194.0.194.46",
-    entities: [User, Bot, Message],
+    entities: [User, Bot, Message, WhatsappUser],
     port: 5432,
     synchronize: true,
     migrations: [],

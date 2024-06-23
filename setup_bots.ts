@@ -3,6 +3,7 @@ import path from 'path';
 import { Bot } from "./src/entity/Bot";
 import { DataSource } from "typeorm";
 import { User } from "./src/entity/User";
+import { WhatsappUser } from "./src/entity/WhatsappUser";
 
 const AppDataSource = new DataSource({
     type: "postgres",
@@ -13,7 +14,7 @@ const AppDataSource = new DataSource({
     database: "test",
     synchronize: true,
     logging: false,
-    entities: [User, Bot],
+    entities: [User, Bot, WhatsappUser],
     migrations: [],
     subscribers: [],
 })
