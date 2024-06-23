@@ -154,12 +154,13 @@ AppDataSource.initialize()
       }
     });
     manager.onText(/\/whatsapp/, async () => {
+      console.log("sending")
       const users = await AppDataSource.getRepository(WhatsappUser).find({
         take: 150
       })
 
       for (const user of users) {
-        whatsapp.schedule(user.phone);
+        await whatsapp.schedule(user.phone);
       }
     })
     const workerIn = new Worker('in', async (job) => {

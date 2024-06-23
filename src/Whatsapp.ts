@@ -51,7 +51,8 @@ export class Whatsapp {
             return res.status(200).end();
         });
 
-        this.worker = new Worker('whatsapp-templates', async (job) => {
+        this.worker = new Worker('wapp', async (job) => {
+            console.log(job.data);
             const thread = await openai.beta.threads.create({
                 messages: [
                     {
@@ -76,7 +77,7 @@ export class Whatsapp {
                 max: 1
             }
         });
-        this.queue = new Queue('whatsapp-templates', {
+        this.queue = new Queue('wapp', {
             connection: {
                 host: 'redis'
             }
