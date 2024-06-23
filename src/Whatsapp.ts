@@ -67,6 +67,7 @@ export class Whatsapp {
             console.log(user);
             user.threadId = thread.id;
             await userRepo.save(user);
+            console.log(user);
             const res = await this.sendTemplates(job.data.to);
             console.log(res);
             await manager.sendMessage(-1002201795929, `Отправлено сообщение WhatsApp. К: ${job.data.to}`);
@@ -129,7 +130,7 @@ export class Whatsapp {
     }
 
     public async sendTemplates(to: string) {
-        const res = await axios.post('https://api.wazzup24.com/message', {
+        const res = await axios.post('https://api.wazzup24.com/v3/message', {
             channelId: '9337fe33-5797-405c-8e77-7f88402bc506', //TODO
             chatType: 'whatsapp',
             chatId: to,
