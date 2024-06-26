@@ -37,7 +37,7 @@ export class Determiner {
         });
 
         const run = this.openai.beta.threads.runs.stream(user.threadId, {
-            assistant_id: gender === 'male' ? 'asst_SS8Ct1OvanqvxGeDRYbrM8sP' : 'asst_8RgJFwUqF11WAfl4uMcOlufE'
+            assistant_id: gender === 'male' ? 'asst_8RgJFwUqF11WAfl4uMcOlufE' : 'asst_LNGeR2YXA5i8i4HluS549xg5'
         }).on('end', async () => {
             let msgs = await run.finalMessages();
             const finalRun = await run.finalRun();
@@ -54,10 +54,12 @@ export class Determiner {
                 user.finished = true;
                 await repo.save(user);
                 await manager.sendMessage(-1002244363083, `Согласована встреча с клиентом. Номер телефона бота: ${num}\nКлиент:${user.usernameOrPhone}`);
-
+                const r = await this.openai.beta.threads.messages.list(user.threadId);
+                //@ts-ignore
+                const str = r.data.reverse().map(el => el.content[0].text.value).join('\n');
                 const data: Data = JSON.parse(finalRun.required_action.submit_tool_outputs.tool_calls[0].function.arguments);
                 const contactId = (await Bitrix.createContact(user.usernameOrPhone, data.userPhone, '')).data.result;
-                const dealId = (await Bitrix.createDeal(num, data.dateTime, data.segment, data.comment, data.dialog)).data.result;
+                const dealId = (await Bitrix.createDeal(num, data.dateTime, data.segment, data.comment, str)).data.result;
                 await Bitrix.addContact(contactId, dealId);
                 let newmsgs: OpenAI.Beta.Threads.Message[] = [];
                 await this.openai.beta.threads.runs.submitToolOutputsStream(finalRun.thread_id, finalRun.id, {
@@ -90,7 +92,7 @@ export class Determiner {
        });
        if (!user.replied) user.replied = true; 
        const run = this.openai.beta.threads.runs.stream(user.threadId, {
-           assistant_id: 'asst_SS8Ct1OvanqvxGeDRYbrM8sP'
+           assistant_id: 'asst_8RgJFwUqF11WAfl4uMcOlufE'
        }).on('end', async () => {
            let msgs = await run.finalMessages();
            const finalRun = await run.finalRun();
@@ -105,7 +107,10 @@ export class Determiner {
 
                const data: Data = JSON.parse(finalRun.required_action.submit_tool_outputs.tool_calls[0].function.arguments);
                const contactId = (await Bitrix.createContact(user.phone, data.userPhone, '')).data.result;
-               const dealId = (await Bitrix.createDeal('Whatsapp', data.dateTime, data.segment, data.comment, data.dialog)).data.result;
+               const r = await this.openai.beta.threads.messages.list(user.threadId);
+                //@ts-ignore
+                const str = r.data.reverse().map(el => el.content[0].text.value).join('\n');
+               const dealId = (await Bitrix.createDeal('Whatsapp', data.dateTime, data.segment, data.comment, str)).data.result;
                await Bitrix.addContact(contactId, dealId);
                let newmsgs: OpenAI.Beta.Threads.Message[] = [];
                await this.openai.beta.threads.runs.submitToolOutputsStream(finalRun.thread_id, finalRun.id, {

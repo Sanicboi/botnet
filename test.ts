@@ -34,23 +34,17 @@ const src = new DataSource({
     migrations: [],
     subscribers: [],
 });
-
-src.initialize().then(() => {
-    let data = fs.readFileSync(path.join(__dirname, 'signup', 'whatsapp.txt'), 'utf8');
-    data = data.replaceAll('\r', '').replaceAll(' ', '').replaceAll('+', '').replaceAll('\'', '').replaceAll('-', '');
-    console.log(data);
-    const nums = data.split('\n');
-
-    nums.forEach(async n => {
-        if (!n) return;
-        if (n.startsWith('8')) {
-            n = n.replace('8', '7');
-        }
-        const user = new WhatsappUser();
-        user.phone = n;
-        await src.getRepository(WhatsappUser).save(user);
-    });
+const openai = new OpenAI({
+    apiKey: ''
 })
+    let data = fs.readFileSync(path.join(__dirname, 'threads.txt'), 'utf8');
+    const threads = data.split('\r\n');
+    threads.forEach(async element => {
+        const msgs = await openai.beta.threads.messages.list(element);
+        //@ts-ignore
+        const texts = msgs.data.map(el => el.content[0].text.value).reverse();
+        fs.appendFileSync(path.join(__dirname, `thread.txt`), "\n" + element + "\n" + texts.join('\n'));
+    });
 
 // src.initialize().then(async () => {
 //     const bots = await src.getRepository(Bot).find({
