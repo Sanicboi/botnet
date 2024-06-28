@@ -54,7 +54,49 @@ AppDataSource.initialize()
         "Я - менеджер ботов компании Legat Business"
       );
     });
-    
+    manager.onText(/\/write/, async (msg) => {
+      const to = msg.text.split(" ")[1];
+      const nBots = await botRepo.find({
+        where: {
+          blocked: false,
+          send: true
+        }
+      });
+      const b = nBots[7];
+      const user = await userRepo.findOne({
+        where: {
+          usernameOrPhone: to
+        }
+      });
+      try {
+        const res = await openAi.chat.completions.create({
+          messages: [{
+            role: 'user',
+            content: `Перепиши синонимично это сообщение, изменив слова и порядок абзацев (замени как минимум 15 слов синонимами), но сохранив мысль: ${b.gender === 'male' ? startMessage: startMessage2}`
+          }],
+          model: 'gpt-4-turbo',
+          temperature: 1.2
+        });
+        const thread = await openAi.beta.threads.create({
+          messages: [
+            {
+              content: res.choices[0].message.content,
+              role: "assistant",
+            },
+          ],
+        });
+        user.threadId = thread.id;
+        user.botid = b.id;
+        await userRepo.save(user);
+        await queueOut.add("out", {
+            bot: b.id,
+            text: res.choices[0].message.content,
+            user: to
+          });
+      } catch (e) {
+        console.log(e);
+      }
+    });
     manager.onText(/\/send/, async (msg) => {
       const nBots = await botRepo.find({
         where: {
@@ -245,7 +287,7 @@ AppDataSource.initialize()
           },
         });
         client.addEventHandler(async (event) => {
-          if (event.isPrivate && event.message.sender.) {
+          if (event.isPrivate) {
             await queueIn.add(
               "in",
               {
