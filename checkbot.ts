@@ -4,7 +4,6 @@ import { Bot } from "./src/entity/Bot";
 import { Message } from "./src/entity/Message";
 import { StringSession } from "telegram/sessions";
 import { TelegramClient } from "telegram";
-import { AppDataSource } from "./src/data-source";
 import { WhatsappUser } from "./src/entity/WhatsappUser";
 
 const src = new DataSource({
@@ -22,21 +21,19 @@ const src = new DataSource({
 
 src.initialize().then(async () => {
     const bots = await src.getRepository(Bot).find({
-        where: {
-            blocked: false
-        }
     });
 
     for (const b of bots) {
         const session = new StringSession(b.token);
         try {
+
             const client = new TelegramClient(session, 28082768, "4bb35c92845f136f8eee12a04c848893", {useWSS: true,
-                proxy: {
-                    ip: '5.42.107.154',
-                    port: 2020,
-                    secret: 'eec1bcb46fcddc05111e7ce92a094c1dae7777772e736f667439382e6972',
-                    MTProxy: true
-                }
+                // proxy: {
+                //     ip: '5.42.107.154',
+                //     port: 2020,
+                //     secret: 'eec1bcb46fcddc05111e7ce92a094c1dae7777772e736f667439382e6972',
+                //     MTProxy: true
+                // }
             });
             let blocked = false;
             await client.start({
@@ -53,6 +50,7 @@ src.initialize().then(async () => {
                 password: async () => '',
             });
                 b.phone = (await client.getMe()).phone;
+                b.blocked = false;
                 await src.getRepository(Bot).save(b);
             await client.disconnect();
         } catch (e) {
@@ -61,5 +59,5 @@ src.initialize().then(async () => {
         }
     }
 
-});;
+}).catch(err => console.log(err));
 
