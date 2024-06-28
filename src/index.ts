@@ -56,13 +56,12 @@ AppDataSource.initialize()
     });
     manager.onText(/\/write/, async (msg) => {
       const to = msg.text.split(" ")[1];
-      const nBots = await botRepo.find({
+      const b = await botRepo.findOne({
         where: {
           blocked: false,
           send: true
         }
       });
-      const b = nBots[0];
       const user = await userRepo.findOne({
         where: {
           usernameOrPhone: to
