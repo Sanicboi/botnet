@@ -46,7 +46,7 @@ export class Bitrix {
                 "COMMENTS": comment,
                 "ASSIGNED_BY_ID": 39,
                 "CATEGORY_ID": 77,
-                "STAGE_ID": "С77:NEW",
+                "STAGE_ID": "C77:NEW",
                 "BEGINDATE": (new Date()).toISOString(),
                 "UF_CRM_1719146021": dialog
             },
