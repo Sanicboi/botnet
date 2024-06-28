@@ -245,7 +245,7 @@ AppDataSource.initialize()
           },
         });
         client.addEventHandler(async (event) => {
-          if (event.isPrivate) {
+          if (event.isPrivate && event.message.sender.) {
             await queueIn.add(
               "in",
               {

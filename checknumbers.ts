@@ -11,6 +11,7 @@ import { Message } from './src/entity/Message';
 
 (async () => {
     const numbers = fs.readFileSync(path.join(__dirname, 'signup', 'numbers.txt'), 'utf8').split('\n');
+    let blocked = 0;
     for (const n of numbers) {
         try {
             if (!n) continue;
@@ -24,6 +25,7 @@ import { Message } from './src/entity/Message';
                     return true;
                 },
                 phoneCode: async () => { 
+                    blocked--;
                     return '';
                  },
                 phoneNumber: async () => n,
@@ -31,6 +33,8 @@ import { Message } from './src/entity/Message';
             }); 
         } catch (err) {
             console.log(err);
+            blocked++;
         }
     }
+    console.log(blocked);
 })();

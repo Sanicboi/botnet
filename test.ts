@@ -35,9 +35,9 @@ const src = new DataSource({
     subscribers: [],
 });
 const openai = new OpenAI({
-    apiKey: ''
+    apiKey: 
 })
-    let data = fs.readFileSync(path.join(__dirname, 'threads.txt'), 'utf8');
+    let data = fs.readFileSync(path.join(__dirname, 'threads.txt'), 'utf8').replaceAll("\"", '');
     const threads = data.split('\r\n');
     threads.forEach(async element => {
         const msgs = await openai.beta.threads.messages.list(element);
