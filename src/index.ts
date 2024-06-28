@@ -62,7 +62,7 @@ AppDataSource.initialize()
           send: true
         }
       });
-      const b = nBots[7];
+      const b = nBots[0];
       const user = await userRepo.findOne({
         where: {
           usernameOrPhone: to
