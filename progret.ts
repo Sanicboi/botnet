@@ -111,6 +111,8 @@ AppDataSource.initialize().then(async () => {
                     }
                 }
             }
+            msg.handled = true;
+            await msgRepo.save(msg);
         }
         
     });
