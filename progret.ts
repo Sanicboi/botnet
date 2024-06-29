@@ -76,6 +76,13 @@ AppDataSource.initialize().then(async () => {
             await botRepo.save(bot);
         });
     });
+    manager.onText(/\/set/, async  (msg) => {
+        bots.forEach(async bot => {
+            const client = clients.get(bot.id);
+            bot.from = (await client.getMe()).id.toString();
+            await botRepo.save(bot);
+        });
+    });
     cron.schedule('*/30 * * * * *', async () => {
         const msg = await msgRepo.findOne({
             where: {
