@@ -37,7 +37,7 @@ AppDataSource.initialize().then(async () => {
                 if (msg.from === bot.from) return;
                 await openai.beta.threads.messages.create(bot.currentThreadId, {
                     role: 'user',
-                    content: msg.text
+                    content: m.from.first_name + ': ' + msg.text
                 });
             });
         }
