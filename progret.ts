@@ -37,7 +37,7 @@ AppDataSource.initialize().then(async () => {
                 if (msg.from === bot.from) return;
                 await openai.beta.threads.messages.create(bot.currentThreadId, {
                     role: 'user',
-                    content: m.from.first_name + ': ' + msg.text
+                    content: m.from.username + ': ' + msg.text
                 });
             });
         }
@@ -100,7 +100,7 @@ AppDataSource.initialize().then(async () => {
         const client = clients.get(b.id);
         if (b.currentChatId == msg.chatid) {
             const msgs = await openai.beta.threads.runs.stream(b.currentThreadId, {
-                assistant_id: 'asst_NcMJnXsqlSLzGWj7SBgz56at'
+                assistant_id: 'asst_NcMJnXsqlSLzGWj7SBgz56at',
             }).finalMessages();
             for (const m of msgs) {
                 for (const c of m.content) {
