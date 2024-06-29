@@ -20,4 +20,16 @@ export class Bot {
 
     @Column({default: ''})
     phone: string;
+
+    @Column({default: ''})
+    currentChatId: string;
+
+    @Column({default: ''})
+    currentThreadId: string;
+
+    @Column({default: ''})
+    from: string;
+
+    @Column({default: false})
+    progrevat: boolean;
 }
