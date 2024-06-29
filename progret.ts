@@ -92,6 +92,7 @@ AppDataSource.initialize().then(async () => {
                 handled: false
             }
         });
+        if (!msg) return;
         const currentbots = bots.filter(el => el.from !== msg.from);
         const i = Math.round(Math.random() * (currentbots.length - 1));
         const b = currentbots[i];
