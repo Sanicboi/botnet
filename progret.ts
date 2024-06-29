@@ -10,7 +10,9 @@ import OpenAI from "openai";
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_KEY
 });
-const chats: number[] = [];
+const chats: number[] = [
+    -1002202356312
+];
 AppDataSource.initialize().then(async () => {
     const botRepo = AppDataSource.getRepository(Bot);
     const msgRepo = AppDataSource.getRepository(ChatMsg);
