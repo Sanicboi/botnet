@@ -190,7 +190,7 @@ AppDataSource.initialize()
         host: 'redis'
       },
       limiter: {
-        duration: 60000 * 5,
+        duration: 60000 * 3,
         max: 1
       }
     });
