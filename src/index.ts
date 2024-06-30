@@ -259,7 +259,6 @@ AppDataSource.initialize()
         max: 1
       }
     });
-    await queueOut.drain();
     const appId = 28082768;
     const appHash = "4bb35c92845f136f8eee12a04c848893";
     for (const bot of bots) {
