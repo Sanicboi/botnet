@@ -32,8 +32,9 @@ AppDataSource.initialize().then(async () => {
             msg.text = m.text;
             msg.from = String(m.from.id);
             await msgRepo.save(msg);
-            console.log(msg);
+
             bots.forEach(async bot => {
+                console.log(msg.from === bot.from);
                 if (msg.from === bot.from) return;
                 await openai.beta.threads.messages.create(bot.currentThreadId, {
                     role: 'user',
