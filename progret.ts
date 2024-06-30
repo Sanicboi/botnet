@@ -32,7 +32,6 @@ AppDataSource.initialize().then(async () => {
             msg.text = m.text;
             msg.from = String(m.from.id);
             await msgRepo.save(msg);
-
             bots.forEach(async bot => {
                 console.log(msg.from === bot.from);
                 if (msg.from === bot.from) return;
@@ -95,7 +94,7 @@ AppDataSource.initialize().then(async () => {
         });
         if (!msg) return;
         const currentbots = bots.filter(el => el.from != msg.from);
-        console.log(currentbots);
+        console.log('Bots: ' + currentbots.map(el => el.from));
         const i = Math.round(Math.random() * (currentbots.length - 1));
         const b = currentbots[i];
         const client = clients.get(b.id);
@@ -104,13 +103,12 @@ AppDataSource.initialize().then(async () => {
                 assistant_id: 'asst_NcMJnXsqlSLzGWj7SBgz56at',
             }).finalMessages();
             for (const m of msgs) {
-                for (const c of m.content) {
+                const c = m.content[0]
                     if (c.type == 'text') {
                         await client.sendMessage(msg.chatid, {
                             message: c.text.value
                         })
                     }
-                }
             }
             msg.handled = true;
             await msgRepo.save(msg);
