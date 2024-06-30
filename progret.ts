@@ -26,21 +26,26 @@ AppDataSource.initialize().then(async () => {
         polling: true
     });
     manager.onText(/./, async (m) => {
-        if (chats.includes(m.chat.id)) {
-            const msg = new ChatMsg();
-            msg.chatid = String(m.chat.id);
-            msg.text = m.text;
-            msg.from = String(m.from.id);
-            await msgRepo.save(msg);
-            bots.forEach(async bot => {
-                console.log(msg.from === bot.from);
-                if (msg.from === bot.from) return;
-                await openai.beta.threads.messages.create(bot.currentThreadId, {
-                    role: 'user',
-                    content: m.from.username + ': ' + msg.text
+        try {
+            if (chats.includes(m.chat.id)) {
+                const msg = new ChatMsg();
+                msg.chatid = String(m.chat.id);
+                msg.text = m.text;
+                msg.from = String(m.from.id);
+                await msgRepo.save(msg);
+                bots.forEach(async bot => {
+                    console.log(msg.from === bot.from);
+                    if (msg.from === bot.from) return;
+                    await openai.beta.threads.messages.create(bot.currentThreadId, {
+                        role: 'user',
+                        content: m.from.username + ': ' + msg.text
+                    });
                 });
-            });
+            }
+        } catch (e) {
+            
         }
+
     });
     const clients = new Map<string, TelegramClient>();
     bots.forEach(async b => {
