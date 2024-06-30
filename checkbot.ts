@@ -21,6 +21,9 @@ const src = new DataSource({
 
 src.initialize().then(async () => {
     const bots = await src.getRepository(Bot).find({
+        where: {
+            blocked: false
+        }
     });
 
     for (const b of bots) {
@@ -55,7 +58,7 @@ src.initialize().then(async () => {
             await client.disconnect();
         } catch (e) {
             b.blocked = true;
-                await src.getRepository(Bot).save(b);
+            await src.getRepository(Bot).save(b);
         }
     }
 
