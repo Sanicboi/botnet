@@ -26,16 +26,16 @@ const src = new DataSource({
     console.log(numbers);
     const bots = await src.getRepository(Bot).find({
         where: {
-            blocked: false,
         }
     });
     for (const b of bots) {
+        const session = new StringSession(b.token);
+        const client = new TelegramClient(session, 28082768, "4bb35c92845f136f8eee12a04c848893", {useWSS: true});
         try {
-            const session = new StringSession(b.token);
-            const client = new TelegramClient(session, 28082768, "4bb35c92845f136f8eee12a04c848893", {useWSS: true});
             await client.start({
-                onError(err) {
-                    console.log(err);
+                async onError(err) {
+                    console.log(`Banned ${b.id}`);
+                    return true;
                 },
                 phoneCode: async () => { throw new Error; },
                 phoneNumber: async () => { throw new Error;},
@@ -48,10 +48,12 @@ const src = new DataSource({
                 console.log(`Found ${phone}`);
             } else {
                 b.send = true;
+                await src.getRepository(Bot).save(b);
             }
-            await client.disconnect();
+            await client.destroy();
         } catch (err) {
             console.log(err);
+            await client.destroy();
         }
     }
   });

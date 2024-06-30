@@ -32,4 +32,7 @@ export class Bot {
 
     @Column({default: false})
     progrevat: boolean;
+
+    @Column({default: false})
+    premium: boolean;
 }

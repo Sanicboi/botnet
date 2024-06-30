@@ -39,6 +39,7 @@
       "sleep": "ts-node sleep.ts",
       "bots": "ts-node checkbot.ts",
       "users": "ts-node setup_users.ts",
-      "progret": "ts-node progret.ts"
+      "progret": "ts-node progret.ts",
+      "stats": "ts-node checksend.ts"
    }
 }

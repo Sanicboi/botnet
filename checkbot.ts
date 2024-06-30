@@ -3,7 +3,7 @@ import { User } from "./src/entity/User";
 import { Bot } from "./src/entity/Bot";
 import { Message } from "./src/entity/Message";
 import { StringSession } from "telegram/sessions";
-import { TelegramClient } from "telegram";
+import { TelegramClient, client } from "telegram";
 import { WhatsappUser } from "./src/entity/WhatsappUser";
 
 const src = new DataSource({
@@ -28,16 +28,17 @@ src.initialize().then(async () => {
 
     for (const b of bots) {
         const session = new StringSession(b.token);
+        const client = new TelegramClient(session, 28082768, "4bb35c92845f136f8eee12a04c848893", {useWSS: true,
+            // proxy: {
+            //     ip: '5.42.107.154',
+            //     port: 2020,
+            //     secret: 'eec1bcb46fcddc05111e7ce92a094c1dae7777772e736f667439382e6972',
+            //     MTProxy: true
+            // }
+        });
         try {
 
-            const client = new TelegramClient(session, 28082768, "4bb35c92845f136f8eee12a04c848893", {useWSS: true,
-                // proxy: {
-                //     ip: '5.42.107.154',
-                //     port: 2020,
-                //     secret: 'eec1bcb46fcddc05111e7ce92a094c1dae7777772e736f667439382e6972',
-                //     MTProxy: true
-                // }
-            });
+
             let blocked = false;
             await client.start({
                 async onError(err) {
@@ -52,13 +53,16 @@ src.initialize().then(async () => {
                 phoneNumber: async () => '',
                 password: async () => '',
             });
-                b.phone = (await client.getMe()).phone;
+            const me = await client.getMe();
+                b.phone = me.phone;
                 b.blocked = false;
+                b.premium = me.premium;
                 await src.getRepository(Bot).save(b);
-            await client.disconnect();
+            await client.destroy();
         } catch (e) {
             b.blocked = true;
             await src.getRepository(Bot).save(b);
+            await client.destroy();
         }
     }
 

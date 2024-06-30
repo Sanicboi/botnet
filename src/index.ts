@@ -114,7 +114,7 @@ AppDataSource.initialize()
       for (const bot of nBots) {
         const client = clients.get(bot.id);
         let currentCount = 0;
-        const toSend = bot.gender === 'male' ? 7 : 5;
+        const toSend = bot.premium ? 25 : 10;
         while (currentCount <= toSend && free > 0) {
           try {
             const res = await openAi.chat.completions.create({
