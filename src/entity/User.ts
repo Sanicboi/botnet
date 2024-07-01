@@ -18,5 +18,6 @@ export class User {
     @Column({default: false})
     finished: boolean;
 
-    
+    @Column({nullable: true})
+    contactId: number;
 }

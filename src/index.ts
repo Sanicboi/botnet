@@ -14,6 +14,7 @@ import { IsNull } from "typeorm";
 import { Message } from "./entity/Message";
 import { Whatsapp } from "./Whatsapp";
 import { WhatsappUser } from "./entity/WhatsappUser";
+import { Bitrix } from "./Bitrix";
 const openAi = new OpenAI({
   apiKey: process.env.OPENAI_KEY,
 });
@@ -287,7 +288,10 @@ AppDataSource.initialize()
             usernameOrPhone: username.username,
           },
         });
-        if (!user.replied) user.replied = true;
+        if (!user.replied) {
+          user.replied = true;
+          user.contactId = (await Bitrix.createContact(user.usernameOrPhone, user.usernameOrPhone, 'Не дано')).data.result;
+        }
         await userRepo.save(user);
         await client.invoke(new Api.messages.ReadHistory({
           maxId: 0,
