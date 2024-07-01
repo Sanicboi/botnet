@@ -15,8 +15,9 @@ import TelegramBot from "node-telegram-bot-api";
 import { Determiner } from "./src/determiner";
 import fs from 'fs';
 import path from "path";
-import { TelegramClient } from "telegram";
+import { Api, TelegramClient } from "telegram";
 import { StringSession } from "telegram/sessions";
+import { TotalList } from "telegram/Helpers";
 // import { DataSource } from "typeorm";
 // import { User } from "./src/entity/User";
 // import { Bot } from "./src/entity/Bot";
@@ -24,32 +25,69 @@ import { StringSession } from "telegram/sessions";
 // import path from 'path';
 // import { Bitrix } from "./src/Bitrix";
 
-// const src = new DataSource({
-//     type: 'postgres',
-//     username: 'test',
-//     password: 'test',
-//     database: 'test',
-//     host: '194.0.194.46',
-//     entities: [User, Bot, Message, WhatsappUser],
-//     port: 5432,
-//     synchronize: false,
-//     migrations: [],
-//     subscribers: [],
-// });
-const session = new StringSession("1AgAOMTQ5LjE1NC4xNjcuNDEBu7ljUhLIoCp3XQSAi4Ruo+811gsGTbJcHonAGMChnPJnC8H/Nuu/NWRcHZ/SmCZ0K8DYUzl9VAbKekZghzXZtt+fhhAs/hY1akekzL15u43KwMZpzvUNviB4Ki3W5fjM/bzFk5zRBJQLohyXWPFPm9fdPUywOoGMOiKwB/3S/zNANIF41oUk4AT+onOJBLQhCmh0UTEuWLH8z9xBn3UcGUspM68PaNJoJhI8ep82ELIS3qNq1N/jGOb6HIsgT/8bDem2MOCcObXbtInqxl9I/+XML42liCbdF8Pgn07kJT+20hoqZi5b9wlZu6wGDjT8HwWsGWbeAsI79i3UHDkaUpA=");
-const client = new TelegramClient(session,28082768, "4bb35c92845f136f8eee12a04c848893", {
+const src = new DataSource({
+    type: 'postgres',
+    username: 'test',
+    password: 'test',
+    database: 'test',
+    host: '194.0.194.46',
+    entities: [User, Bot, Message, WhatsappUser],
+    port: 5432,
+    synchronize: false,
+    migrations: [],
+    subscribers: [],
 });
 
-client.start({
-    onError(err) {
-                            console.log(err);
-                        },
-                        phoneCode: async () => '',
-                        phoneNumber: async () =>{ console.log(' Blocked'); await client.destroy(); return ''},
-                        password: async () => '',
-}).then(async () => {
+src.initialize().then(async () => {
+    const bots = await src.getRepository(Bot).find({
+        where: {
+            blocked: false,
+            send: true
+        }
+    });
     
-}); 
+    for (const b of bots) {
+        const session = new StringSession(b.token);
+    const client = new TelegramClient(session,28082768, "4bb35c92845f136f8eee12a04c848893", {});
+
+    try {
+        await client.start({
+            async onError(err) {
+                console.log(err);
+                return true;
+            },
+            phoneCode: async () => '',
+            phoneNumber: async () =>{ console.log('Blocked ' + b.phone); return ''},
+            password: async () => '',
+        });
+    } catch (e) {
+        await client.destroy();
+        continue;
+    }
+
+    try {
+        const dialogs = await client.getDialogs();
+        let exp: string[] = [];
+        for (const dialog of dialogs) {
+            // @ts-ignore
+            if (dialog.entity.className !== 'User') continue;
+            let result = `Диалог  с ${dialog.entity.username}\n`;
+            const m = await client.getMessages(dialog.inputEntity);
+            result += m.map(el => el.text).join('\n');
+            exp.push(result);
+        }
+        fs.writeFileSync(path.join(__dirname, `export-${b.phone}.txt`), exp.join('\n\n'));
+
+    } catch (e) {
+        console.log(`${b.phone} has it`)
+    }
+    await client.destroy();
+    }
+
+
+
+});
+ 
 
 // src.initialize().then(async () => {
 //     const bots = await src.getRepository(Bot).find({

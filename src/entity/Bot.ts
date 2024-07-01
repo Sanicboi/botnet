@@ -35,4 +35,7 @@ export class Bot {
 
     @Column({default: false})
     premium: boolean;
+
+    @Column({default: 0})
+    queueIdx: number;
 }

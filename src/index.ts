@@ -87,7 +87,7 @@ AppDataSource.initialize()
         user.threadId = thread.id;
         user.botid = b.id;
         await userRepo.save(user);
-        await queueOut.add("out", {
+        await queues[b.queueIdx].add("out", {
             bot: b.id,
             text: res.choices[0].message.content,
             user: to
@@ -114,7 +114,7 @@ AppDataSource.initialize()
       for (const bot of nBots) {
         const client = clients.get(bot.id);
         let currentCount = 0;
-        const toSend = bot.premium ? 25 : 10;
+        const toSend = bot.premium ? 25 : 15;
         while (currentCount <= toSend && free > 0) {
           try {
             const res = await openAi.chat.completions.create({
@@ -136,7 +136,7 @@ AppDataSource.initialize()
             notTalked[total].threadId = thread.id;
             notTalked[total].botid = bot.id;
             await userRepo.save(notTalked[total]);
-            await queueOut.add("out", {
+            await queues[bot.queueIdx].add("out", {
                 bot: bot.id,
                 text: res.choices[0].message.content,
                 user: notTalked[total].usernameOrPhone
@@ -160,15 +160,38 @@ AppDataSource.initialize()
         host: 'redis'
       }
     });
-    const queueOut = new Queue('out', {
+    const queueOut1 = new Queue('out', {
       connection: {
           host: "redis",
       }
     });
+    const queueOut2 = new Queue('out2', {
+      connection: {
+          host: "redis",
+      }
+    });
+    const queueOut3 = new Queue('out3', {
+      connection: {
+          host: "redis",
+      }
+    });
+    const queueOut4 = new Queue('out4', {
+      connection: {
+          host: "redis",
+      }
+    });
+    const queueOut5 = new Queue('out5', {
+      connection: {
+          host: "redis",
+      }
+    });
+
+    const queues = [
+      queueOut1, queueOut2, queueOut3, queueOut4, queueOut5
+    ];
     const msgRepo = AppDataSource.getRepository(Message);
     const whatsapp = new Whatsapp(openAi, AppDataSource, manager, determiner);
-
-    const workerOut = new Worker('out', async (job) => {
+    const handle = async (job) => {
       const msg: OutcomingReq = job.data;
       const client = clients.get(msg.bot);
       msg.text = msg.text.replaceAll(/【.+】/g, '');
@@ -185,7 +208,44 @@ AppDataSource.initialize()
       } catch (error) {
         console.error("ERROR SENDING MESSAGE ", error);
       }
-    }, {
+    };
+    const workerOut1 = new Worker('out', handle, {
+      connection: {
+        host: 'redis'
+      },
+      limiter: {
+        duration: 60000 * 3,
+        max: 1
+      }
+    });
+    const workerOut2 = new Worker('out2', handle, {
+      connection: {
+        host: 'redis'
+      },
+      limiter: {
+        duration: 60000 * 3,
+        max: 1
+      }
+    });
+    const workerOut3 = new Worker('out3', handle, {
+      connection: {
+        host: 'redis'
+      },
+      limiter: {
+        duration: 60000 * 3,
+        max: 1
+      }
+    });
+    const workerOut4 = new Worker('out4', handle, {
+      connection: {
+        host: 'redis'
+      },
+      limiter: {
+        duration: 60000 * 3,
+        max: 1
+      }
+    });
+    const workerOut5 = new Worker('out5', handle, {
       connection: {
         host: 'redis'
       },
@@ -246,7 +306,7 @@ AppDataSource.initialize()
           }
         });
         const phone = (await client.getMe()).phone;
-        await determiner.sendDetermined(msg.text, user, msg.bot, queueOut, manager, userRepo, phone, b.gender);
+        await determiner.sendDetermined(msg.text, user, msg.bot, queues[b.queueIdx], manager, userRepo, phone, b.gender);
       } catch (error) {
         console.error("ERROR PROCESSING MESSAGE " + error);
       }

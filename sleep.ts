@@ -17,7 +17,7 @@ const src = new DataSource({
     host: "194.0.194.46",
     entities: [User, Bot, Message],
     port: 5432,
-    synchronize: false,
+    synchronize: true,
     migrations: [],
     subscribers: [],
   });
@@ -26,6 +26,7 @@ const src = new DataSource({
     console.log(numbers);
     const bots = await src.getRepository(Bot).find({
         where: {
+            blocked: false
         }
     });
     for (const b of bots) {
@@ -34,7 +35,7 @@ const src = new DataSource({
         try {
             await client.start({
                 async onError(err) {
-                    console.log(`Banned ${b.id}`);
+                    console.log(`Banned ${b.phone}`);
                     return true;
                 },
                 phoneCode: async () => { throw new Error; },
@@ -42,6 +43,8 @@ const src = new DataSource({
                 password: async () => input.text("Password"),
             }); 
             const phone = (await client.getMe()).phone;
+            const prem = (await client.getMe()).premium;
+            b.premium = prem;
             if (!numbers.includes(phone)) {
                 b.send = false;
                 await src.getRepository(Bot).save(b);
@@ -53,6 +56,8 @@ const src = new DataSource({
             await client.destroy();
         } catch (err) {
             console.log(err);
+            b.blocked = true;
+            await src.getRepository(Bot).save(b);
             await client.destroy();
         }
     }

@@ -17,4 +17,6 @@ export class User {
 
     @Column({default: false})
     finished: boolean;
+
+    
 }

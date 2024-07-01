@@ -35,7 +35,6 @@ export class Determiner {
              content: msg,
              role: 'user'
         });
-
         const run = this.openai.beta.threads.runs.stream(user.threadId, {
             assistant_id: gender === 'male' ? 'asst_8RgJFwUqF11WAfl4uMcOlufE' : 'asst_LNGeR2YXA5i8i4HluS549xg5'
         }).on('end', async () => {
