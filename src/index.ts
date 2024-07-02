@@ -156,7 +156,12 @@ AppDataSource.initialize()
         console.log((await q.getJobCountByTypes('active', 'waiting')));
         await q.drain();
       }
-    })
+    });
+    manager.onText(/\/log/, async (msg) => {
+      for (const q of queues) {
+        console.log((await q.getJobCountByTypes('active', 'waiting')));
+      }
+    });
     const bots = await botRepo.find({
       where: {
         blocked: false
