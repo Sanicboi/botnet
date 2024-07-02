@@ -151,6 +151,12 @@ AppDataSource.initialize()
         }
       }
     });
+    manager.onText(/\/reset/, async (msg) => {
+      for (const q of queues) {
+        console.log(q.getJobCountByTypes('active', 'waiting'));
+        await q.drain();
+      }
+    })
     const bots = await botRepo.find({
       where: {
         blocked: false
@@ -186,9 +192,14 @@ AppDataSource.initialize()
           host: "redis",
       }
     });
+    const queueOut6 = new Queue('out6', {
+      connection: {
+          host: "redis",
+      }
+    });
 
     const queues = [
-      queueOut1, queueOut2, queueOut3, queueOut4, queueOut5
+      queueOut1, queueOut2, queueOut3, queueOut4, queueOut5, queueOut6
     ];
     const msgRepo = AppDataSource.getRepository(Message);
     const whatsapp = new Whatsapp(openAi, AppDataSource, manager, determiner);
@@ -247,6 +258,15 @@ AppDataSource.initialize()
       }
     });
     const workerOut5 = new Worker('out5', handle, {
+      connection: {
+        host: 'redis'
+      },
+      limiter: {
+        duration: 60000 * 3,
+        max: 1
+      }
+    });
+    const workerOut6 = new Worker('out6', handle, {
       connection: {
         host: 'redis'
       },
