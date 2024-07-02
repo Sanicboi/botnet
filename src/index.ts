@@ -153,7 +153,7 @@ AppDataSource.initialize()
     });
     manager.onText(/\/reset/, async (msg) => {
       for (const q of queues) {
-        console.log(q.getJobCountByTypes('active', 'waiting'));
+        console.log((await q.getJobCountByTypes('active', 'waiting')));
         await q.drain();
       }
     })
