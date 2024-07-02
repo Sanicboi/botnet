@@ -121,7 +121,7 @@ AppDataSource.initialize()
             const res = await openAi.chat.completions.create({
               messages: [{
                 role: 'user',
-                content: `Перепиши синонимично это сообщение, изменив слова и порядок абзацев (замени как минимум 15 слов синонимами), но сохранив мысль: ${bot.gender === 'male' ? startMessage: startMessage2}`
+                content: `ТЕБЯ ЗОВУТ ${(await client.getMe()).firstName}. Перепиши синонимично это сообщение, изменив слова и порядок абзацев (замени как минимум 15 слов синонимами), но сохранив мысль: ${bot.gender === 'male' ? startMessage: startMessage2}`
               }],
               model: 'gpt-4-turbo',
               temperature: 1.2
@@ -335,7 +335,7 @@ AppDataSource.initialize()
           }
         });
         const phone = (await client.getMe()).phone;
-        await determiner.sendDetermined(msg.text, user, msg.bot, queues[b.queueIdx], manager, userRepo, phone, b.gender);
+        await determiner.sendDetermined(msg.text, user, msg.bot, queues[b.queueIdx], manager, userRepo, phone, b.gender, (await client.getMe()).firstName);
       } catch (error) {
         console.error("ERROR PROCESSING MESSAGE " + error);
       }
