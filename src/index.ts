@@ -231,7 +231,7 @@ AppDataSource.initialize()
         host: 'redis'
       },
       limiter: {
-        duration: 60000 * 3,
+        duration: 60000 * 5,
         max: 1
       }
     });
@@ -240,7 +240,7 @@ AppDataSource.initialize()
         host: 'redis'
       },
       limiter: {
-        duration: 60000 * 3,
+        duration: 60000 * 5,
         max: 1
       }
     });
@@ -249,7 +249,7 @@ AppDataSource.initialize()
         host: 'redis'
       },
       limiter: {
-        duration: 60000 * 3,
+        duration: 60000 * 5,
         max: 1
       }
     });
@@ -258,7 +258,7 @@ AppDataSource.initialize()
         host: 'redis'
       },
       limiter: {
-        duration: 60000 * 3,
+        duration: 60000 * 5,
         max: 1
       }
     });
@@ -267,7 +267,7 @@ AppDataSource.initialize()
         host: 'redis'
       },
       limiter: {
-        duration: 60000 * 3,
+        duration: 60000 * 5,
         max: 1
       }
     });
@@ -276,7 +276,7 @@ AppDataSource.initialize()
         host: 'redis'
       },
       limiter: {
-        duration: 60000 * 3,
+        duration: 60000 * 5,
         max: 1
       }
     });

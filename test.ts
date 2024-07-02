@@ -6,7 +6,7 @@ import axios from "axios";
 import { Bitrix } from "./src/Bitrix";
 import { Whatsapp } from "./src/Whatsapp";
 import OpenAI from "openai";
-import { DataSource } from "typeorm";
+import { DataSource, IsNull, Not } from "typeorm";
 import { User } from "./src/entity/User";
 import { Bot } from "./src/entity/Bot";
 import { Message } from "./src/entity/Message";
@@ -48,11 +48,14 @@ src.initialize().then(async () => {
     
     for (const b of bots) {
         const session = new StringSession(b.token);
-    const client = new TelegramClient(session,28082768, "4bb35c92845f136f8eee12a04c848893", {});
+    const client = new TelegramClient(session,28082768, "4bb35c92845f136f8eee12a04c848893", {
+        useWSS: true
+    });
 
     try {
         await client.start({
             async onError(err) {
+                console.log('Blocked ' + b.phone)
                 console.log(err);
                 return true;
             },
@@ -66,24 +69,24 @@ src.initialize().then(async () => {
     }
 
     try {
-        const dialogs = await client.getDialogs();
-        let exp: string[] = [];
-        for (const dialog of dialogs) {
-            // @ts-ignore
-            if (dialog.entity.className !== 'User') continue;
-            let result = `Диалог  с ${dialog.entity.username}\n`;
-            const m = await client.getMessages(dialog.inputEntity);
-            result += m.map(el => el.text).join('\n');
-            exp.push(result);
+        const users = await src.getRepository(User).find({
+            where: {
+                botid: Not(IsNull()),
+                contactId: IsNull()
+            }
+        });
+        for (const u of users) {
+            let result = ``;
+            const m = await client.getMessages(u.usernameOrPhone);
+            result = m.map(el => el.text).join('\n');
+            await Bitrix.createContact(u.usernameOrPhone, b.phone);
         }
-        fs.writeFileSync(path.join(__dirname, `export-${b.phone}.txt`), exp.join('\n\n'));
-
-    } catch (e) {
-        console.log(`${b.phone} has it`)
+        
+    
+    } catch (err) {
+        await client.destroy();
     }
-    await client.destroy();
-    }
-
+}
 
 
 });
