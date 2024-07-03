@@ -198,6 +198,7 @@ AppDataSource.initialize().then(async () => {
         polling: true
     });
     manager.onText(/./, async (m) => {
+        console.log(m.chat.id);
         try {
             if (chats.includes(m.chat.id)) {
                 const msg = new ChatMsg();
