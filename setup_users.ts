@@ -21,15 +21,14 @@ const AppDataSource = new DataSource({
 
 AppDataSource.initialize().then(async () => {
     let data = fs.readFileSync(path.join(__dirname, "signup", "users.txt"), "utf8");
-    data = data.replaceAll('@', '').replaceAll('+', '').replaceAll('-', '').replaceAll(' ', '').replaceAll('\'', '');
-    if (data.startsWith('8')) data.replace('8', '7');
+    data = data.replaceAll('@', '');
     const lines = data.split('\n');
     for (let i of lines) {
         if (!i) continue;
         try {
-            const user = new WhatsappUser();
-            user.phone = i;
-            await AppDataSource.getRepository(WhatsappUser).save(user);
+            const user = new User();
+            user.usernameOrPhone = i;
+            await AppDataSource.getRepository(User).save(user);
         } catch(e) {
 
         }

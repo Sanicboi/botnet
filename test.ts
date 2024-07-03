@@ -37,7 +37,7 @@ const src = new DataSource({
     migrations: [],
     subscribers: [],
 });
-
+process.env.WEBHOOK_URL = 'https://adamart.bitrix24.ru/rest/39/w0654aqejhhe6zdi/';
 src.initialize().then(async () => {
     const bots = await src.getRepository(Bot).find({
         where: {
@@ -76,14 +76,22 @@ src.initialize().then(async () => {
             }
         });
         for (const u of users) {
-            let result = ``;
+            try {
+                let result = ``;
             const m = await client.getMessages(u.usernameOrPhone);
             result = m.map(el => el.text).join('\n');
-            await Bitrix.createContact(u.usernameOrPhone, b.phone);
+            const r = await Bitrix.createContact(u.usernameOrPhone, b.phone);
+            u.contactId = r.data.result;
+            await src.getRepository(User).save(u);
+            } catch (e) {
+                console.log(e);
+            }
+            
         }
         
     
     } catch (err) {
+        console.error(err);
         await client.destroy();
     }
 }

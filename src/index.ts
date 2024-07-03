@@ -112,6 +112,7 @@ AppDataSource.initialize()
       });
       let free = notTalked.length;
       let total = 0;
+      console.log(notTalked)
       for (const bot of nBots) {
         const client = clients.get(bot.id);
         let currentCount = 0;

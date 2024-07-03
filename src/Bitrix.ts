@@ -16,7 +16,7 @@ export class Bitrix {
     }
 
     public static async createContact(username: string, phone: string, name?: string): Promise<AxiosResponse<{result: number}>> {
-        const res = await axios.get(process.env.WEBHOOK_URL + 'crm.contact.add.json', {
+        const res = await axios.get(process.env.WEBHOOK_URL + 'crm.contact.add', {
             params: {
                 fields: {
                     "NAME": name,
