@@ -182,7 +182,8 @@ const openai = new OpenAI({
     apiKey: process.env.OPENAI_KEY
 });
 const chats: number[] = [
-    -1002202356312
+    -1002202356312,
+    -1002016793708
 ];
 AppDataSource.initialize().then(async () => {
     const botRepo = AppDataSource.getRepository(Bot);
