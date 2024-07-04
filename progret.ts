@@ -12,7 +12,8 @@ const openai = new OpenAI({
     apiKey: process.env.OPENAI_KEY
 });
 const chats: number[] = [
-    -1002202356312
+    -1002202356312,
+    -1002016793708
 ];
 const outq = new Queue('p-out', {
     connection: {
@@ -41,6 +42,7 @@ AppDataSource.initialize().then(async () => {
     });
 
     const outw = new Worker('p-out', async (job) => {
+        console.log('Out job')
         const client = clients.get(job.data.bot.id);
         const msgs = (await openai.beta.threads.runs.stream(job.data.bot.threadId, {
             assistant_id: 'asst_NcMJnXsqlSLzGWj7SBgz56at'
@@ -66,6 +68,7 @@ AppDataSource.initialize().then(async () => {
     });
     
     const inw = new Worker('p-in', async (job) => {
+        console.log('In job');
         bots.forEach(async bot => {
             console.log(job.data.msg.from === bot.from);
             if (job.data.msg.from === bot.from) return;
