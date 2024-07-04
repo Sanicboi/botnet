@@ -70,7 +70,7 @@ src.initialize().then(async () => {
     try {
         const users = await src.getRepository(User).find({
             where: {
-                botid: Not(IsNull()),
+                botid: b.id,
                 replied: true
             }
         });
