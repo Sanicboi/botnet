@@ -16,12 +16,12 @@ const chats: number[] = [
 ];
 const outq = new Queue('p-out', {
     connection: {
-        host: 'redis'
+        host: 'localhost'
     }
 });
 const inq = new Queue('p-in', {
     connection: {
-        host: 'redis'
+        host: 'localhost'
     }
 });
 
@@ -60,7 +60,7 @@ AppDataSource.initialize().then(async () => {
             max: 1
         },
         connection: {
-            host: 'redis'
+            host: 'localhost'
         },
         concurrency: 1
     });
@@ -83,7 +83,7 @@ AppDataSource.initialize().then(async () => {
         })
     }, {
         connection: {
-            host: 'redis'
+            host: 'localhost'
         },
         concurrency: 1
     });
