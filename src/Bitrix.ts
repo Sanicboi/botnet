@@ -69,4 +69,18 @@ export class Bitrix {
         });
     }
 
+    public static async editDeal(id: number, callTime: string, segment: string, comment: string, dialog: string) {
+        return await axios.post(process.env.WEBHOOK_URL+'crm.deal.update', {
+            fields: {
+                "UF_CRM_1718783952": callTime,
+                "UF_CRM_1705043524805": segment,
+                "COMMENTS": comment,
+                "UF_CRM_1719146021": dialog
+            },
+            params: {
+                "REGISTER_SONET_EVENT": "Y"
+            },
+            id
+        });
+    }
 }

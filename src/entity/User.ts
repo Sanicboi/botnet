@@ -20,4 +20,7 @@ export class User {
 
     @Column({nullable: true})
     contactId: number;
+
+    @Column({nullable: true})
+    dealId: number;
 }

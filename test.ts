@@ -33,7 +33,7 @@ const src = new DataSource({
     host: '194.0.194.46',
     entities: [User, Bot, Message, WhatsappUser],
     port: 5432,
-    synchronize: false,
+    synchronize: true,
     migrations: [],
     subscribers: [],
 });
@@ -72,7 +72,7 @@ src.initialize().then(async () => {
         const users = await src.getRepository(User).find({
             where: {
                 botid: Not(IsNull()),
-                contactId: IsNull()
+                replied: true
             }
         });
         for (const u of users) {
@@ -80,8 +80,10 @@ src.initialize().then(async () => {
                 let result = ``;
             const m = await client.getMessages(u.usernameOrPhone);
             result = m.map(el => el.text).join('\n');
-            const r = await Bitrix.createContact(u.usernameOrPhone, b.phone);
+            const r = await Bitrix.createContact(u.usernameOrPhone, u.usernameOrPhone);
             u.contactId = r.data.result;
+            u.dealId = (await Bitrix.createDeal(b.phone, 'Неизвестно, полухолодный', 'неизвестно', 'полухолодный', result)).data.result;
+            await Bitrix.addContact(u.contactId, u.dealId);
             await src.getRepository(User).save(u);
             } catch (e) {
                 console.log(e);

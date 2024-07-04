@@ -58,8 +58,11 @@ export class Determiner {
                 //@ts-ignore
                 const str = r.data.reverse().map(el => el.content[0].text.value).join('\n');
                 const data: Data = JSON.parse(finalRun.required_action.submit_tool_outputs.tool_calls[0].function.arguments);
-                const dealId = (await Bitrix.createDeal(num, data.dateTime, data.segment, data.comment, str)).data.result;
-                await Bitrix.addContact(user.contactId, dealId);
+                try {
+                    await Bitrix.editDeal(user.dealId, data.dateTime, data.segment, data.comment, data.dialog);
+                } catch (err) {
+                    console.log('BITRIX ERROR ' + err);
+                }
                 let newmsgs: OpenAI.Beta.Threads.Message[] = [];
                 await this.openai.beta.threads.runs.submitToolOutputsStream(finalRun.thread_id, finalRun.id, {
                     tool_outputs: [
