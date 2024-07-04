@@ -42,7 +42,6 @@ src.initialize().then(async () => {
     const bots = await src.getRepository(Bot).find({
         where: {
             blocked: false,
-            send: true
         }
     });
     
