@@ -38,4 +38,7 @@ export class Bot {
 
     @Column({default: 0})
     queueIdx: number;
+
+    @Column({default: 4})
+    quota: number;
 }
