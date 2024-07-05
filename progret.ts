@@ -44,9 +44,11 @@ AppDataSource.initialize().then(async () => {
     const outw = new Worker('p-out', async (job) => {
         console.log('Out job')
         const client = clients.get(job.data.bot.id);
-        const msgs = (await openai.beta.threads.runs.stream(job.data.bot.threadId, {
+	console.log(job.data);
+        const msgs = await openai.beta.threads.runs.stream(job.data.bot.currentThreadId, {
             assistant_id: 'asst_NcMJnXsqlSLzGWj7SBgz56at'
-        }).finalMessages())
+        }).finalMessages()
+		     console.log(msgs);
         for (const m of msgs) {
             await client.sendMessage(job.data.msg.chatid, {
                 //@ts-ignore
@@ -54,11 +56,12 @@ AppDataSource.initialize().then(async () => {
             });
             await new Promise((resolve, reject) => setTimeout(resolve, 1000));
         }
-        job.data.bot.quota--;
-        await botRepo.save(job.data.bot);
+	const b = await botRepo.findOneBy({id: job.data.bot.id});
+        b.quota--;
+        await botRepo.save(b);
     }, {
         limiter: {
-            duration: 10000,
+            duration: 60000,
             max: 1
         },
         connection: {
@@ -68,22 +71,29 @@ AppDataSource.initialize().then(async () => {
     });
     
     const inw = new Worker('p-in', async (job) => {
-        console.log('In job');
+        try {
+	    console.log('In job');
         bots.forEach(async bot => {
+		try {
             console.log(job.data.msg.from === bot.from);
             if (job.data.msg.from === bot.from) return;
             await openai.beta.threads.messages.create(bot.currentThreadId, {
                 role: 'user',
                 content: job.data.username + ': ' + job.data.msg.text
             });
+		} catch (e) {
+		console.log("ERR " + e)
+		}
         });
-        const eligible = bots.filter(el => el.from !== job.data.msg.from).filter(el => el.quota > 0);
+        const eligible = bots.filter(el => el.from !== job.data.msg.from).filter(el => el.quota > 0).filter(el => el.currentChatId == job.data.msg.chatid);
         const i = Math.round(Math.random() * (eligible.length - 1));
+	console.log(eligible);
         const client = clients.get(eligible[i].id);
         await outq.add('send', {
             msg: job.data.msg,
             bot: eligible[i],
         })
+    } catch (e) {}
     }, {
         connection: {
             host: 'redis'
@@ -136,12 +146,14 @@ AppDataSource.initialize().then(async () => {
         });
     });
     manager.onText(/\/off/, (msg) => {
+	    try {
         bots.forEach(async bot => {
             bot.currentChatId = '';
             await openai.beta.threads.del(bot.currentThreadId);
             bot.currentThreadId = '';
             await botRepo.save(bot);
-        });
+        });}
+	catch (e) {}
     });
     manager.onText(/\/set/, async  (msg) => {
         bots.forEach(async bot => {
