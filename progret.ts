@@ -93,15 +93,13 @@ AppDataSource.initialize().then(async () => {
 		console.log("ERR " + e)
 		}
         }
-        await AppDataSource.createQueryBuilder()
-            .update(ChatMsg)
-            .where('id = :id', {
+        const msg = await msgRepo.findOne({
+            where: {
                 id: job.data.msg.id
-            })
-            .set({
-                queued: true
-            })
-            .execute();
+            }
+        });
+        msg.queued = true;
+        await msgRepo.save(msg);
     
     } catch (e) {}
     }, {
