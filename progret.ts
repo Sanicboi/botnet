@@ -52,7 +52,7 @@ AppDataSource.initialize().then(async () => {
         for (const m of msgs) {
             await client.sendMessage(job.data.bot.currentChatId, {
                 //@ts-ignore
-                message: m.content[0].text.value.replaceAll(/【.+】/g, '')
+                message: m.content[0].text.value.replaceAll(/【.+】/g, '').replaceAll('#', '')
             });
             await new Promise((resolve, reject) => setTimeout(resolve, 1000));
         }
