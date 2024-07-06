@@ -122,7 +122,7 @@ AppDataSource.initialize().then(async () => {
                 msg.handled = false
                 await msgRepo.save(msg);
                 console.log()
-                await inq.add('handle', {msg, username: m.from.username});
+                await inq.add('handle', {msg, username: `Имя пользователя: ${m.from.username}, Имя: ${m.from.first_name}`});
                 
             }
         } catch (e) {
