@@ -81,7 +81,7 @@ AppDataSource.initialize().then(async () => {
     const inw = new Worker('p-in', async (job) => {
         try {
 	    console.log('In job');
-        bots.forEach(async bot => {
+        for (const bot of bots) {
 		try {
             console.log(job.data.msg.from === bot.from);
             if (job.data.msg.from === bot.from) return;
@@ -92,6 +92,7 @@ AppDataSource.initialize().then(async () => {
 		} catch (e) {
 		console.log("ERR " + e)
 		}
+        }
         await AppDataSource.createQueryBuilder()
             .update(ChatMsg)
             .where('id = :id', {
@@ -101,7 +102,7 @@ AppDataSource.initialize().then(async () => {
                 queued: true
             })
             .execute();
-        });
+    
     } catch (e) {}
     }, {
         connection: {
