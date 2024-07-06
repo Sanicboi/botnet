@@ -62,6 +62,7 @@ AppDataSource.initialize().then(async () => {
         await AppDataSource.createQueryBuilder()
             .update(ChatMsg)
             .where('handled = false')
+            .andWhere('queued = true')
             .set({
                 handled: true
             })
@@ -91,6 +92,15 @@ AppDataSource.initialize().then(async () => {
 		} catch (e) {
 		console.log("ERR " + e)
 		}
+        await AppDataSource.createQueryBuilder()
+            .update(ChatMsg)
+            .where('id = :id', {
+                id: job.data.msg.id
+            })
+            .set({
+                queued: true
+            })
+            .execute();
         });
     } catch (e) {}
     }, {
@@ -109,6 +119,7 @@ AppDataSource.initialize().then(async () => {
                 msg.from = String(m.from.id);
                 await msgRepo.save(msg);
                 await inq.add('handle', {msg, username: m.from.username});
+                
             }
         } catch (e) {
             

@@ -20,4 +20,7 @@ export class ChatMsg {
 
     @CreateDateColumn()
     createdAt: Date;
+
+    @Column({default: false})
+    queued: boolean;
 }
