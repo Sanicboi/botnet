@@ -97,10 +97,13 @@ AppDataSource.initialize().then(async () => {
                 id: job.data.msg.id
             }
         });
+        console.log(msg);
         msg.queued = true;
         await msgRepo.save(msg);
     
-    } catch (e) {}
+    } catch (e) {
+        console.log("CRITICAL ERR" + e)
+    }
     }, {
         connection: {
             host: 'redis'
@@ -115,7 +118,9 @@ AppDataSource.initialize().then(async () => {
                 msg.chatid = String(m.chat.id);
                 msg.text = m.text;
                 msg.from = String(m.from.id);
+                msg.handled = false
                 await msgRepo.save(msg);
+                console.log()
                 await inq.add('handle', {msg, username: m.from.username});
                 
             }
