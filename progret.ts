@@ -49,6 +49,14 @@ AppDataSource.initialize().then(async () => {
             assistant_id: 'asst_NcMJnXsqlSLzGWj7SBgz56at',
             additional_instructions: `Ты пишешь с аккаунта ${me.username} (${me.firstName})`
         }).finalMessages()
+        await AppDataSource.createQueryBuilder()
+        .update(ChatMsg)
+        .where('handled = false')
+        .andWhere('queued = true')
+        .set({
+            handled: true
+        })
+        .execute();
         for (const m of msgs) {
             await client.sendMessage(job.data.bot.currentChatId, {
                 //@ts-ignore
@@ -59,14 +67,7 @@ AppDataSource.initialize().then(async () => {
 	    const b = await botRepo.findOneBy({id: job.data.bot.id});
         b.quota--;
         await botRepo.save(b);
-        await AppDataSource.createQueryBuilder()
-            .update(ChatMsg)
-            .where('handled = false')
-            .andWhere('queued = true')
-            .set({
-                handled: true
-            })
-            .execute();
+
     }, {
         limiter: {
             duration: 10000,
