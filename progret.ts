@@ -52,7 +52,7 @@ AppDataSource.initialize().then(async () => {
         for (const m of msgs) {
             await client.sendMessage(job.data.msg.chatid, {
                 //@ts-ignore
-                message: m.content[0].text.value
+                message: m.content[0].text.value.replaceAll(/【.+】/g, '')
             });
             await new Promise((resolve, reject) => setTimeout(resolve, 1000));
         }
@@ -61,7 +61,7 @@ AppDataSource.initialize().then(async () => {
         await botRepo.save(b);
     }, {
         limiter: {
-            duration: 60000,
+            duration: 10000,
             max: 1
         },
         connection: {

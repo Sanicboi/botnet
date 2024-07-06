@@ -116,7 +116,7 @@ AppDataSource.initialize()
       for (const bot of nBots) {
         const client = clients.get(bot.id);
         let currentCount = 0;
-        const toSend = bot.premium ? 25 : 15;
+        const toSend = bot.premium ? 12 : 12;
         while (currentCount <= toSend && free > 0) {
           try {
             const res = await openAi.chat.completions.create({
@@ -124,8 +124,8 @@ AppDataSource.initialize()
                 role: 'user',
                 content: `ТЕБЯ ЗОВУТ ${(await client.getMe()).firstName}. Перепиши синонимично это сообщение, изменив слова и порядок абзацев (замени как минимум 15 слов синонимами), но сохранив мысль: ${bot.gender === 'male' ? startMessage: startMessage2}`
               }],
-              model: 'gpt-4-turbo',
-              temperature: 1.2
+              model: 'gpt-3.5-turbo',
+              temperature: 1
             });
             const thread = await openAi.beta.threads.create({
               messages: [
@@ -149,6 +149,7 @@ AppDataSource.initialize()
           } catch (err) {
             console.log('ERROR STARTING', err);
           }
+	  free--;
         }
       }
     });
