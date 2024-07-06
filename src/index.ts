@@ -116,7 +116,7 @@ AppDataSource.initialize()
       for (const bot of nBots) {
         const client = clients.get(bot.id);
         let currentCount = 0;
-        const toSend = bot.premium ? 12 : 12;
+        const toSend = bot.premium ? 25 : 15;
         while (currentCount <= toSend && free > 0) {
           try {
             const res = await openAi.chat.completions.create({
@@ -199,14 +199,34 @@ AppDataSource.initialize()
           host: "redis",
       }
     });
+    const queueOut7 = new Queue('out7', {
+      connection: {
+          host: "redis",
+      }
+    });
+    const queueOut8 = new Queue('out8', {
+      connection: {
+          host: "redis",
+      }
+    });
+    const queueOut9 = new Queue('out9', {
+      connection: {
+          host: "redis",
+      }
+    });
     const queueOut6 = new Queue('out6', {
+      connection: {
+          host: "redis",
+      }
+    });
+    const queueOut10 = new Queue('out10', {
       connection: {
           host: "redis",
       }
     });
 
     const queues = [
-      queueOut1, queueOut2, queueOut3, queueOut4, queueOut5, queueOut6
+      queueOut1, queueOut2, queueOut3, queueOut4, queueOut5, queueOut6, queueOut7, queueOut8, queueOut9, queueOut10
     ];
     const msgRepo = AppDataSource.getRepository(Message);
     const whatsapp = new Whatsapp(openAi, AppDataSource, manager, determiner);
@@ -274,6 +294,42 @@ AppDataSource.initialize()
       }
     });
     const workerOut6 = new Worker('out6', handle, {
+      connection: {
+        host: 'redis'
+      },
+      limiter: {
+        duration: 60000 * 5,
+        max: 1
+      }
+    });
+    const workerOut7 = new Worker('out7', handle, {
+      connection: {
+        host: 'redis'
+      },
+      limiter: {
+        duration: 60000 * 5,
+        max: 1
+      }
+    });
+    const workerOut8 = new Worker('out8', handle, {
+      connection: {
+        host: 'redis'
+      },
+      limiter: {
+        duration: 60000 * 5,
+        max: 1
+      }
+    });
+    const workerOut9 = new Worker('out9', handle, {
+      connection: {
+        host: 'redis'
+      },
+      limiter: {
+        duration: 60000 * 5,
+        max: 1
+      }
+    });
+    const workerOut10 = new Worker('out10', handle, {
       connection: {
         host: 'redis'
       },

@@ -67,7 +67,7 @@ AppDataSource.initialize().then(async () => {
 	    const b = await botRepo.findOneBy({id: job.data.bot.id});
         b.quota--;
         await botRepo.save(b);
-
+        
     }, {
         limiter: {
             duration: 10000,
