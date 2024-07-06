@@ -83,8 +83,7 @@ AppDataSource.initialize().then(async () => {
 	    console.log('In job');
         for (const bot of bots) {
 		try {
-            console.log(job.data.msg.from === bot.from);
-            if (job.data.msg.from === bot.from) return;
+            if (job.data.msg.from === bot.from) continue;
             await openai.beta.threads.messages.create(bot.currentThreadId, {
                 role: 'user',
                 content: job.data.username + ': ' + job.data.msg.text
