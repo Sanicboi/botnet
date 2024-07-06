@@ -44,21 +44,28 @@ AppDataSource.initialize().then(async () => {
     const outw = new Worker('p-out', async (job) => {
         console.log('Out job')
         const client = clients.get(job.data.bot.id);
-	console.log(job.data);
+        const me = await client.getMe();
         const msgs = await openai.beta.threads.runs.stream(job.data.bot.currentThreadId, {
-            assistant_id: 'asst_NcMJnXsqlSLzGWj7SBgz56at'
+            assistant_id: 'asst_NcMJnXsqlSLzGWj7SBgz56at',
+            additional_instructions: `Ты пишешь с аккаунта ${me.username} (${me.firstName})`
         }).finalMessages()
-		     console.log(msgs);
         for (const m of msgs) {
-            await client.sendMessage(job.data.msg.chatid, {
+            await client.sendMessage(job.data.bot.currentChatId, {
                 //@ts-ignore
                 message: m.content[0].text.value.replaceAll(/【.+】/g, '')
             });
             await new Promise((resolve, reject) => setTimeout(resolve, 1000));
         }
-	const b = await botRepo.findOneBy({id: job.data.bot.id});
+	    const b = await botRepo.findOneBy({id: job.data.bot.id});
         b.quota--;
         await botRepo.save(b);
+        await AppDataSource.createQueryBuilder()
+            .update(ChatMsg)
+            .where('handled = false')
+            .set({
+                handled: true
+            })
+            .execute();
     }, {
         limiter: {
             duration: 10000,
@@ -85,14 +92,6 @@ AppDataSource.initialize().then(async () => {
 		console.log("ERR " + e)
 		}
         });
-        const eligible = bots.filter(el => el.from !== job.data.msg.from).filter(el => el.quota > 0).filter(el => el.currentChatId == job.data.msg.chatid);
-        const i = Math.round(Math.random() * (eligible.length - 1));
-	console.log(eligible);
-        const client = clients.get(eligible[i].id);
-        await outq.add('send', {
-            msg: job.data.msg,
-            bot: eligible[i],
-        })
     } catch (e) {}
     }, {
         connection: {
@@ -109,7 +108,7 @@ AppDataSource.initialize().then(async () => {
                 msg.text = m.text;
                 msg.from = String(m.from.id);
                 await msgRepo.save(msg);
-                await inq.add('handle', {msg});
+                await inq.add('handle', {msg, username: m.from.username});
             }
         } catch (e) {
             
@@ -167,6 +166,27 @@ AppDataSource.initialize().then(async () => {
             bot.quota = 4;
             await botRepo.save(bot);
         });
+    });
+    cron.schedule('*/30 * * * * *', async () => {
+        const msgs = await msgRepo.find({
+            where: {
+                handled: false,
+            },
+            order: {
+                createdAt: {
+                    direction: 'DESC'
+                }
+            }
+        });
+
+        if (msgs.length > 0) {
+            const eligible = bots.filter(el => el.from != msgs[0].from).filter(el => el.currentChatId == msgs[0].chatid).filter(el => el.quota > 0);
+            const i = Math.round(Math.random() * (eligible.length - 1));
+            const b = eligible[i];
+            await outq.add('send', {
+                bot: b
+            });
+        }
     });
     // cron.schedule('*/30 * * * * *', async () => {
     //     const msg = await msgRepo.findOne({
