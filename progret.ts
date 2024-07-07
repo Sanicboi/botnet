@@ -204,6 +204,7 @@ AppDataSource.initialize().then(async () => {
         if (msgs.length > 0) {
             const eligible = bots.filter(el => el.from != msgs[0].from).filter(el => el.currentChatId == msgs[0].chatid).filter(el => el.quota > 0);
             const i = Math.round(Math.random() * (eligible.length - 1));
+            console.log(eligible);
             const b = eligible[i];
             await outq.add('send', {
                 bot: b
