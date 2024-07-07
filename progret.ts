@@ -45,7 +45,7 @@ AppDataSource.initialize().then(async () => {
     const outw = new Worker('p-out', async (job) => {
         try {
         console.log('Out job');
-        console.log(job.data.bot);
+        console.log(job.data);
         const client = clients.get(job.data.bot.id);
         const me = await client.getMe();
         const msgs = await openai.beta.threads.runs.stream(job.data.bot.currentThreadId, {
