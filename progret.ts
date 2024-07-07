@@ -26,6 +26,7 @@ const inq = new Queue('p-in', {
     }
 });
 
+let currentChatId: number;
 
 
 AppDataSource.initialize().then(async () => {
@@ -117,7 +118,7 @@ AppDataSource.initialize().then(async () => {
 
     manager.onText(/./, async (m) => {
         try {
-            if (chats.includes(m.chat.id)) {
+            if (chats.includes(m.chat.id) && m.chat.id == currentChatId) {
                 const msg = new ChatMsg();
                 msg.chatid = String(m.chat.id);
                 msg.text = m.text;
@@ -159,6 +160,7 @@ AppDataSource.initialize().then(async () => {
             bot.currentThreadId = (await openai.beta.threads.create({
                 messages: []
             })).id;
+            currentChatId = +msg.text.split(' ')[1]
             await botRepo.save(bot);
         });
     });
@@ -168,6 +170,7 @@ AppDataSource.initialize().then(async () => {
             bot.currentChatId = '';
             await openai.beta.threads.del(bot.currentThreadId);
             bot.currentThreadId = '';
+            currentChatId = 0;
             await botRepo.save(bot);
         });}
 	catch (e) {}
