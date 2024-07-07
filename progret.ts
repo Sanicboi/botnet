@@ -11,7 +11,6 @@ import { Queue, Worker } from "bullmq";
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_KEY,
 });
-const chats: number[] = [-1002202356312, -1002016793708];
 const outq = new Queue("p-out", {
   connection: {
     host: "redis",
@@ -28,12 +27,6 @@ let currentChatId: number;
 AppDataSource.initialize().then(async () => {
   const botRepo = AppDataSource.getRepository(Bot);
   const msgRepo = AppDataSource.getRepository(ChatMsg);
-  const bots = await botRepo.find({
-    where: {
-      blocked: false,
-      progrevat: true,
-    },
-  });
   const manager = new TelegramBot(
     "7461695989:AAHAeqsiW7M15BTmNYRtRlb3VfN7UEJ7I08",
     {
@@ -94,6 +87,12 @@ AppDataSource.initialize().then(async () => {
   const inw = new Worker(
     "p-in",
     async (job) => {
+        const bots = await botRepo.find({
+            where: {
+              blocked: false,
+              progrevat: true,
+            },
+          });
       try {
         console.log("In job");
         for (const bot of bots) {
@@ -131,7 +130,7 @@ AppDataSource.initialize().then(async () => {
     console.log(m.chat.id);
     console.log(currentChatId);
     try {
-      if (chats.includes(m.chat.id) && m.chat.id == currentChatId) {
+      if (m.chat.id == currentChatId) {
         const msg = new ChatMsg();
         msg.chatid = String(m.chat.id);
         msg.text = m.text;
@@ -146,8 +145,14 @@ AppDataSource.initialize().then(async () => {
       }
     } catch (e) {}
   });
+  const botsOg = await botRepo.find({
+    where: {
+      blocked: false,
+      progrevat: true,
+    },
+  });
   const clients = new Map<string, TelegramClient>();
-  bots.forEach(async (b) => {
+  botsOg.forEach(async (b) => {
     try {
       const session = new StringSession(b.token);
       const client = new TelegramClient(
@@ -168,7 +173,13 @@ AppDataSource.initialize().then(async () => {
       client.addEventHandler(async (e) => {}, new NewMessage());
     } catch (e) {}
   });
-  manager.onText(/\/on/, (msg) => {
+  manager.onText(/\/on/,async (msg) => {
+    const bots = await botRepo.find({
+        where: {
+          blocked: false,
+          progrevat: true,
+        },
+      });
     bots.forEach(async (bot) => {
       bot.currentChatId = msg.text.split(" ")[1];
       bot.currentThreadId = (
@@ -182,6 +193,12 @@ AppDataSource.initialize().then(async () => {
   });
   manager.onText(/\/off/, async (msg) => {
     try {
+        const bots = await botRepo.find({
+            where: {
+              blocked: false,
+              progrevat: true,
+            },
+          });
       bots.forEach(async (bot) => {
         bot.currentChatId = "";
         await openai.beta.threads.del(bot.currentThreadId);
@@ -199,6 +216,12 @@ AppDataSource.initialize().then(async () => {
     } catch (e) {}
   });
   manager.onText(/\/set/, async (msg) => {
+    const bots = await botRepo.find({
+        where: {
+          blocked: false,
+          progrevat: true,
+        },
+      });
     bots.forEach(async (bot) => {
       const client = clients.get(bot.id);
       bot.from = (await client.getMe()).id.toString();
@@ -206,6 +229,12 @@ AppDataSource.initialize().then(async () => {
     });
   });
   manager.onText(/\/restart/, async (msg) => {
+    const bots = await botRepo.find({
+        where: {
+          blocked: false,
+          progrevat: true,
+        },
+      });
     bots.forEach(async (bot) => {
       bot.quota = 4;
       await botRepo.save(bot);
@@ -224,6 +253,12 @@ AppDataSource.initialize().then(async () => {
     });
 
     if (msgs.length > 0) {
+        const bots = await botRepo.find({
+            where: {
+              blocked: false,
+              progrevat: true,
+            },
+          });
       const notFrom = bots.filter((el) => el.from != msgs[0].from);
       console.log(notFrom);
       const fromChat = notFrom.filter(
