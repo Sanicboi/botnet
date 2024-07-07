@@ -118,6 +118,8 @@ AppDataSource.initialize().then(async () => {
     });
 
     manager.onText(/./, async (m) => {
+        console.log(m.chat.id);
+        console.log(currentChatId);
         try {
             if (chats.includes(m.chat.id) && m.chat.id == currentChatId) {
                 const msg = new ChatMsg();
