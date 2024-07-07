@@ -44,7 +44,8 @@ AppDataSource.initialize().then(async () => {
 
     const outw = new Worker('p-out', async (job) => {
         try {
-        console.log('Out job')
+        console.log('Out job');
+        console.log(job.data.bot);
         const client = clients.get(job.data.bot.id);
         const me = await client.getMe();
         const msgs = await openai.beta.threads.runs.stream(job.data.bot.currentThreadId, {
@@ -66,7 +67,6 @@ AppDataSource.initialize().then(async () => {
             });
             await new Promise((resolve, reject) => setTimeout(resolve, 1000));
         }
-        console.log(job.data.bot);
 	    const b = await botRepo.findOneBy({id: job.data.bot.id});
         b.quota--;
         await botRepo.save(b);
