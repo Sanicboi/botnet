@@ -42,6 +42,7 @@ AppDataSource.initialize().then(async () => {
     });
 
     const outw = new Worker('p-out', async (job) => {
+        try {
         console.log('Out job')
         const client = clients.get(job.data.bot.id);
         const me = await client.getMe();
@@ -67,7 +68,9 @@ AppDataSource.initialize().then(async () => {
 	    const b = await botRepo.findOneBy({id: job.data.bot.id});
         b.quota--;
         await botRepo.save(b);
-        
+    } catch (err) {
+        console.log(err);
+    }
     }, {
         limiter: {
             duration: 10000,
