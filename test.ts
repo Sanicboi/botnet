@@ -24,81 +24,60 @@ import { TotalList } from "telegram/Helpers";
 // import fs from 'fs';
 // import path from 'path';
 // import { Bitrix } from "./src/Bitrix";
+const numbers = fs.readFileSync(path.join(__dirname, 'signup', 'numbers.txt'), 'utf8').split('\r\n');
 
-const src = new DataSource({
-    type: 'postgres',
-    username: 'test',
-    password: 'test',
-    database: 'test',
-    host: '194.0.194.46',
-    entities: [User, Bot, Message, WhatsappUser],
-    port: 5432,
-    synchronize: true,
-    migrations: [],
-    subscribers: [],
-});
-process.env.WEBHOOK_URL = 'https://adamart.bitrix24.ru/rest/39/w0654aqejhhe6zdi/';
-src.initialize().then(async () => {
-    const bots = await src.getRepository(Bot).find({
-        where: {
-            blocked: false,
-        }
-    });
+// const src = new DataSource({
+//     type: 'postgres',
+//     username: 'test',
+//     password: 'test',
+//     database: 'test',
+//     host: '194.0.194.46',
+//     entities: [User, Bot, Message, WhatsappUser],
+//     port: 5432,
+//     synchronize: true,
+//     migrations: [],
+//     subscribers: [],
+// });
+// src.initialize().then(async () => {
+//     const bots = await src.getRepository(Bot).find({
+//         where: {
+//             blocked: false,
+//         }
+//     });
     
-    for (const b of bots) {
-        const session = new StringSession(b.token);
-    const client = new TelegramClient(session,28082768, "4bb35c92845f136f8eee12a04c848893", {
-        useWSS: true
-    });
+(async () => {
+    const blocked = [];
+    for (const n of numbers) {
+        if (!n) continue;
+        const session = new StringSession("");
+        const client = new TelegramClient(session,28082768, "4bb35c92845f136f8eee12a04c848893", {
+            useWSS: true
+        });
 
     try {
+        let ok = false;
         await client.start({
             async onError(err) {
-                console.log('Blocked ' + b.phone)
+                if (!ok) {
+                    blocked.push(n)
+                }
                 console.log(err);
                 return true;
             },
-            phoneCode: async () => '',
-            phoneNumber: async () =>{ console.log('Blocked ' + b.phone); return ''},
+            phoneCode: async () => {ok = true; return ''},
+            phoneNumber: async () =>n,
             password: async () => '',
         });
     } catch (e) {
         await client.destroy();
         continue;
     }
-
-    try {
-        const users = await src.getRepository(User).find({
-            where: {
-                botid: b.id,
-                replied: true
-            }
-        });
-        for (const u of users) {
-            try {
-                let result = ``;
-            const m = await client.getMessages(u.usernameOrPhone);
-            result = m.map(el => el.text).join('\n');
-            const r = await Bitrix.createContact(u.usernameOrPhone, u.usernameOrPhone);
-            u.contactId = r.data.result;
-            u.dealId = (await Bitrix.createDeal(b.phone, 'Неизвестно, полухолодный', 'неизвестно', 'полухолодный', result)).data.result;
-            await Bitrix.addContact(u.contactId, u.dealId);
-            await src.getRepository(User).save(u);
-            } catch (e) {
-                console.log(e);
-            }
-            
-        }
-        
-    
-    } catch (err) {
-        console.error(err);
-        await client.destroy();
-    }
 }
+console.log(blocked);
+})();
 
 
-});
+//});
  
 
 // src.initialize().then(async () => {

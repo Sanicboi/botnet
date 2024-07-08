@@ -15,11 +15,14 @@ import { Message } from "./entity/Message";
 import { Whatsapp } from "./Whatsapp";
 import { WhatsappUser } from "./entity/WhatsappUser";
 import { Bitrix } from "./Bitrix";
+import { ChatMsg } from "./entity/ChatMsg";
+import cron from 'node-cron';
 const openAi = new OpenAI({
   apiKey: process.env.OPENAI_KEY,
 });
 const determiner = new Determiner(openAi)
 const clients = new Map<string, TelegramClient>();
+let currentChatId: number;
 interface IncomingReq {
   bot: string;
   userId: string;
@@ -30,8 +33,19 @@ interface OutcomingReq {
   bot: string;
   user: string;
   text: string;
+  first?: boolean;
 }
-// НУ ЕБАНЫЙ РОТ ЕБУЧИЕ ТАЙМИНГИ
+
+const outq = new Queue("p-out", {
+  connection: {
+    host: "redis",
+  },
+});
+const inq = new Queue("p-in", {
+  connection: {
+    host: "redis",
+  },
+});
 
 const wait = async (s: number) => {
   await new Promise((resolve, reject) => setTimeout(resolve, 1000 * s));
@@ -44,9 +58,231 @@ AppDataSource.initialize()
   .then(async () => {
     const userRepo = AppDataSource.getRepository(User);
     const botRepo = AppDataSource.getRepository(Bot);
-
+    const chatRepo = AppDataSource.getRepository(ChatMsg);
     const manager = new TgBot("7347879515:AAGfiiuwBzlgFHHASnBnjxkwNPUooFXO3Qc", {
       polling: true,
+    });
+    const manager2 = new TgBot(
+      "7461695989:AAHAeqsiW7M15BTmNYRtRlb3VfN7UEJ7I08",
+      {
+        polling: true,
+      }
+    );
+
+    const outw = new Worker(
+      "p-out",
+      async (job) => {
+        try {
+          console.log("Out job");
+          console.log(job.data);
+          const client = clients.get(job.data.bot.id);
+          const me = await client.getMe();
+          const msgs = await openAi.beta.threads.runs
+            .stream(job.data.bot.currentThreadId, {
+              assistant_id: "asst_NcMJnXsqlSLzGWj7SBgz56at",
+              additional_instructions: `Ты пишешь с аккаунта ${me.username} (${me.firstName})`,
+            })
+            .finalMessages();
+          await AppDataSource.createQueryBuilder()
+            .update(ChatMsg)
+            .where("handled = false")
+            .andWhere("queued = true")
+            .set({
+              handled: true,
+            })
+            .execute();
+          for (const m of msgs) {
+            await client.sendMessage(job.data.bot.currentChatId, {
+              //@ts-ignore
+              message: m.content[0].text.value
+                .replaceAll(/【.+】/g, "")
+                .replaceAll("#", ""),
+            });
+            await new Promise((resolve, reject) => setTimeout(resolve, 1000));
+          }
+          const b = await botRepo.findOneBy({ id: job.data.bot.id });
+          b.quota--;
+          await botRepo.save(b);
+        } catch (err) {
+          console.log(err);
+        }
+      },
+      {
+        limiter: {
+          duration: 10000,
+          max: 1,
+        },
+        connection: {
+          host: "redis",
+        },
+        concurrency: 1,
+      }
+    );
+  
+    const inw = new Worker(
+      "p-in",
+      async (job) => {
+          const bots = await botRepo.find({
+              where: {
+                blocked: false,
+                progrevat: true,
+              },
+            });
+        try {
+          console.log("In job");
+          for (const bot of bots) {
+            try {
+              if (job.data.msg.from === bot.from) continue;
+              await openAi.beta.threads.messages.create(bot.currentThreadId, {
+                role: "user",
+                content: job.data.username + ": " + job.data.msg.text,
+              });
+            } catch (e) {
+              console.log("ERR " + e);
+            }
+          }
+          const msg = await chatRepo.findOne({
+            where: {
+              id: job.data.msg.id,
+            },
+          });
+          console.log(msg);
+          msg.queued = true;
+          await msgRepo.save(msg);
+        } catch (e) {
+          console.log("CRITICAL ERR" + e);
+        }
+      },
+      {
+        connection: {
+          host: "redis",
+        },
+        concurrency: 1,
+      }
+    );
+    manager2.onText(/./, async (m) => {
+      console.log(m.chat.id);
+      console.log(currentChatId);
+      try {
+        if (m.chat.id == currentChatId) {
+          const msg = new ChatMsg();
+          msg.chatid = String(m.chat.id);
+          msg.text = m.text;
+          msg.from = String(m.from.id);
+          msg.handled = false;
+          await msgRepo.save(msg);
+          console.log();
+          await inq.add("handle", {
+            msg,
+            username: `Имя пользователя: ${m.from.username}, Имя: ${m.from.first_name}`,
+          });
+        }
+      } catch (e) {}
+    });
+
+    manager2.onText(/\/on/,async (msg) => {
+      const bots = await botRepo.find({
+          where: {
+            blocked: false,
+            progrevat: true,
+          },
+        });
+      bots.forEach(async (bot) => {
+        bot.currentChatId = msg.text.split(" ")[1];
+        bot.currentThreadId = (
+          await openAi.beta.threads.create({
+            messages: [],
+          })
+        ).id;
+        currentChatId = +msg.text.split(" ")[1];
+        await botRepo.save(bot);
+      });
+    });
+
+    manager2.onText(/\/off/, async (msg) => {
+      try {
+          const bots = await botRepo.find({
+              where: {
+                blocked: false,
+                progrevat: true,
+              },
+            });
+        bots.forEach(async (bot) => {
+          bot.currentChatId = "";
+          await openAi.beta.threads.del(bot.currentThreadId);
+          bot.currentThreadId = "";
+          currentChatId = 0;
+          await botRepo.save(bot);
+        });
+        await AppDataSource.createQueryBuilder()
+          .update(ChatMsg)
+          .where("handled = false")
+          .set({
+            handled: true,
+          })
+          .execute();
+      } catch (e) {}
+    });
+    manager2.onText(/\/set/, async (msg) => {
+      const bots = await botRepo.find({
+          where: {
+            blocked: false,
+            progrevat: true,
+          },
+        });
+      bots.forEach(async (bot) => {
+        const client = clients.get(bot.id);
+        bot.from = (await client.getMe()).id.toString();
+        await botRepo.save(bot);
+      });
+    });
+    manager2.onText(/\/restart/, async (msg) => {
+      const bots = await botRepo.find({
+          where: {
+            blocked: false,
+            progrevat: true,
+          },
+        });
+      bots.forEach(async (bot) => {
+        bot.quota = 3;
+        await botRepo.save(bot);
+      });
+    });
+
+    cron.schedule("*/30 * * * * *", async () => {
+      const msgs = await chatRepo.find({
+        where: {
+          handled: false,
+        },
+        order: {
+          createdAt: {
+            direction: "DESC",
+          },
+        },
+      });
+  
+      if (msgs.length > 0) {
+          const bots = await botRepo.find({
+              where: {
+                blocked: false,
+                progrevat: true,
+              },
+            });
+        const notFrom = bots.filter((el) => el.from != msgs[0].from);
+        console.log(notFrom);
+        const fromChat = notFrom.filter(
+          (el) => el.currentChatId == msgs[0].chatid
+        );
+        console.log(fromChat);
+        const quoted = fromChat.filter((el) => el.quota > 0);
+        const eligible = quoted;
+        const i = Math.round(Math.random() * (eligible.length - 1));
+        console.log(eligible);
+        const b = eligible[i];
+        await outq.add("send", {
+          bot: b,
+        });
+      }
     });
 
     manager.onText(/\/start/, async (msg) => {
@@ -141,7 +377,8 @@ AppDataSource.initialize()
             await queues[bot.queueIdx].add("out", {
                 bot: bot.id,
                 text: res.choices[0].message.content,
-                user: notTalked[total].usernameOrPhone
+                user: notTalked[total].usernameOrPhone,
+                first: true
               });
             free--;
             total++;
@@ -244,6 +481,13 @@ AppDataSource.initialize()
           message: msg.text,
         });
         await manager.sendMessage(-1002201795929, `Отправлено сообщение. От: ${m.botphone}. К: ${m.username}. Дата: ${m.date.toUTCString()}`);
+        if (msg.first) {
+          const obj = await botRepo.findOneBy({
+            id: msg.bot,
+          });
+          obj.sentMsgs++;
+          await botRepo.save(obj);
+        }
       } catch (error) {
         console.error("ERROR SENDING MESSAGE ", error);
       }

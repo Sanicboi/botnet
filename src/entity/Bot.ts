@@ -41,4 +41,7 @@ export class Bot {
 
     @Column({default: 4})
     quota: number;
+
+    @Column({default: 0})
+    sentMsgs: number;
 }
