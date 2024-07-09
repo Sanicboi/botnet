@@ -161,6 +161,7 @@ AppDataSource.initialize()
       }
     );
     manager2.onText(/./, async (m) => {
+      console.log('Recieving message');
       console.log(m.chat.id);
       console.log(currentChatId);
       try {
