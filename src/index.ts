@@ -172,7 +172,7 @@ AppDataSource.initialize()
           msg.from = String(m.from.id);
           msg.handled = false;
           await msgRepo.save(msg);
-          console.log();
+          console.log(msg);
           await inq.add("handle", {
             msg,
             username: `Имя пользователя: ${m.from.username}, Имя: ${m.from.first_name}`,
