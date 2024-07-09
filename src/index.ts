@@ -171,7 +171,7 @@ AppDataSource.initialize()
           msg.text = m.text;
           msg.from = String(m.from.id);
           msg.handled = false;
-          await msgRepo.save(msg);
+          await chatRepo.save(msg);
           console.log(msg);
           await inq.add("handle", {
             msg,
