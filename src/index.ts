@@ -666,7 +666,7 @@ AppDataSource.initialize()
         await client.start({
           phoneNumber: async () => {
             //@ts-ignore
-            return await input.text("number ?");
+            return '';
           },
           phoneCode: async () => {
             //@ts-ignore
@@ -676,8 +676,9 @@ AppDataSource.initialize()
             //@ts-ignore
             return await input.text("password ?");
           },
-          onError: () => {
+          onError: async () => {
             console.error("error");
+            return true;
           },
         });
         client.addEventHandler(async (event) => {
