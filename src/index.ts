@@ -225,6 +225,7 @@ AppDataSource.initialize()
       } catch (e) {}
     });
     manager2.onText(/\/set/, async (msg) => {
+      try {
       const bots = await botRepo.find({
           where: {
             blocked: false,
@@ -236,6 +237,9 @@ AppDataSource.initialize()
         bot.from = (await client.getMe()).id.toString();
         await botRepo.save(bot);
       });
+    } catch (e) {
+      
+    }
     });
     manager2.onText(/\/restart/, async (msg) => {
       const bots = await botRepo.find({
