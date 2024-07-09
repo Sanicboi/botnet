@@ -232,11 +232,11 @@ AppDataSource.initialize()
             progrevat: true,
           },
         });
-      bots.forEach(async (bot) => {
+      for (const bot of bots) {
         const client = clients.get(bot.id);
         bot.from = (await client.getMe()).id.toString();
         await botRepo.save(bot);
-      });
+      }
     } catch (e) {
       
     }
