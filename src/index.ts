@@ -255,10 +255,11 @@ AppDataSource.initialize()
       });
     });
 
-    cron.schedule("*/30 * * * * *", async () => {
+    cron.schedule("*/2 * * * *", async () => {
       const msgs = await chatRepo.find({
         where: {
           handled: false,
+          chatid: String(currentChatId)
         },
         order: {
           createdAt: {
