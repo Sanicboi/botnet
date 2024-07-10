@@ -620,9 +620,17 @@ AppDataSource.initialize()
             usernameOrPhone: username.username,
           },
         });
+        const b = await botRepo.findOne({
+          where: {
+            id: msg.bot
+          }
+        });
         if (!user.replied) {
+          await manager.sendMessage(-1002244363083, `Получен ответ от клиента ${user.usernameOrPhone}`);
           user.replied = true;
           user.contactId = (await Bitrix.createContact(user.usernameOrPhone, user.usernameOrPhone, 'Не дано')).data.result;
+          const dialog = await client.getMessages(user.usernameOrPhone);
+          user.dealId = (await Bitrix.createDeal(b.phone, 'Нет', 'Нет', 'Полухолодный', dialog.map(el => el.sender.className + ' ' + el.text).join('\n\n'))).data.result;
         }
         await userRepo.save(user);
         await client.invoke(new Api.messages.ReadHistory({
@@ -636,11 +644,7 @@ AppDataSource.initialize()
             action: new Api.SendMessageTypingAction(),
           })
         );
-        const b = await botRepo.findOne({
-          where: {
-            id: msg.bot
-          }
-        });
+
         const phone = (await client.getMe()).phone;
         await determiner.sendDetermined(msg.text, user, msg.bot, queues[b.queueIdx], manager, userRepo, phone, b.gender, (await client.getMe()).firstName);
       } catch (error) {

@@ -24,57 +24,63 @@ import { TotalList } from "telegram/Helpers";
 // import fs from 'fs';
 // import path from 'path';
 // import { Bitrix } from "./src/Bitrix";
-const numbers = fs.readFileSync(path.join(__dirname, 'signup', 'numbers.txt'), 'utf8').split('\r\n');
+// const numbers = fs.readFileSync(path.join(__dirname, 'signup', 'numbers.txt'), 'utf8').split('\r\n');
 
-// const src = new DataSource({
-//     type: 'postgres',
-//     username: 'test',
-//     password: 'test',
-//     database: 'test',
-//     host: '194.0.194.46',
-//     entities: [User, Bot, Message, WhatsappUser],
-//     port: 5432,
-//     synchronize: true,
-//     migrations: [],
-//     subscribers: [],
-// });
-// src.initialize().then(async () => {
-//     const bots = await src.getRepository(Bot).find({
-//         where: {
-//             blocked: false,
-//         }
-//     });
-    
-(async () => {
-    const blocked = [];
-    for (const n of numbers) {
-        if (!n) continue;
-        const session = new StringSession("");
+const src = new DataSource({
+    type: 'postgres',
+    username: 'test',
+    password: 'test',
+    database: 'test',
+    host: '194.0.194.46',
+    entities: [User, Bot, Message, WhatsappUser],
+    port: 5432,
+    synchronize: true,
+    migrations: [],
+    subscribers: [],
+});
+src.initialize().then(async () => {
+    const bots = await src.getRepository(Bot).find({
+        where: {
+            blocked: false,
+            send: true
+        }
+    });
+    for (const b of bots) {
+        const session = new StringSession(b.token);
         const client = new TelegramClient(session,28082768, "4bb35c92845f136f8eee12a04c848893", {
             useWSS: true
         });
 
-    try {
-        let ok = false;
-        await client.start({
-            async onError(err) {
-                if (!ok) {
-                    blocked.push(n)
+        try {
+            await client.start({
+                async onError(err) {
+                    return true;
+                },
+                phoneCode: async () => {return ''},
+                phoneNumber: async () => '',
+                password: async () => '',
+            });
+            fs.appendFileSync(path.join(__dirname, 'export.txt'), `Бот ${b.phone}\n`);
+            const users = await src.getRepository(User).find({
+                where: {
+                    botid: b.id,
                 }
-                console.log(err);
-                return true;
-            },
-            phoneCode: async () => {ok = true; return ''},
-            phoneNumber: async () =>n,
-            password: async () => '',
-        });
-    } catch (e) {
-        await client.destroy();
-        continue;
+            });
+
+            for (const u of users) {
+                const msgs = await client.getMessages(u.usernameOrPhone);
+                if (msgs.length > 0) {
+                    fs.appendFileSync(path.join(__dirname, 'export.txt'), `\n\nПользователь ${u.usernameOrPhone}\n`);
+                    fs.appendFileSync(path.join(__dirname, 'export.txt'), msgs.map(el => el.text).join('\n'));
+                }
+            }
+            await client.disconnect();
+        } catch (e) {
+
+        }
     }
-}
-console.log(blocked);
-})();
+});
+    
 
 
 //});
