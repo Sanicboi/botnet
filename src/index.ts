@@ -47,6 +47,13 @@ const inq = new Queue("p-in", {
   },
 });
 
+const procq = new Queue("proc", {
+  connection: {
+    host: "redis",
+  }
+});
+
+
 const wait = async (s: number) => {
   await new Promise((resolve, reject) => setTimeout(resolve, 1000 * s));
 };
@@ -161,6 +168,46 @@ AppDataSource.initialize()
         concurrency: 1,
       }
     );
+
+    const procw = new Worker("proc", async (job) => {
+      const client = clients.get(job.data.bot.id);
+      const res = await openAi.chat.completions.create({
+        messages: [{
+          role: 'user',
+          content: `ТЕБЯ ЗОВУТ ${(await client.getMe()).firstName}. Перепиши синонимично это сообщение, изменив слова и порядок абзацев (замени как минимум 15 слов синонимами), но сохранив мысль: ${job.data.bot.gender === 'male' ? startMessage: startMessage2}`
+        }],
+        model: 'gpt-3.5-turbo',
+        temperature: 1
+      });
+      const thread = await openAi.beta.threads.create({
+        messages: [
+          {
+            content: res.choices[0].message.content,
+            role: "assistant",
+          },
+        ],
+      });
+      const user = await userRepo.findOneBy({
+        usernameOrPhone: job.data.user.usernameOrPhone
+      });
+      user.threadId = thread.id;
+      user.botid = job.data.bot.id;
+      await userRepo.save(user);
+      await queues[job.data.bot.queueIdx].add("out", {
+        bot: job.data.bot.id,
+        text: res.choices[0].message.content,
+        user: job.data.user.usernameOrPhone,
+        first: true
+      });
+    }, {
+      connection: {
+        host: 'redis',
+      },
+      limiter: {
+        max: 5000,
+        duration: 60000
+      }
+    });
     manager2.onText(/./, async (m) => {
       console.log('Recieving message');
       console.log(m.chat.id);
@@ -362,38 +409,17 @@ AppDataSource.initialize()
         const toSend = bot.premium ? 25 : 15;
         while (currentCount <= toSend && free > 0) {
           try {
-            const res = await openAi.chat.completions.create({
-              messages: [{
-                role: 'user',
-                content: `ТЕБЯ ЗОВУТ ${(await client.getMe()).firstName}. Перепиши синонимично это сообщение, изменив слова и порядок абзацев (замени как минимум 15 слов синонимами), но сохранив мысль: ${bot.gender === 'male' ? startMessage: startMessage2}`
-              }],
-              model: 'gpt-3.5-turbo',
-              temperature: 1
+            
+            await procq.add('gen', {
+              user: notTalked[total],
+              bot: bot
             });
-            const thread = await openAi.beta.threads.create({
-              messages: [
-                {
-                  content: res.choices[0].message.content,
-                  role: "assistant",
-                },
-              ],
-            });
-            notTalked[total].threadId = thread.id;
-            notTalked[total].botid = bot.id;
-            await userRepo.save(notTalked[total]);
-            await queues[bot.queueIdx].add("out", {
-                bot: bot.id,
-                text: res.choices[0].message.content,
-                user: notTalked[total].usernameOrPhone,
-                first: true
-              });
             free--;
             total++;
             currentCount++;
           } catch (err) {
             console.log('ERROR STARTING', err);
           }
-	  free--;
         }
       }
     });
