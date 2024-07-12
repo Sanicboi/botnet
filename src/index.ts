@@ -496,7 +496,7 @@ AppDataSource.initialize()
     };
     const queues = [];
     const workers = [];
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < 50; i++) {
       queues.push(
         new Queue("out" + i, {
           connection: {
@@ -510,7 +510,7 @@ AppDataSource.initialize()
             host: 'redis',
           },
           limiter: {
-            duration: 60000*5,
+            duration: 60000*3,
             max: 1
           }
         })
@@ -568,7 +568,7 @@ AppDataSource.initialize()
             user.replied = true;
             user.contactId = (
               await Bitrix.createContact(
-                user.usernameOrPhone,
+                "@" + user.usernameOrPhone,
                 user.usernameOrPhone,
                 "Не дано"
               )
@@ -581,7 +581,8 @@ AppDataSource.initialize()
                 "Нет",
                 "Полухолодный",
                 dialog
-                  .map((el) => el.sender.className + " " + el.text)
+                  .filter(el => el.sender.className == 'User' || el.sender.className == 'UserEmpty')
+                  .map((el) => el.sender.className == 'User'? el.sender.username + " " + el.text: el.text)
                   .join("\n\n")
               )
             ).data.result;
