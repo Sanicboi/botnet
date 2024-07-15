@@ -22,7 +22,7 @@ const openAi = new OpenAI({
 });
 const determiner = new Determiner(openAi);
 const clients = new Map<string, TelegramClient>();
-let currentChatId: number = -1002016793708;
+let currentChatId: number;
 interface IncomingReq {
   bot: string;
   userId: string;
@@ -421,11 +421,13 @@ AppDataSource.initialize()
       });
       let free = notTalked.length;
       let total = 0;
-      console.log(notTalked);
-      for (const bot of nBots) {
+      for (let i = 0; i < nBots.length; i++) {
+        const bot = nBots[i];
         const client = clients.get(bot.id);
         let currentCount = 0;
         const toSend = bot.premium ? 25 : 15;
+        bot.queueIdx = i % 30;
+        await botRepo.save(bot);
         while (currentCount <= toSend && free > 0) {
           try {
             await procq.add("gen", {
