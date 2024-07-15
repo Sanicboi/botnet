@@ -22,7 +22,7 @@ const openAi = new OpenAI({
 });
 const determiner = new Determiner(openAi);
 const clients = new Map<string, TelegramClient>();
-let currentChatId: number;
+let currentChatId: number = -1002016793708;
 interface IncomingReq {
   bot: string;
   userId: string;
@@ -317,7 +317,7 @@ AppDataSource.initialize()
       });
     });
 
-    cron.schedule("*/2 * * * *", async () => {
+    cron.schedule("*/4 * * * *", async () => {
       const msgs = await chatRepo.find({
         where: {
           handled: false,
