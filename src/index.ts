@@ -120,10 +120,10 @@ AppDataSource.initialize()
           await botRepo.save(b);
         } catch (err) {
           console.log(err);
-          await manager.sendMessage(
-            -1002201795929,
-            `Ошибка отправки сообщения прогреватором с аккаунта ${job.data.bot.phone}. Ошибка: ${err}`
-          );
+          // await manager.sendMessage(
+          //   -1002201795929,
+          //   `Ошибка отправки сообщения прогреватором с аккаунта ${job.data.bot.phone}. Ошибка: ${err}`
+          // );
         }
       },
       {
@@ -367,7 +367,7 @@ AppDataSource.initialize()
       });
     });
 
-    cron.schedule("*/1 * * * *", async () => {
+    cron.schedule("*/4 * * * *", async () => {
       const chats = await cRepo.find({
         where: {
           listen: true
