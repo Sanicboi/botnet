@@ -5,6 +5,8 @@ import { Bot } from "./entity/Bot"
 import { Message } from "./entity/Message"
 import { WhatsappUser } from "./entity/WhatsappUser"
 import { ChatMsg } from "./entity/ChatMsg"
+import { Thread } from "./entity/Thread"
+import { Chat } from "./entity/Chat"
 
 export const AppDataSource = new DataSource({
     type: "postgres",
@@ -15,7 +17,7 @@ export const AppDataSource = new DataSource({
     database: "test",
     synchronize: true,
     logging: false,
-    entities: [User, Bot, Message, WhatsappUser, ChatMsg],
+    entities: [User, Bot, Message, WhatsappUser, ChatMsg, Thread, Chat],
     migrations: [],
     subscribers: [],
 })

@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Thread } from "./Thread";
 
 @Entity()
 export class Bot {
@@ -44,4 +45,7 @@ export class Bot {
 
     @Column({default: 0})
     sentMsgs: number;
+
+    @OneToMany(() => Thread, (thread) => thread.bot)
+    threads: Thread[];
 }

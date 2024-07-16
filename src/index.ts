@@ -17,6 +17,8 @@ import { WhatsappUser } from "./entity/WhatsappUser";
 import { Bitrix } from "./Bitrix";
 import { ChatMsg } from "./entity/ChatMsg";
 import cron from "node-cron";
+import { Chat } from "./entity/Chat";
+import { Thread } from "./entity/Thread";
 const openAi = new OpenAI({
   apiKey: process.env.OPENAI_KEY,
 });
@@ -65,6 +67,8 @@ AppDataSource.initialize()
     const userRepo = AppDataSource.getRepository(User);
     const botRepo = AppDataSource.getRepository(Bot);
     const chatRepo = AppDataSource.getRepository(ChatMsg);
+    const cRepo = AppDataSource.getRepository(Chat);
+    const threadRepo = AppDataSource.getRepository(Thread);
     const manager = new TgBot(
       "7347879515:AAGfiiuwBzlgFHHASnBnjxkwNPUooFXO3Qc",
       {
@@ -83,7 +87,6 @@ AppDataSource.initialize()
       async (job) => {
         try {
           console.log("Out job");
-          console.log(job.data);
           const client = clients.get(job.data.bot.id);
           const me = await client.getMe();
           const msgs = await openAi.beta.threads.runs
@@ -96,12 +99,15 @@ AppDataSource.initialize()
             .update(ChatMsg)
             .where("handled = false")
             .andWhere("queued = true")
+            .andWhere("chatid = :id", {
+              id: job.data.chatId
+            })
             .set({
               handled: true,
             })
             .execute();
           for (const m of msgs) {
-            await client.sendMessage(job.data.bot.currentChatId, {
+            await client.sendMessage(job.data.chatId, {
               //@ts-ignore
               message: m.content[0].text.value
                 .replaceAll(/【.+】/g, "")
@@ -116,13 +122,13 @@ AppDataSource.initialize()
           console.log(err);
           await manager.sendMessage(
             -1002201795929,
-            `Ошибка отправки сообщения прогреватором с аккаунта ${job.data.bot}. Ошибка: ${err}`
+            `Ошибка отправки сообщения прогреватором с аккаунта ${job.data.bot.phone}. Ошибка: ${err}`
           );
         }
       },
       {
         limiter: {
-          duration: 10000,
+          duration: 1000,
           max: 1,
         },
         connection: {
@@ -135,18 +141,21 @@ AppDataSource.initialize()
     const inw = new Worker(
       "p-in",
       async (job) => {
-        const bots = await botRepo.find({
-          where: {
-            blocked: false,
-            progrevat: true,
-          },
-        });
+        const threads = await threadRepo
+          .createQueryBuilder('thread')
+          .select()
+          .leftJoinAndSelect('thread.bot', 'bot')
+          .leftJoinAndSelect('thread.chat', 'chat')
+          .where('chat.id = :id', {
+            id: job.data.msg.chatid
+          })
+          .getMany();
         try {
           console.log("In job");
-          for (const bot of bots) {
+          for (const thread of threads) {
             try {
-              if (job.data.msg.from === bot.from) continue;
-              await openAi.beta.threads.messages.create(bot.currentThreadId, {
+              if (job.data.msg.from === thread.bot.from) continue;
+              await openAi.beta.threads.messages.create(thread.id, {
                 role: "user",
                 content: job.data.username + ": " + job.data.msg.text,
               });
@@ -159,7 +168,6 @@ AppDataSource.initialize()
               id: job.data.msg.id,
             },
           });
-          console.log(msg);
           msg.queued = true;
           await msgRepo.save(msg);
         } catch (e) {
@@ -227,10 +235,13 @@ AppDataSource.initialize()
     );
     manager2.onText(/./, async (m) => {
       console.log("Recieving message");
-      console.log(m.chat.id);
-      console.log(currentChatId);
       try {
-        if (m.chat.id == currentChatId) {
+        const chat = await cRepo.findOne({
+          where: {
+            id: String(m.chat.id)
+          }
+        });
+        if (chat && chat.listen) {
           const msg = new ChatMsg();
           msg.chatid = String(m.chat.id);
           msg.text = m.text;
@@ -241,6 +252,7 @@ AppDataSource.initialize()
           await inq.add("handle", {
             msg,
             username: `Имя пользователя: ${m.from.username}, Имя: ${m.from.first_name}`,
+            chat
           });
         }
       } catch (e) {}
@@ -254,35 +266,50 @@ AppDataSource.initialize()
         },
       });
       bots.forEach(async (bot) => {
-        bot.currentChatId = msg.text.split(" ")[1];
-        bot.currentThreadId = (
+        const thread = new Thread();
+        thread.bot = bot;
+        thread.chat = await cRepo.findOne({
+          where: {
+            id: msg.text.split(" ")[1]
+          }
+        });
+        thread.id = (
           await openAi.beta.threads.create({
             messages: [],
           })
         ).id;
-        currentChatId = +msg.text.split(" ")[1];
-        await botRepo.save(bot);
+        await threadRepo.save(thread);
       });
     });
 
     manager2.onText(/\/off/, async (msg) => {
+      const id = msg.text.split(" ")[1];
+      const chat = await cRepo.findOneBy({id})
       try {
-        const bots = await botRepo.find({
+        const threads = await threadRepo.find({
           where: {
-            blocked: false,
-            progrevat: true,
+            chat,
           },
+          relations: {
+            bot: true
+          }
         });
-        bots.forEach(async (bot) => {
-          bot.currentChatId = "";
-          await openAi.beta.threads.del(bot.currentThreadId);
-          bot.currentThreadId = "";
-          currentChatId = 0;
-          await botRepo.save(bot);
-        });
+          for (const t of threads) {
+            await openAi.beta.threads.del(t.id);
+          }
+        await threadRepo
+          .createQueryBuilder('thread')
+          .delete()
+          .where('thread.id IN :ids', {
+            ids: threads.map(el => el.id)
+          })
+          .execute();
         await AppDataSource.createQueryBuilder()
           .update(ChatMsg)
           .where("handled = false")
+          .andWhere("chatid = :id", {
+            id
+          })
           .set({
             handled: true,
           })
@@ -318,41 +345,57 @@ AppDataSource.initialize()
     });
 
     cron.schedule("*/4 * * * *", async () => {
-      const msgs = await chatRepo.find({
+      const chats = await cRepo.find({
         where: {
-          handled: false,
-          chatid: String(currentChatId),
-        },
-        order: {
-          createdAt: {
-            direction: "DESC",
-          },
-        },
+          listen: true
+        }
       });
-
-      if (msgs.length > 0) {
-        const bots = await botRepo.find({
+      for (const chat of chats) {
+        const msgs = await chatRepo.find({
           where: {
-            blocked: false,
-            progrevat: true,
+            handled: false,
+            chatid: chat.id,
+          },
+          order: {
+            createdAt: {
+              direction: "DESC",
+            },
           },
         });
-        const notFrom = bots.filter((el) => el.from != msgs[0].from);
-        console.log(notFrom);
-        const fromChat = notFrom.filter(
-          (el) => el.currentChatId == msgs[0].chatid
-        );
-        console.log(fromChat);
-        const quoted = fromChat.filter((el) => el.quota > 0);
-        const eligible = quoted;
-        const i = Math.round(Math.random() * (eligible.length - 1));
-        console.log(eligible);
-        const b = eligible[i];
-        await outq.add("send", {
-          bot: b,
-        });
+  
+        if (msgs.length > 0) {
+          const threads = await threadRepo.find({
+            where: {
+              chat: chat,
+            },
+            relations: {
+              bot: true,
+              chat: true
+            }
+          });
+
+
+
+          const notFrom = threads.filter((el) => el.bot.from != msgs[0].from);
+          const quoted = notFrom.filter((el) => el.bot.quota > 0);
+          const eligible = quoted;
+          const i = Math.round(Math.random() * (eligible.length - 1));
+          const b = eligible[i];
+          await outq.add("send", {
+            bot: b.bot,
+            chatId: chat.id
+          });
+        }
       }
+      
     });
+    manager2.onText(/\/chat/, async (msg) => {
+      const id = msg.text.split(" ")[1];
+      const chat = new Chat();
+      chat.listen = false;
+      chat.id = id;
+      await cRepo.save(chat);
+    })
 
     manager.onText(/\/start/, async (msg) => {
       manager.sendMessage(
