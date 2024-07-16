@@ -89,14 +89,8 @@ AppDataSource.initialize()
           console.log("Out job");
           const client = clients.get(job.data.bot.id);
           const me = await client.getMe();
-          const thread = await threadRepo.findOne({
-            where: {
-              bot: job.data.bot,
-              chat: job.data.chat
-            }
-          });
           const msgs = await openAi.beta.threads.runs
-            .stream(thread.id, {
+            .stream(job.data.thread.id, {
               assistant_id: "asst_NcMJnXsqlSLzGWj7SBgz56at",
               additional_instructions: `Ты пишешь с аккаунта ${me.username} (${me.firstName})`,
             })
@@ -403,8 +397,7 @@ AppDataSource.initialize()
               chat: true
             }
           });
-
-
+          console.log(threads);
 
           const notFrom = threads.filter((el) => el.bot.from != msgs[0].from);
           const quoted = notFrom.filter((el) => el.bot.quota > 0);
@@ -413,7 +406,8 @@ AppDataSource.initialize()
           const b = eligible[i];
           await outq.add("send", {
             bot: b.bot,
-            chatId: chat.id
+            chatId: chat.id,
+            thread: b
           });
         }
       }
