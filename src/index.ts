@@ -160,6 +160,7 @@ AppDataSource.initialize()
                 role: "user",
                 content: job.data.username + ": " + job.data.msg.text,
               });
+              console.log('iter', thread.id)
             } catch (e) {
               console.log("ERR " + e);
             }
@@ -169,6 +170,7 @@ AppDataSource.initialize()
               id: job.data.msg.id,
             },
           });
+          console.log(msg);
           msg.queued = true;
           await msgRepo.save(msg);
         } catch (e) {
