@@ -150,6 +150,7 @@ AppDataSource.initialize()
             id: job.data.msg.chatid
           })
           .getMany();
+        console.log(threads);
         try {
           console.log("In job");
           for (const thread of threads) {
@@ -364,7 +365,7 @@ AppDataSource.initialize()
       });
     });
 
-    cron.schedule("*/15 * * * * *", async () => {
+    cron.schedule("* */4 * * * *", async () => {
       const chats = await cRepo.find({
         where: {
           listen: true
