@@ -344,7 +344,7 @@ AppDataSource.initialize()
       });
     });
 
-    cron.schedule("*/4 * * * *", async () => {
+    cron.schedule("*/15 * * * * *", async () => {
       const chats = await cRepo.find({
         where: {
           listen: true
