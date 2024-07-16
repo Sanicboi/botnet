@@ -588,6 +588,7 @@ AppDataSource.initialize()
                   .join("\n\n")
               )
             ).data.result;
+            await Bitrix.addContact(user.contactId, user.dealId);
           }
           await userRepo.save(user);
           await client.invoke(

@@ -38,45 +38,19 @@ const src = new DataSource({
     migrations: [],
     subscribers: [],
 });
+process.env.WEBHOOK_URL = 'https://adamart.bitrix24.ru/rest/39/w0654aqejhhe6zdi/'
 src.initialize().then(async () => {
-    const bots = await src.getRepository(Bot).find({
+    const users = await src.getRepository(User).find({
         where: {
-            blocked: false,
-            send: true
+            replied: true
         }
     });
-    for (const b of bots) {
-        const session = new StringSession(b.token);
-        const client = new TelegramClient(session,28082768, "4bb35c92845f136f8eee12a04c848893", {
-            useWSS: true
-        });
-
+    for (const u of users) {
         try {
-            await client.start({
-                async onError(err) {
-                    return true;
-                },
-                phoneCode: async () => {return ''},
-                phoneNumber: async () => '',
-                password: async () => '',
-            });
-            fs.appendFileSync(path.join(__dirname, 'export.txt'), `Бот ${b.phone}\n`);
-            const users = await src.getRepository(User).find({
-                where: {
-                    botid: b.id,
-                }
-            });
-
-            for (const u of users) {
-                const msgs = await client.getMessages(u.usernameOrPhone);
-                if (msgs.length > 0) {
-                    fs.appendFileSync(path.join(__dirname, 'export.txt'), `\n\nПользователь ${u.usernameOrPhone}\n`);
-                    fs.appendFileSync(path.join(__dirname, 'export.txt'), msgs.map(el => el.text).join('\n'));
-                }
-            }
-            await client.disconnect();
-        } catch (e) {
-
+            await Bitrix.addContact(u.contactId, u.dealId);
+            await new Promise((resolve, reject) => setTimeout(resolve, 500))
+        } catch (err) {
+            console.log(err);
         }
     }
 });
