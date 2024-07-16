@@ -89,8 +89,14 @@ AppDataSource.initialize()
           console.log("Out job");
           const client = clients.get(job.data.bot.id);
           const me = await client.getMe();
+          const thread = await threadRepo.findOne({
+            where: {
+              bot: job.data.bot,
+              chat: job.data.chat
+            }
+          });
           const msgs = await openAi.beta.threads.runs
-            .stream(job.data.bot.currentThreadId, {
+            .stream(thread.id, {
               assistant_id: "asst_NcMJnXsqlSLzGWj7SBgz56at",
               additional_instructions: `Ты пишешь с аккаунта ${me.username} (${me.firstName})`,
             })
