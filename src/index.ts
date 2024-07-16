@@ -320,7 +320,7 @@ AppDataSource.initialize()
         await threadRepo
           .createQueryBuilder('thread')
           .delete()
-          .where('thread.id IN :ids', {
+          .where('thread.id IN (:...ids)', {
             ids: threads.map(el => el.id)
           })
           .execute();
