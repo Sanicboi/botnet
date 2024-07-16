@@ -255,7 +255,9 @@ AppDataSource.initialize()
             chat
           });
         }
-      } catch (e) {}
+      } catch (e) {
+        console.log(e)
+      }
     });
 
     manager2.onText(/\/on/, async (msg) => {
