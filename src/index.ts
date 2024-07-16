@@ -172,7 +172,7 @@ AppDataSource.initialize()
           });
           console.log(msg);
           msg.queued = true;
-          await msgRepo.save(msg);
+          await chatRepo.save(msg);
         } catch (e) {
           console.log("CRITICAL ERR" + e);
         }
