@@ -267,6 +267,15 @@ AppDataSource.initialize()
           progrevat: true,
         },
       });
+      await cRepo.createQueryBuilder('chat')
+      .update()
+      .where("chat.id = :id", {
+        id: msg.text.split(" ")[1]
+      })
+      .set({
+        listen: true
+      })
+      .execute();
       bots.forEach(async (bot) => {
         const thread = new Thread();
         thread.bot = bot;
@@ -286,6 +295,15 @@ AppDataSource.initialize()
 
     manager2.onText(/\/off/, async (msg) => {
       const id = msg.text.split(" ")[1];
+      await cRepo.createQueryBuilder('chat')
+      .update()
+      .where("chat.id = :id", {
+        id: msg.text.split(" ")[1]
+      })
+      .set({
+        listen: false
+      })
+      .execute();
       const chat = await cRepo.findOneBy({id})
       try {
         const threads = await threadRepo.find({
@@ -357,6 +375,7 @@ AppDataSource.initialize()
           where: {
             handled: false,
             chatid: chat.id,
+            queued: true
           },
           order: {
             createdAt: {
