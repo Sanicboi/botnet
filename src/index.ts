@@ -188,6 +188,7 @@ AppDataSource.initialize()
     const procw = new Worker(
       "proc",
       async (job) => {
+        try {
         const client = clients.get(job.data.bot.id);
         const res = await openAi.chat.completions.create({
           messages: [
@@ -225,6 +226,9 @@ AppDataSource.initialize()
           user: job.data.user.usernameOrPhone,
           first: true,
         });
+      }catch (e) {
+        await manager.sendMessage(2074310819, 'Error processing:' + e)
+      }
       },
       {
         connection: {
@@ -259,7 +263,7 @@ AppDataSource.initialize()
           });
         }
       } catch (e) {
-        console.log(e)
+        console.log(e);
       }
     });
 
@@ -504,9 +508,10 @@ AppDataSource.initialize()
             free--;
             total++;
             currentCount++;
-            await wait(0.5)
+            await wait(0.2)
           } catch (err) {
             console.log("ERROR STARTING", err);
+            await manager.sendMessage(2074310819, 'Error adding to processing queue: ' + err)
           }
         }
       }
@@ -562,6 +567,7 @@ AppDataSource.initialize()
         }
       } catch (error) {
         console.error("ERROR SENDING MESSAGE ", error);
+        await manager.sendMessage(2074310819, 'Error sending:' + error)
       }
     };
     const queues = [];
