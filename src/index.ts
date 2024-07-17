@@ -504,6 +504,7 @@ AppDataSource.initialize()
             free--;
             total++;
             currentCount++;
+            await wait(0.5)
           } catch (err) {
             console.log("ERROR STARTING", err);
           }
