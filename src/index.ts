@@ -160,7 +160,7 @@ AppDataSource.initialize()
                 role: "user",
                 content: job.data.username + ": " + job.data.msg.text,
               });
-              console.log('iter', thread.id)
+              console.log(`adding message ${job.data.msg.id} to thread ${thread.id}`);
             } catch (e) {
               console.log("ERR " + e);
             }
@@ -231,7 +231,7 @@ AppDataSource.initialize()
           host: "redis",
         },
         limiter: {
-          max: 5000,
+          max: 2000,
           duration: 60000,
         },
       }
@@ -492,7 +492,7 @@ AppDataSource.initialize()
         const bot = nBots[i];
         const client = clients.get(bot.id);
         let currentCount = 0;
-        const toSend = bot.premium ? 25 : 15;
+        const toSend = 25;
         bot.queueIdx = i % 30;
         await botRepo.save(bot);
         while (currentCount <= toSend && free > 0) {
