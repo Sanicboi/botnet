@@ -18,6 +18,9 @@ import path from "path";
 import { Api, TelegramClient } from "telegram";
 import { StringSession } from "telegram/sessions";
 import { TotalList } from "telegram/Helpers";
+import input from 'input'
+import { Chat } from "./src/entity/Chat";
+import { Thread } from "./src/entity/Thread";
 // import { DataSource } from "typeorm";
 // import { User } from "./src/entity/User";
 // import { Bot } from "./src/entity/Bot";
@@ -32,69 +35,86 @@ const src = new DataSource({
     password: 'test',
     database: 'test',
     host: '194.0.194.46',
-    entities: [User, Bot, Message, WhatsappUser],
+    entities: [User, Bot, Message, WhatsappUser, Chat, Thread],
     port: 5432,
     synchronize: true,
     migrations: [],
     subscribers: [],
 });
-process.env.WEBHOOK_URL = 'https://adamart.bitrix24.ru/rest/39/w0654aqejhhe6zdi/'
-src.initialize().then(async () => {
-    const users = await src.getRepository(User).find({
-        where: {
-            replied: true
-        }
-    });
-    for (const u of users) {
-        try {
-            await Bitrix.addContact(u.contactId, u.dealId);
-            await new Promise((resolve, reject) => setTimeout(resolve, 500))
-        } catch (err) {
-            console.log(err);
-        }
-    }
-});
+// process.env.WEBHOOK_URL = 'https://adamart.bitrix24.ru/rest/39/w0654aqejhhe6zdi/'
+// src.initialize().then(async () => {
+//     const users = await src.getRepository(User).find({
+//         where: {
+//             replied: true
+//         }
+//     });
+//     for (const u of users) {
+//         try {
+//             await Bitrix.addContact(u.contactId, u.dealId);
+//             await new Promise((resolve, reject) => setTimeout(resolve, 500))
+//         } catch (err) {
+//             console.log(err);
+//         }
+//     }
+// });
     
 
 
 //});
  
 
-// src.initialize().then(async () => {
-//     const bots = await src.getRepository(Bot).find({
-//         where: {
-//             blocked: false,
-//         }
-//     })
-//     let amount = 0;
-//     for (const b of bots) {
-//         try {
-//             const session = new StringSession(b.token);
-//             const client = new TelegramClient(session, 28082768, "4bb35c92845f136f8eee12a04c848893", {useWSS: true});
-//             let blocked = false;
-//             await client.start({
-//                 onError(err) {
-//                     console.log(err);
-//                 },
-//                 phoneCode: async () => input.text("Code"),
-//                 phoneNumber: async () =>{ console.log(b.id + ' Blocked'); await client.destroy(); blocked = true; return ''},
-//                 password: async () => input.text("Password"),
-//             }); 
+src.initialize().then(async () => {
+    const bots = await src.getRepository(Bot).find({
+        where: {
+            blocked: false,
+            send: true
+        }
+    })
+    let amount = 0;
+    for (const b of bots) {
+        try {
+            const session = new StringSession(b.token);
+            const client = new TelegramClient(session, 28082768, "4bb35c92845f136f8eee12a04c848893", {useWSS: true});
+            await client.start({
+                onError(err) {
+                    console.log(err);
+                },
+                phoneCode: async () => input.text("Code"),
+                phoneNumber: async () =>{ console.log(b.id + ' Blocked'); await client.destroy(); return ''},
+                password: async () => input.text("Password"),
+            }); 
             
-//             console.log((await client.getMe()).phone)
-//             //@ts-ignore
-//             const users = (await client.getDialogs()).filter(el => el.isUser === true).filter(el => el.entity.className === 'User').map(el => el.entity).map(el => el.username);
-//             console.log(users);
+            const users = await src.getRepository(User).find({
+                where: {
+                    botid: b.id
+                }
+            });
+            for (const u of users) {
+                try {
+                let result = `\n\nДиалог с ${u.usernameOrPhone}:\n\n`;
+                const msgs = await client.getMessages(u.usernameOrPhone);
+                for (const msg of msgs) {
+                    if (msg.sender.className === 'User') {
+                        result += `[${msg.sender.username}]\n${msg.text}`;
+                    }
+                }
+                if (msgs.length > 0) fs.appendFileSync(path.join(__dirname, 'export.txt'), result);
+                await new Promise((resolve, reject) => setTimeout(resolve, 2000))
+                } catch (e) {
+
+                }
+            }
             
-//             if (!blocked) await client.disconnect();
-//         } catch (err) {
-//             console.log(err);
-//         }
-//     }
+            
+            await client.disconnect();
+        } catch (err) {
+            console.log(err);
+        }
+    }
 
 
 
-// });
+});
 
 
 

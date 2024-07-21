@@ -7,6 +7,8 @@ import { DataSource } from 'typeorm';
 import { User } from './src/entity/User';
 import { Bot } from './src/entity/Bot';
 import { Message } from './src/entity/Message';
+import { Thread } from './src/entity/Thread';
+import { Chat } from './src/entity/Chat';
 
 
 const src = new DataSource({
@@ -15,9 +17,9 @@ const src = new DataSource({
     password: "test",
     database: "test",
     host: "194.0.194.46",
-    entities: [User, Bot, Message],
+    entities: [User, Bot, Message, Thread, Chat],
     port: 5432,
-    synchronize: true,
+    synchronize: false,
     migrations: [],
     subscribers: [],
   });

@@ -6,6 +6,8 @@ import { User } from "./src/entity/User";
 import { Bot } from "./src/entity/Bot";
 import { Message } from "./src/entity/Message";
 import { WhatsappUser } from "./src/entity/WhatsappUser";
+import { Thread } from "./src/entity/Thread";
+import { Chat } from "./src/entity/Chat";
 
 const src = new DataSource({
   type: "postgres",
@@ -13,7 +15,7 @@ const src = new DataSource({
   password: "test",
   database: "test",
   host: "194.0.194.46",
-  entities: [User, Bot, Message, WhatsappUser],
+  entities: [User, Bot, Message, WhatsappUser, Thread, Chat],
   port: 5432,
   synchronize: true,
   migrations: [],
