@@ -42,6 +42,7 @@
       "progret": "ts-node progret.ts",
       "stats": "ts-node checksend.ts",
       "progrev": "ts-node progrev.ts",
-      "exclude": "ts-node exclude.ts"
+      "exclude": "ts-node exclude.ts",
+      "voronka": "ts-node src/avtovoronka.ts"
    }
 }
