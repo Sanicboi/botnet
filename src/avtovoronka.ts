@@ -87,93 +87,93 @@ AppDataSource.initialize().then(async () => {
                             ]
                         }
                     });
-                } else if (!user.optimizing) {
-                    //@ts-ignore
-                    user.optimizing = msg.text;
-                    if (user.optimizing != 'other') {
-                        let keyboard: TgBot.KeyboardButton[][] = [];
-                        switch (user.optimizing) {
-                            case 'sales':
-                                keyboard = [
-                                    [
-                                        {
-                                            text: 'Увеличение конверсии (CR) в продажу'
-                                        }
-                                    ],
-                                    [
-                                        {
-                                            text: 'Отслеживание эффективности сотрудника'
-                                        }
-                                    ],
-                                    [
-                                        {
-                                            text: 'Контроль выполнения плана продаж'
-                                        }
-                                    ]
-                                ];
-                                break;
-                            case 'mailer':
-                                keyboard = [
-                                    [
-                                        {
-                                            text: 'Лидогенерация с целью продажи продуктов',
-                                        }
-                                    ],
-                                    [
-                                        {
-                                            text: 'Лидогенерация с целью привлечения инвестиций'
-                                        }
-                                    ],
-                                    [
-                                        {
-                                            text: 'Лидогенерация с целью поиска партнеров'
-                                        }
-                                    ]
-                                ];
-                                break;
-                            case 'commenter':
-                                keyboard = [
-                                    [
-                                        {
-                                            text: 'Набор подписчиков в ТГ канал'
-                                        }
-                                    ],
-                                    [
-                                        {
-                                            text: 'Набор подписчиков в канал ВК'
-                                        }
-                                    ]
-                                ];
-                                break;
-                            case 'hr': 
-                                keyboard = [
-                                    [
-                                        {
-                                            text: 'Поиск кадров'
-                                        }
-                                    ],
-                                    [
-                                        {
-                                            text: 'Квалификация кадров'
-                                        }
-                                    ],
-                                    [
-                                        {
-                                            text: 'Управление персоналом'
-                                        }
-                                    ]
-                                ];
-                                break;
-                        }
-                        await bot.sendMessage(msg.from.id, 'Какую задачу в данном сегменте, вы бы хотели решить с помощью ИИ? (выберите цель или напишите другую)',
-                            {
-                                reply_markup: {
-                                    keyboard,
-                                    one_time_keyboard: true
-                                }
-                            }
-                        );
-                    }
+                // } else if (!user.optimizing) {
+                //     //@ts-ignore
+                //     user.optimizing = msg.text;
+                //     if (user.optimizing != 'other') {
+                //         let keyboard: TgBot.KeyboardButton[][] = [];
+                //         switch (user.optimizing) {
+                //             case 'sales':
+                //                 keyboard = [
+                //                     [
+                //                         {
+                //                             text: 'Увеличение конверсии (CR) в продажу'
+                //                         }
+                //                     ],
+                //                     [
+                //                         {
+                //                             text: 'Отслеживание эффективности сотрудника'
+                //                         }
+                //                     ],
+                //                     [
+                //                         {
+                //                             text: 'Контроль выполнения плана продаж'
+                //                         }
+                //                     ]
+                //                 ];
+                //                 break;
+                //             case 'mailer':
+                //                 keyboard = [
+                //                     [
+                //                         {
+                //                             text: 'Лидогенерация с целью продажи продуктов',
+                //                         }
+                //                     ],
+                //                     [
+                //                         {
+                //                             text: 'Лидогенерация с целью привлечения инвестиций'
+                //                         }
+                //                     ],
+                //                     [
+                //                         {
+                //                             text: 'Лидогенерация с целью поиска партнеров'
+                //                         }
+                //                     ]
+                //                 ];
+                //                 break;
+                //             case 'commenter':
+                //                 keyboard = [
+                //                     [
+                //                         {
+                //                             text: 'Набор подписчиков в ТГ канал'
+                //                         }
+                //                     ],
+                //                     [
+                //                         {
+                //                             text: 'Набор подписчиков в канал ВК'
+                //                         }
+                //                     ]
+                //                 ];
+                //                 break;
+                //             case 'hr': 
+                //                 keyboard = [
+                //                     [
+                //                         {
+                //                             text: 'Поиск кадров'
+                //                         }
+                //                     ],
+                //                     [
+                //                         {
+                //                             text: 'Квалификация кадров'
+                //                         }
+                //                     ],
+                //                     [
+                //                         {
+                //                             text: 'Управление персоналом'
+                //                         }
+                //                     ]
+                //                 ];
+                //                 break;
+                //         }
+                //         await bot.sendMessage(msg.from.id, 'Какую задачу в данном сегменте, вы бы хотели решить с помощью ИИ? (выберите цель или напишите другую)',
+                //             {
+                //                 reply_markup: {
+                //                     keyboard,
+                //                     one_time_keyboard: true
+                //                 }
+                //             }
+                //         );
+                //     }
                 } else if (!user.goal) {
                     user.goal = msg.text;
                     if (user.optimizing == 'sales') {
@@ -393,4 +393,99 @@ AppDataSource.initialize().then(async () => {
             }
         }
     });
+
+    bot.on('callback_query', async (q) => {
+        const user = await userRepo.findOne({
+            where: {
+                chatId: String(q.from.id)
+            }
+        });
+        //@ts-ignore
+        user.optimizing = q.data;
+        await userRepo.save(user);
+        if (user.optimizing != 'other') {
+            let keyboard: TgBot.KeyboardButton[][] = [];
+            switch (user.optimizing) {
+                case 'sales':
+                    keyboard = [
+                        [
+                            {
+                                text: 'Увеличение конверсии (CR) в продажу'
+                            }
+                        ],
+                        [
+                            {
+                                text: 'Отслеживание эффективности сотрудника'
+                            }
+                        ],
+                        [
+                            {
+                                text: 'Контроль выполнения плана продаж'
+                            }
+                        ]
+                    ];
+                    break;
+                case 'mailer':
+                    keyboard = [
+                        [
+                            {
+                                text: 'Лидогенерация с целью продажи продуктов',
+                            }
+                        ],
+                        [
+                            {
+                                text: 'Лидогенерация с целью привлечения инвестиций'
+                            }
+                        ],
+                        [
+                            {
+                                text: 'Лидогенерация с целью поиска партнеров'
+                            }
+                        ]
+                    ];
+                    break;
+                case 'commenter':
+                    keyboard = [
+                        [
+                            {
+                                text: 'Набор подписчиков в ТГ канал'
+                            }
+                        ],
+                        [
+                            {
+                                text: 'Набор подписчиков в канал ВК'
+                            }
+                        ]
+                    ];
+                    break;
+                case 'hr': 
+                    keyboard = [
+                        [
+                            {
+                                text: 'Поиск кадров'
+                            }
+                        ],
+                        [
+                            {
+                                text: 'Квалификация кадров'
+                            }
+                        ],
+                        [
+                            {
+                                text: 'Управление персоналом'
+                            }
+                        ]
+                    ];
+                    break;
+            }
+            await bot.sendMessage(q.from.id, 'Какую задачу в данном сегменте, вы бы хотели решить с помощью ИИ? (выберите цель или напишите другую)',
+                {
+                    reply_markup: {
+                        keyboard,
+                        one_time_keyboard: true
+                    }
+                }
+            );
+        }
+    })
 })
