@@ -238,6 +238,7 @@ AppDataSource.initialize()
           max: 2000,
           duration: 60000,
         },
+        concurrency: 100
       }
     );
     manager2.onText(/./, async (m) => {
