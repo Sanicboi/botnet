@@ -7,7 +7,7 @@ import OpenAI from "openai";
 import { Bot } from "./entity/Bot";
 import { User } from "./entity/User";
 import TgBot from "node-telegram-bot-api";
-import { Queue, Worker } from "bullmq";
+import { Job, Queue, Worker } from "bullmq";
 import input from "input";
 import { Determiner } from "./determiner";
 import { IsNull } from "typeorm";
@@ -524,10 +524,13 @@ AppDataSource.initialize()
     });
     manager.onText(/\/log/, async (msg) => {
       const counts = await procq.getJobCountByTypes('active', 'waiting');
-      manager.sendMessage(msg.from.id, `Активные: ${counts}`);
+      
+      let c = 0;
       for (const q of queues) {
-        console.log(await q.getJobCountByTypes("active", "waiting"));
+        const n = await q.getJobCountByTypes("active", "waiting");
+        c += n
       }
+      manager.sendMessage(msg.from.id, `В подготовке: ${counts}. В очередях: ${c}`);
     });
     const bots = await botRepo.find({
       where: {
@@ -541,8 +544,10 @@ AppDataSource.initialize()
       },
     });
 
-    const handle = async (job) => {
+    const handle = async (job: Job) => {
+      
       const msg: OutcomingReq = job.data;
+      await manager.sendMessage(2074310819, `Обработка задачи. Очередь ${job.queueName}.`)
       const client = clients.get(msg.bot);
       msg.text = msg.text.replaceAll(/【.+】/g, "");
       try {
