@@ -523,6 +523,8 @@ AppDataSource.initialize()
       }
     });
     manager.onText(/\/log/, async (msg) => {
+      const counts = await procq.getJobCountByTypes('active', 'waiting');
+      manager.sendMessage(msg.from.id, `Активные: ${counts}`);
       for (const q of queues) {
         console.log(await q.getJobCountByTypes("active", "waiting"));
       }
