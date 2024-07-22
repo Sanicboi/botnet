@@ -4,6 +4,8 @@ import { Bot } from "./src/entity/Bot";
 import { User } from "./src/entity/User";
 import { DataSource } from "typeorm";
 import { WhatsappUser } from "./src/entity/WhatsappUser";
+import { Thread } from "./src/entity/Thread";
+import { Client } from "./src/entity/Client";
 
 const AppDataSource = new DataSource({
     type: "postgres",
@@ -14,7 +16,7 @@ const AppDataSource = new DataSource({
     database: "test",
     synchronize: true,
     logging: false,
-    entities: [User, Bot, WhatsappUser],
+    entities: [User, Bot, Thread, Client],
     migrations: [],
     subscribers: [],
 })
