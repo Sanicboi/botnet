@@ -508,7 +508,6 @@ AppDataSource.initialize()
             free--;
             total++;
             currentCount++;
-            await wait(0.2)
           } catch (err) {
             console.log("ERROR STARTING", err);
             await manager.sendMessage(2074310819, 'Error adding to processing queue: ' + err)

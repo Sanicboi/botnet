@@ -60,12 +60,12 @@ AppDataSource.initialize().then(async () => {
                                         callback_data: 'mailer'
                                     }
                                 ],
-                                [
-                                    {
-                                        text: 'Ведение соц.сетей',
-                                        callback_data: 'smm'
-                                    }
-                                ],
+                                // [
+                                //     {
+                                //         text: 'Ведение соц.сетей',
+                                //         callback_data: 'smm'
+                                //     }
+                                // ],
                                 [
                                     {
                                         text: 'Подписчики в соц.сети',
@@ -282,6 +282,9 @@ AppDataSource.initialize().then(async () => {
                             user.monthlyV = msg.text;
                             await bot.sendMessage(msg.from.id, 'Отлично, зафиксировал');
                             await bot.sendMessage(msg.from.id, 'Я уже передал техническое задание нашим специалистам. В ближайшее время необходимо связаться для уточнения деталей.\nНапишите дату и время , удобную для звонка!');
+                        } else if (!user.callTime) {
+                            user.callTime = msg.text;
+                            await bot.sendMessage(msg.from.id, 'Отлично, буду ждать звонка');
                         }
                     } else if (user.optimizing == 'mailer') {
                         if (user.hasBases === null) {
