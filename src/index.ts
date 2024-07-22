@@ -498,7 +498,7 @@ AppDataSource.initialize()
         const client = clients.get(bot.id);
         let currentCount = 0;
         const toSend = 25;
-        bot.queueIdx = i % 30;
+        bot.queueIdx = i % 50;
         await botRepo.save(bot);
         while (currentCount <= toSend && free > 0) {
           try {
