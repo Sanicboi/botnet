@@ -235,10 +235,10 @@ AppDataSource.initialize()
           host: "redis",
         },
         limiter: {
-          max: 2000,
+          max: 300,
           duration: 60000,
         },
-        concurrency: 100
+        concurrency: 10
       }
     );
     manager2.onText(/./, async (m) => {
