@@ -23,13 +23,13 @@ const src = new DataSource({
     subscribers: [],
   });
   src.initialize().then(async () => {
-    const numbers = fs.readFileSync(path.join(__dirname, 'signup', 'sleep.txt'), 'utf8').split('\n').map(el => el.replace('\r', ''));
-    console.log(numbers);
     const bots = await src.getRepository(Bot).find({
         where: {
-            blocked: false
+            blocked: false,
+            send: true,
         }
     });
+    const errors: string[] = [];
     for (const b of bots) {
         const session = new StringSession(b.token);
         const client = new TelegramClient(session, 28082768, "4bb35c92845f136f8eee12a04c848893", {useWSS: true});
@@ -42,16 +42,13 @@ const src = new DataSource({
                 phoneCode: async () => { throw new Error; },
                 phoneNumber: async () => { throw new Error;},
             }); 
-            const phone = (await client.getMe()).phone;
-            const prem = (await client.getMe()).premium;
-            b.premium = prem!;
-            if (!numbers.includes(phone!)) {
-                b.send = false;
-                await src.getRepository(Bot).save(b);
-                console.log(`Found ${phone}`);
-            } else {
-                b.send = true;
-                await src.getRepository(Bot).save(b);
+            const phone = (await client.getMe()).phone!;
+            try {
+                await client.sendMessage("Sanicboii", {
+                    message: "Проверка на предупреждения"
+                })
+            } catch (err) {
+                errors.push(phone);
             }
             await client.destroy();
         } catch (err) {
@@ -61,4 +58,5 @@ const src = new DataSource({
             await client.destroy();
         }
     }
+    console.log(errors);
   });

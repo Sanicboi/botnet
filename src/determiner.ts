@@ -59,7 +59,7 @@ export class Determiner {
                 const str = r.data.reverse().map(el => el.content[0].text.value).join('\n');
                 const data: Data = JSON.parse(finalRun.required_action.submit_tool_outputs.tool_calls[0].function.arguments);
                 try {
-                    await Bitrix.editDeal(user.dealId, data.dateTime, data.segment, data.comment, data.dialog);
+                    await Bitrix.editDeal(user.dealId, data.dateTime, data.segment, data.comment, );
                 } catch (err) {
                     console.log('BITRIX ERROR ' + err);
                 }

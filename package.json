@@ -21,7 +21,7 @@
       "node-cron": "^3.0.3",
       "node-schedule": "^2.1.1",
       "node-telegram-bot-api": "^0.66.0",
-      "openai": "^4.49.0",
+      "openai": "^4.53.0",
       "pg": "^8.4.0",
       "redis": "^4.6.14",
       "reflect-metadata": "^0.1.13",
@@ -43,6 +43,7 @@
       "stats": "ts-node checksend.ts",
       "progrev": "ts-node progrev.ts",
       "exclude": "ts-node exclude.ts",
-      "voronka": "ts-node src/avtovoronka.ts"
+      "voronka": "ts-node src/avtovoronka.ts",
+      "floods": "ts-node checkfloods.ts"
    }
 }

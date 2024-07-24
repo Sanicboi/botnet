@@ -3,7 +3,7 @@
       "lib": [
          "es2021"
       ],
-      "target": "es5",
+      "target": "es6",
       "module": "commonjs",
       "moduleResolution": "node",
       "outDir": "./build",
@@ -11,6 +11,8 @@
       "experimentalDecorators": true,
       "sourceMap": true,
       "esModuleInterop": true,
-      "allowSyntheticDefaultImports": true
+      "allowSyntheticDefaultImports": true,
+      "strict": true,
+      "strictPropertyInitialization": false
    }
 }
