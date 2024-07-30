@@ -4,14 +4,14 @@ import { IsNull, Repository } from "typeorm";
 import { Bot } from "./entity/Bot";
 import { AppDataSource } from "./data-source";
 import { User } from "./entity/User";
-import { TelegramCLientManager } from "./TelegramClientManager";
 import { Job, Queue, Worker } from "bullmq";
 import { InvalidInputError, UnknownError } from "./utils/Errors";
 import { Message } from "./entity/Message";
-import { Api } from "telegram";
+import { Api, TelegramClient } from "telegram";
 import { Bitrix } from "./Bitrix";
 import { Assistant, IData } from "./Assistant";
 import { wait } from ".";
+import { NewMessage, NewMessageEvent } from "telegram/events";
 
 interface IProcessingTask {
   bot: Bot;
@@ -52,26 +52,31 @@ export class TelegramMailer {
       polling: true,
     }
   );
+  private inQueue: Queue<IIncomingTask> = new Queue('in', {
+    connection: {
+      host: 'redis'
+    }
+  });
 
   constructor(
     private openai: OpenAI,
-    private clients: TelegramCLientManager,
     private reporter: TelegramBot,
     private assistant: Assistant,
-    private queueCount: number = 50
+    private queueCount: number = 50,
+    private clients: Map<string, TelegramClient>,
+    bots: Bot[]
   ) {
-    this.manager.onText(/\/start/, this.onStart);
-    this.manager.onText(/\/send/, this.onSend);
-    this.manager.onText(/\/reset/, this.onReset);
-    this.manager.onText(/\/log/, this.onLog);
-    this.manager.onText(/\/write/, this.onWrite);
-    for (let i = 0; i < queueCount; i++) {
-      this.outQueues.push(new Queue("out" + i));
-      this.outWorkers.push(new Worker("out" + i, this.onOut));
+    this.setup();
+    for (const b of bots) {
+      const client = clients.get(b.id);
+      client!.addEventHandler((e) => (this.onMessage(e, b)), new NewMessage());
     }
+    
   }
 
-  private onSend = async (msg: TelegramBot.Message): Promise<void> => {
+
+  private async onSend(msg: TelegramBot.Message): Promise<void> {
+    try {
     const nBots = await this.botRepo.find({
       where: {
         blocked: false,
@@ -88,7 +93,7 @@ export class TelegramMailer {
     let total = 0;
     for (let i = 0; i < nBots.length; i++) {
       const bot = nBots[i];
-      const client = this.clients.getClient(bot.id);
+      const client = this.clients.get(bot.id);
       let currentCount = 0;
       const toSend = 25;
       bot.queueIdx = i % this.queueCount;
@@ -111,27 +116,32 @@ export class TelegramMailer {
         }
       }
     }
+  } catch (e) {
+    console.log(e);
+  }
   };
 
   private onProcessing = async (job: Job<IProcessingTask>): Promise<void> => {
     try {
-      const client = this.clients.getClient(job.data.bot.id);
+      console.log("Porcessing");
+      const client = this.clients.get(job.data.bot.id);
       const res = await this.openai.chat.completions.create({
         messages: [
           {
             role: "user",
             content: `ТЕБЯ ЗОВУТ ${
               (
-                await client.getMe()
+                await client!.getMe()
               ).firstName
-            }. Перепиши синонимично это сообщение, изменив слова и порядок абзацев (замени как минимум 15 слов синонимами), но сохранив мысль: ${
-              job.data.bot.gender === "male" ? startMessage : startMessage2
+            }. Если у тебя женское имя, напиши от него. Перепиши синонимично это сообщение, заменив 15 слов синонимами, но сохранив мысль: ${
+              startMessage
             }`,
           },
         ],
         model: "gpt-4o-mini",
         temperature: 1,
       });
+      console.log("Generation done!");
       const thread = await this.openai.beta.threads.create({
         messages: [
           {
@@ -140,6 +150,7 @@ export class TelegramMailer {
           },
         ],
       });
+      console.log("Thread created!")
       const user = await this.userRepo.findOneBy({
         usernameOrPhone: job.data.user.usernameOrPhone,
       });
@@ -158,7 +169,9 @@ export class TelegramMailer {
         user: job.data.user.usernameOrPhone,
         first: true,
       });
+      console.log("Added to queue!");
     } catch (e) {
+      console.log(e);
       await this.manager.sendMessage(2074310819, "Error processing:" + e);
     }
   };
@@ -168,7 +181,7 @@ export class TelegramMailer {
       2074310819,
       `#Обработка задачи. Очередь ${job.queueName}.`
     );
-    const client = this.clients.getClient(job.data.bot);
+    const client = this.clients.get(job.data.bot);
     job.data.text = job.data.text.replaceAll(/【.+】/g, "").replaceAll("#", "");
     try {
       const m = new Message();
@@ -176,7 +189,7 @@ export class TelegramMailer {
       m.text = job.data.text;
       m.username = job.data.user;
       await this.msgRepo.save(m);
-      await client.sendMessage(job.data.user, {
+      await client!.sendMessage(job.data.user, {
         message: job.data.text,
       });
       await this.manager.sendMessage(
@@ -282,9 +295,9 @@ export class TelegramMailer {
   };
 
   private onIncoming = async (job: Job<IIncomingTask>): Promise<void> => {
-    const client = this.clients.getClient(job.data.bot);
+    const client = this.clients.get(job.data.bot);
     try {
-      const dialogs = await client.getDialogs();
+      const dialogs = await client!.getDialogs();
       const cl = dialogs.find((el) => {
         return (
           el.entity!.className === "User" &&
@@ -322,7 +335,7 @@ export class TelegramMailer {
             "Не дано"
           )
         ).data.result;
-        const dialog = await client.getMessages(user.usernameOrPhone);
+        const dialog = await client!.getMessages(user.usernameOrPhone);
         user.dealId = (
           await Bitrix.createDeal(
             b.phone,
@@ -337,6 +350,7 @@ export class TelegramMailer {
               )
               .map((el) =>
                 el.sender!.className == "User"
+                  //@ts-ignore
                   ? el.sender!.username + " " + el.text
                   : el.text
               )
@@ -346,21 +360,21 @@ export class TelegramMailer {
         await Bitrix.addContact(user.contactId, user.dealId);
       }
       await this.userRepo.save(user);
-      await client.invoke(
+      await client!.invoke(
         new Api.messages.ReadHistory({
           maxId: 0,
           peer: user.usernameOrPhone,
         })
       );
       await wait(7);
-      await client.invoke(
+      await client!.invoke(
         new Api.messages.SetTyping({
           peer: user.usernameOrPhone,
           action: new Api.SendMessageTypingAction(),
         })
       );
 
-      const phone = (await client.getMe()).phone;
+      const phone = (await client!.getMe()).phone;
       const messages = await this.assistant.answerMessage(
         job.data.text,
         user,
@@ -392,8 +406,8 @@ export class TelegramMailer {
       -1002244363083,
       `Согласована встреча с клиентом. Номер телефона бота: ${bot.phone}\nКлиент:${user.usernameOrPhone}`
     );
-    const client = this.clients.getClient(bot.id);
-    const dialog = await client.getMessages(user.usernameOrPhone);
+    const client = this.clients.get(bot.id);
+    const dialog = await client!.getMessages(user.usernameOrPhone);
     const str = dialog
       .filter(
         (el) =>
@@ -401,6 +415,7 @@ export class TelegramMailer {
       )
       .map((el) =>
         el.sender!.className == "User"
+          //@ts-ignore
           ? el.sender!.username + " " + el.text
           : el.text
       )
@@ -418,13 +433,75 @@ export class TelegramMailer {
     }
   };
 
-  private processingWorker: Worker<IProcessingTask> = new Worker(
-    "proc",
-    this.onProcessing
-  );
+  public onMessage = async (e: NewMessageEvent, bot: Bot): Promise<void> => {
+    if (e.isPrivate) {
+      await this.inQueue.add("in", {
+        text: e.message.text,
+        userId: e.message.senderId!.toJSON(),
+        bot: bot.id,
+      });
+    }
+  }
 
-  private inWorker: Worker<IIncomingTask> = new Worker(
-    "in",
-    this.onIncoming
-  )
+  private processingWorker: Worker<IProcessingTask>;
+
+  private inWorker: Worker<IIncomingTask>;
+
+  public setup() {
+    this.onStart = this.onStart.bind(this);
+    this.onSend = this.onSend.bind(this);
+    this.onIncoming = this.onIncoming.bind(this);
+    this.onWrite = this.onWrite.bind(this);
+    this.onLog = this.onLog.bind(this);
+    this.onMessage = this.onMessage.bind(this);
+    this.onProcessing = this.onProcessing.bind(this);
+    this.onRequiresAction = this.onRequiresAction.bind(this);
+    this.onReset = this.onReset.bind(this);
+    for (let i = 0; i < this.queueCount; i++) {
+      this.outQueues.push(new Queue("out" + i, {
+        connection: {
+          host: 'redis'
+        }
+      }));
+      this.outWorkers.push(new Worker("out" + i, this.onOut.bind(this), {
+        connection: {
+          host: 'redis'
+        },
+        concurrency: 1,
+        limiter: {
+          duration: 60000,
+          max: 1
+        }
+      }));
+    }
+
+    this.inWorker = new Worker(
+      "in",
+      this.onIncoming.bind(this),
+      {
+        connection: {
+          host: 'redis'
+        }
+      }
+    )
+    this.processingWorker = new Worker(
+      "proc",
+      this.onProcessing.bind(this),
+      {
+        connection: {
+          host: 'redis'
+        },
+        limiter: {
+          max: 300,
+          duration: 60000,
+        },
+        concurrency: 10
+      }
+    );
+    this.manager.onText(/\/start/, this.onStart);
+    this.manager.onText(/\/send/, this.onSend);
+    this.manager.onText(/\/reset/, this.onReset);
+    this.manager.onText(/\/log/, this.onLog);
+    this.manager.onText(/\/write/, this.onWrite);
+  }
 }

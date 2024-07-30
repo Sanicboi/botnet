@@ -48,8 +48,16 @@ export class Progrevator {
   constructor(
     private openai: OpenAI,
     private reporter: TelegramBot,
-    private clients: TelegramCLientManager
+    private clients: 
   ) {
+    this.onChat = this.onChat.bind(this);
+    this.onCronExecution = this.onCronExecution.bind(this);
+    this.onOff = this.onOff.bind(this);
+    this.onOn = this.onOn.bind(this);
+    this.onRestart = this.onRestart.bind(this);
+    this.onSet = this.onSet.bind(this);
+    this.onTextMessage = this.onTextMessage.bind(this);
+    this.outQueueHandler = this.outQueueHandler.bind(this);
     this.manager.onText(/./, this.onTextMessage);
     this.manager.onText(/\/set/, this.onSet);
     this.manager.onText(/\/on/, this.onOn);
@@ -331,10 +339,26 @@ export class Progrevator {
 
   private inWorker: Worker<IInQueueJobData> = new Worker(
     "p-in",
-    this.inQueueHandler
+    this.inQueueHandler.bind(this),
+    {
+      connection: {
+        host: 'redis'
+      },
+      concurrency: 1,
+    }
   );
   private outWorker: Worker<IOutQueueJobData> = new Worker(
     "p-out",
-    this.outQueueHandler
+    this.outQueueHandler.bind(this),
+    {
+      connection: {
+        host: 'redis'
+      },
+      limiter: {
+        duration: 1000,
+        max: 1,
+      },
+      concurrency: 1,
+    }
   );
 }

@@ -1,3 +1,4 @@
+//@ts-ignore
 import input from "input";
 import { TelegramClient } from "telegram";
 import { StringSession } from "telegram/sessions";

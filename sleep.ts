@@ -45,6 +45,8 @@ const src = new DataSource({
             const phone = (await client.getMe()).phone;
             const prem = (await client.getMe()).premium;
             b.premium = prem!;
+            b.blocked = false;
+            b.phone = phone!;
             if (!numbers.includes(phone!)) {
                 b.send = false;
                 await src.getRepository(Bot).save(b);

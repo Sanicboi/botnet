@@ -8,6 +8,7 @@ import { Bot } from './src/entity/Bot';
 import { Message } from './src/entity/Message';
 import { Thread } from './src/entity/Thread';
 import { Chat } from './src/entity/Chat';
+import { NewMessage, NewMessageEvent } from 'telegram/events';
 
 
 const src = new DataSource({
@@ -26,10 +27,8 @@ const src = new DataSource({
     const bots = await src.getRepository(Bot).find({
         where: {
             blocked: false,
-            send: true,
         }
     });
-    const errors: string[] = [];
     for (const b of bots) {
         const session = new StringSession(b.token);
         const client = new TelegramClient(session, 28082768, "4bb35c92845f136f8eee12a04c848893", {useWSS: true});
@@ -43,20 +42,20 @@ const src = new DataSource({
                 phoneNumber: async () => { throw new Error;},
             }); 
             const phone = (await client.getMe()).phone!;
+            client.addEventHandler(async (e: NewMessageEvent) => {
+                console.log(phone + ": " + e.message.text);
+                fs.appendFileSync(path.join(__dirname, 'floods.txt'), phone + ": " + e.message.text + "\n\n");
+            }, new NewMessage());
             try {
-                await client.sendMessage("Sanicboii", {
-                    message: "Проверка на предупреждения"
+                await client.sendMessage("SpamBot", {
+                    message: "/start"
                 })
             } catch (err) {
-                errors.push(phone);
+                console.log(err);
             }
-            await client.destroy();
+            
         } catch (err) {
             console.log(err);
-            b.blocked = true;
-            await src.getRepository(Bot).save(b);
-            await client.destroy();
         }
     }
-    console.log(errors);
   });

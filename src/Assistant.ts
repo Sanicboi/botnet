@@ -18,14 +18,15 @@ type Callback = (
 ) => Promise<void>;
 
 export class Assistant {
-  constructor(private openai: OpenAI) {}
+  constructor(private openai: OpenAI) {
+  }
 
-  public answerMessage = async (
+  public async answerMessage(
     msg: string,
     user: User,
     bot: Bot,
     onRequresAction: Callback
-  ): Promise<string[]> => {
+  ): Promise<string[]> {
     let result: string[] = [];
     await this.openai.beta.threads.messages.create(user.threadId, {
       role: "user",

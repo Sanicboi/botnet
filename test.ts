@@ -41,7 +41,7 @@ const src = new DataSource({
     migrations: [],
     subscribers: [],
 });
-// process.env.WEBHOOK_URL = 'https://adamart.bitrix24.ru/rest/39/w0654aqejhhe6zdi/'
+// process.env.WEBHOOK_URL = ''
 // src.initialize().then(async () => {
 //     const users = await src.getRepository(User).find({
 //         where: {
