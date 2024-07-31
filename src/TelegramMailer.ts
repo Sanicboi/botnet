@@ -469,7 +469,7 @@ export class TelegramMailer {
         },
         concurrency: 1,
         limiter: {
-          duration: 60000 * 5,
+          duration: 10000,
           max: 1
         }
       }));
