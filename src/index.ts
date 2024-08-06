@@ -61,16 +61,20 @@ AppDataSource.initialize()
     const assistant = new Assistant(openAi);
 
     for (const b of bots) {
-      const session = new StringSession(b.token);
-      const client = new TelegramClient(session, Number(process.env.TG_APP_ID), process.env.TG_APP_HASH ?? '', {
-        useWSS: true
-      });
-      await client.start({
-          onError: async (e) => true,
-          phoneNumber: async () => "",
-          phoneCode: async () => ""
-      });
-      clients.set(b.id, client); 
+      try {
+        const session = new StringSession(b.token);
+        const client = new TelegramClient(session, Number(process.env.TG_APP_ID), process.env.TG_APP_HASH ?? '', {
+          useWSS: true
+        });
+        await client.start({
+            onError: async (e) => true,
+            phoneNumber: async () => "",
+            phoneCode: async () => ""
+        });
+        clients.set(b.id, client); 
+      } catch (e) {
+        
+      }
   }
   const mailer = new TelegramMailer(openAi, reporter, assistant, 50, clients, bots);
   })
