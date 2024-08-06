@@ -502,7 +502,7 @@ export class TelegramMailer {
         },
         concurrency: 1,
         limiter: {
-          duration: 10000,
+          duration: 60000 * 5,
           max: 1
         }
       }));
