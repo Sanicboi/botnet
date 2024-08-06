@@ -33,7 +33,7 @@
       "typeorm": "typeorm-ts-node-commonjs",
       "signup": "ts-node signup/index.ts",
       "serve": "ts-node test.ts",
-      "save-men": "ts-node setup_bots.ts",
+      "getUsernames": "ts-node getUsernames.ts",
       "nums": "ts-node checknumbers.ts",
       "add": "ts-node createbot.ts",
       "sleep": "ts-node sleep.ts",

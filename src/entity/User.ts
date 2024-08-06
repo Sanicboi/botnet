@@ -24,4 +24,8 @@ export class User {
     @Column({nullable: true})
     dealId: number;
 
+    @Column({
+        default: 0
+    })
+    numSentMsgs: number;
 }

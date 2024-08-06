@@ -35,6 +35,10 @@ const startMessage =
   "Приветствую, я являюсь сооснователем бизнес клуба. Хочу с Вами познакомиться и  понять по каким вопросам к Вам можно обращаться? Мы ищем интересные проекты в которые можно инвестировать, предпринимателей и экспертов для партнерства. Готовы направить к Вам нашу аудиторию в качестве клиентов. Видел Вас в нескольких чатах сообществ в телеграмм группах. Если требуется могу прислать информацию о нас.";
 const startMessage2 =
   "Приветствую, я являюсь менеджером бизнес клуба. Хочу с Вами познакомиться и понять по каким вопросам к Вам можно обращаться? Мы ищем интересные проекты в которые можно инвестировать, предпринимателей и экспертов для партнерства. Готовы направить к Вам нашу аудиторию в качестве клиентов. Видела Вас в нескольких чатах сообществ в телеграмм группах. Если требуется могу прислать информацию о нас.";
+
+const dobiv1 = "Есть ли у Вас какие-то вопросы?";
+const dobiv2 = "Я могу предоставить Вам дополнительную информацию о компании, если нужно.";
+const dobiv3 = "Если Вам неинтересно, можем отложить обсуждение."
 export class TelegramMailer {
   private botRepo: Repository<Bot> = AppDataSource.getRepository(Bot);
   private userRepo: Repository<User> = AppDataSource.getRepository(User);
@@ -443,6 +447,35 @@ export class TelegramMailer {
     }
   }
 
+  private onResend = async () => {
+    const bots = await this.botRepo.find({
+      where: {
+        blocked: false
+      }
+    });
+
+    for (const b of bots) {
+      const users = await this.userRepo.find({
+        where: {
+          replied: false,
+          botid: b.id
+        }
+      });
+
+      for (const u of users) {
+        let t = ''
+        if (u.numSentMsgs == 0) {
+          t = dobiv1;
+        }
+        await this.outQueues[b.queueIdx].add('resend', {
+          bot: b.id,
+          text: t,
+          user: u.usernameOrPhone
+        });
+      }
+    }
+  }
+
   private processingWorker: Worker<IProcessingTask>;
 
   private inWorker: Worker<IIncomingTask>;
@@ -503,5 +536,6 @@ export class TelegramMailer {
     this.manager.onText(/\/reset/, this.onReset);
     this.manager.onText(/\/log/, this.onLog);
     this.manager.onText(/\/write/, this.onWrite);
+    this.manager.onText(/\/resend/, this.onResend);
   }
 }
