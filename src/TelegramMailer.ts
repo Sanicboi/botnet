@@ -521,12 +521,13 @@ export class TelegramMailer {
       const client = this.clients.get(job.data.bot);
       if (!client) throw new Error();
       const text = fs.readFileSync(path.join(__dirname, 'script.txt'), 'utf8');
+      const p = path.join(__dirname, "photo.jpg");
       await client.invoke(new Api.messages.SendMedia({
         media: new Api.InputMediaUploadedPhoto({
           file: await client.uploadFile({
-            file: new CustomFile("photo.jpg", 
+            file: new CustomFile(p, 
               fs.statSync(
-              path.join(__dirname, "photo.jpg")).size, "./photo.jpg"),
+              p).size, p),
             workers: 1
           })
         }),
