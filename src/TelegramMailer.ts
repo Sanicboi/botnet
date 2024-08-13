@@ -524,8 +524,9 @@ export class TelegramMailer {
       await client.invoke(new Api.messages.SendMedia({
         media: new Api.InputMediaUploadedPhoto({
           file: await client.uploadFile({
-            file: new CustomFile("photo.jpg", fs.statSync(
-              "./photo.jpg").size, "./photo.jpg"),
+            file: new CustomFile("photo.jpg", 
+              fs.statSync(
+              path.join(__dirname, "photo.jpg")).size, "./photo.jpg"),
             workers: 1
           })
         }),
