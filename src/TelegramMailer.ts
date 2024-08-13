@@ -502,7 +502,6 @@ export class TelegramMailer {
           botid: b.id,
           sentSpam: false
         },
-        take: 25
       });
       for (const user of users) {
         console.log(user.sentSpam);
