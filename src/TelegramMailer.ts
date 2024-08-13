@@ -500,7 +500,7 @@ export class TelegramMailer {
       const users = await this.userRepo.find({
         where: {
           botid: b.id,
-          sentSpam: true
+          sentSpam: false
         },
         take: 25
       });
