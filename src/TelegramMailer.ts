@@ -528,13 +528,13 @@ export class TelegramMailer {
     }
 
     await this.userRepo
-    .createQueryBuilder('user')
-    .update()
-    .where('user.usernameOrPhone = :name', {
-      name: job.data.username
-    })
+    .createQueryBuilder()
+    .update('user')
     .set({
       sentSpam: true
+    })
+    .where('user.usernameOrPhone = :name', {
+      name: job.data.username
     })
     .execute();
   }
