@@ -522,17 +522,10 @@ export class TelegramMailer {
       if (!client) throw new Error();
       const text = fs.readFileSync(path.join(__dirname, 'script.txt'), 'utf8');
       const p = path.join(__dirname, "photo.jpg");
-      await client.invoke(new Api.messages.SendMedia({
-        media: new Api.InputMediaUploadedPhoto({
-          file: await client.uploadFile({
-            file: new CustomFile("photo.jpg", 
-              fs.statSync(
-              p).size, "../photo.jpg"),
-            workers: 1
-          })
-        }),
-        message: text,
-      }))
+      await client.sendFile(job.data.username, {
+        file: p,
+        caption: text
+      })
       await this.userRepo
       .createQueryBuilder()
       .update('user')
