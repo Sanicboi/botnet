@@ -532,7 +532,7 @@ export class TelegramMailer {
       .set({
         sentSpam: true
       })
-      .where('user.usernameOrPhone = :name', {
+      .where('"usernameOrPhone" = :name', {
         name: job.data.username
       })
       .execute();
