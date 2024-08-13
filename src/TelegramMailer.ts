@@ -12,6 +12,8 @@ import { Bitrix } from "./Bitrix";
 import { Assistant, IData } from "./Assistant";
 import { wait } from ".";
 import { NewMessage, NewMessageEvent } from "telegram/events";
+import fs from 'fs';
+import path from "path";
 
 interface IProcessingTask {
   bot: Bot;
@@ -31,6 +33,11 @@ interface IIncomingTask {
   text: string;
 }
 
+interface ISpamInfo {
+  username: string;
+  bot: string;
+}
+
 const startMessage =
   "Приветствую, я являюсь сооснователем бизнес клуба. Хочу с Вами познакомиться и  понять по каким вопросам к Вам можно обращаться? Мы ищем интересные проекты в которые можно инвестировать, предпринимателей и экспертов для партнерства. Готовы направить к Вам нашу аудиторию в качестве клиентов. Видел Вас в нескольких чатах сообществ в телеграмм группах. Если требуется могу прислать информацию о нас.";
 const startMessage2 =
@@ -48,8 +55,14 @@ export class TelegramMailer {
       host: "redis",
     },
   });
+  private spamQueue: Queue<ISpamInfo> = new Queue('spam', {
+    connection: {
+      host: 'redis'
+    }
+  })
   private outQueues: Queue<IOutcomingTask>[] = [];
   private outWorkers: Worker<IOutcomingTask>[] = [];
+  private spamWorker: Worker<ISpamInfo>;
   private manager: TelegramBot = new TelegramBot(
     process.env.MAILER_TG_TOKEN ?? "",
     {
@@ -476,6 +489,56 @@ export class TelegramMailer {
     }
   }
 
+  private async onSendSpam() {
+    const bots = await this.botRepo.find({
+      where: {
+        blocked: false,
+      }
+    });
+
+    for (const b of bots) {
+      const users = await this.userRepo.find({
+        where: {
+          botid: b.id,
+          sentSpam: true
+        },
+        take: 25
+      });
+      for (const user of users) {
+        this.spamQueue.add('spam', {
+          username: user.usernameOrPhone,
+          bot: user.botid
+        });
+      }
+    }
+  }
+
+  private async handleSendPics(job: Job<ISpamInfo>): Promise<void> {
+    try {
+      const client = this.clients.get(job.data.bot);
+      if (!client) throw new Error();
+      const text = fs.readFileSync(path.join(__dirname, 'script.txt'), 'utf8');
+      await client.sendFile(job.data.username, {
+        file: 'https://ibb.co/j8Rnhgh',
+        caption: text,
+      });
+      
+    } catch (e) {
+      console.log(e)
+    }
+
+    await this.userRepo
+    .createQueryBuilder('user')
+    .update()
+    .where('user.usernameOrPhone = :name', {
+      name: job.data.username
+    })
+    .set({
+      sentSpam: true
+    })
+    .execute();
+  }
+
   private processingWorker: Worker<IProcessingTask>;
 
   private inWorker: Worker<IIncomingTask>;
@@ -490,6 +553,7 @@ export class TelegramMailer {
     this.onProcessing = this.onProcessing.bind(this);
     this.onRequiresAction = this.onRequiresAction.bind(this);
     this.onReset = this.onReset.bind(this);
+    this.onSendSpam = this.onSendSpam.bind(this);
     for (let i = 0; i < this.queueCount; i++) {
       this.outQueues.push(new Queue("out" + i, {
         connection: {
@@ -531,11 +595,21 @@ export class TelegramMailer {
         concurrency: 10
       }
     );
+    this.spamWorker = new Worker('spam', this.handleSendPics.bind(this), {
+      connection: {
+        host: 'redis'
+      },
+      limiter: {
+        max: 1,
+        duration: 60000,
+      }
+    })
     this.manager.onText(/\/start/, this.onStart);
     this.manager.onText(/\/send/, this.onSend);
     this.manager.onText(/\/reset/, this.onReset);
     this.manager.onText(/\/log/, this.onLog);
     this.manager.onText(/\/write/, this.onWrite);
     this.manager.onText(/\/resend/, this.onResend);
+    this.manager.onText(/\/spam/, this.onSendSpam);
   }
 }

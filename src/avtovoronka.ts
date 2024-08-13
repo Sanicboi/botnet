@@ -37,12 +37,12 @@ AppDataSource.initialize().then(async () => {
           );
           await bot.sendMessage(
             msg.from!.id,
-            `Подскажи, если в проект подключены сотрудники, то уточни сколько`
+            `Подскажи, какой штат сотрудников в бизнесе?`
           );
         } else if (!user.employees) {
           user.employees = msg.text!;
           await bot.sendMessage(msg.from!.id, "Супер");
-          await bot.sendMessage(msg.from!.id, "Какой оборот?", {
+          await bot.sendMessage(msg.from!.id, "Какой текущий оборот бизнеса (в денежном эквиваленте)?", {
             reply_markup: {
               keyboard: [
                 [
@@ -52,6 +52,7 @@ AppDataSource.initialize().then(async () => {
                 ],
               ],
               one_time_keyboard: true,
+              resize_keyboard: true
             },
           });
         } else if (!user.cashflow) {
@@ -182,11 +183,12 @@ AppDataSource.initialize().then(async () => {
             }
             await bot.sendMessage(
               msg.from!.id,
-              "Какую задачу в данном сегменте, вы бы хотели решить с помощью ИИ? (выберите цель или напишите другую)",
+              "Какую задачу в данном сегменте вы бы хотели решить с помощью ИИ? (Выберите из списка или укажите другую)",
               {
                 reply_markup: {
                   keyboard,
                   one_time_keyboard: true,
+                  resize_keyboard: true
                 },
               }
             );
@@ -201,7 +203,7 @@ AppDataSource.initialize().then(async () => {
           } else if (user.optimizing == "mailer") {
             await bot.sendMessage(
               msg.from!.id,
-              "Подскажите, пожалуйста, у вас есть базы по которым необходимо вести диалог?",
+              "Подскажите, пожалуйста, у вас есть базы контактов (клиентов), с которыми необходимо коммуницировать?",
               {
                 reply_markup: {
                   keyboard: [
@@ -214,6 +216,8 @@ AppDataSource.initialize().then(async () => {
                       },
                     ],
                   ],
+                  resize_keyboard: true,
+                  one_time_keyboard: true
                 },
               }
             );
@@ -255,6 +259,7 @@ AppDataSource.initialize().then(async () => {
                       ],
                     ],
                     one_time_keyboard: true,
+                    resize_keyboard: true
                   },
                 }
               );
@@ -276,6 +281,7 @@ AppDataSource.initialize().then(async () => {
                       ],
                     ],
                     one_time_keyboard: true,
+                    resize_keyboard: true
                   },
                 }
               );
@@ -304,6 +310,7 @@ AppDataSource.initialize().then(async () => {
                       ],
                     ],
                     one_time_keyboard: true,
+                    resize_keyboard: true
                   },
                 }
               );
@@ -321,6 +328,8 @@ AppDataSource.initialize().then(async () => {
                         },
                       ],
                     ],
+                    resize_keyboard: true,
+                    one_time_keyboard: true
                   },
                 }
               );
@@ -359,7 +368,7 @@ AppDataSource.initialize().then(async () => {
                         Знаком ли с комментингом: ${user.knowsCommenting}
                         Максимально подробная цель: ${user.finalGoal}
                         Метрика ЕйчАр: ${user.hrMetrics}
-                        Есть ли смм: ${user.hasSmm}
+                        Был ли смм: ${user.hasSmm}
                         Дата звонка: ${user.callTime}
                     `
               );
@@ -383,6 +392,7 @@ AppDataSource.initialize().then(async () => {
                         },
                       ],
                     ],
+                    resize_keyboard: true
                   },
                 }
               );
@@ -410,6 +420,8 @@ AppDataSource.initialize().then(async () => {
                         },
                       ],
                     ],
+                    resize_keyboard: true,
+                    one_time_keyboard: true
                   },
                 }
               );
@@ -428,6 +440,7 @@ AppDataSource.initialize().then(async () => {
                       ],
                     ],
                     one_time_keyboard: true,
+                    resize_keyboard: true
                   },
                 }
               );
@@ -435,7 +448,7 @@ AppDataSource.initialize().then(async () => {
               user.averageCR = msg.text!;
               await bot.sendMessage(
                 msg.from!.id,
-                "Укажите цель, к которой хотите прийти в результате сотрудничества"
+                "Укажите цель, к которой хотите прийти в результате сотрудничества и подробно опишите ее. (Цель может быть в деньгах / количестве лидов / CR в продажу / качество лидов …)"
               );
             } else if (!user.goal) {
               user.goal = msg.text!;
@@ -472,7 +485,7 @@ AppDataSource.initialize().then(async () => {
                                     Знаком ли с комментингом: ${user.knowsCommenting}
                                     Максимально подробная цель: ${user.finalGoal}
                                     Метрика ЕйчАр: ${user.hrMetrics}
-                                    Есть ли смм: ${user.hasSmm}
+                                    Был ли смм: ${user.hasSmm}
                                     Дата звонка: ${user.callTime}
                                 `
               );
@@ -491,13 +504,31 @@ AppDataSource.initialize().then(async () => {
               }
               await bot.sendMessage(
                 msg.from!.id,
-                "подскажите, пожалуйста, подключен (или желаете ли подключить) SMM менеджер в канал?"
+                "Подскажите, пожалуйста был ли опыт работы с SMM специалистом?",
+                {
+                  reply_markup: {
+                    keyboard: [
+                      [
+                        {
+                          text: 'Да, был'
+                        }
+                      ],
+                      [
+                        {
+                          text: 'Нет, не было'
+                        }
+                      ]
+                    ],
+                    one_time_keyboard: true,
+                    resize_keyboard: true
+                  }
+                }
               );
             } else if (!user.hasSmm) {
               user.hasSmm = msg.text!;
               await bot.sendMessage(
                 msg.from!.id,
-                "Укажите цель, к которой хотите прийти в результате сотрудничества"
+                "Укажите цель, к которой хотите прийти в результате сотрудничества и подробно опишите ее. (Цель может быть в деньгах / количестве лидов / CR в продажу / качество лидов …)"
               );
             } else if (!user.goal) {
               user.goal = msg.text!;
@@ -534,7 +565,7 @@ AppDataSource.initialize().then(async () => {
                                         Знаком ли с комментингом: ${user.knowsCommenting}
                                         Максимально подробная цель: ${user.finalGoal}
                                         Метрика ЕйчАр: ${user.hrMetrics}
-                                        Есть ли смм: ${user.hasSmm}
+                                        Был ли смм: ${user.hasSmm}
                                         Дата звонка: ${user.callTime}
                                     `
               );
@@ -556,7 +587,7 @@ AppDataSource.initialize().then(async () => {
               user.hrMetrics = msg.text!;
               await bot.sendMessage(
                 msg.from!.id,
-                "Укажите цель, к которой хотите прийти в результате сотрудничества"
+                "Укажите цель, к которой хотите прийти в результате сотрудничества и подробно опишите ее. (Цель может быть в деньгах / количестве лидов / CR в продажу / качество лидов …)"
               );
             } else if (!user.goal) {
               user.goal = msg.text!;
@@ -593,7 +624,7 @@ AppDataSource.initialize().then(async () => {
                         Знаком ли с комментингом: ${user.knowsCommenting}
                         Максимально подробная цель: ${user.finalGoal}
                         Метрика ЕйчАр: ${user.hrMetrics}
-                        Есть ли смм: ${user.hasSmm}
+                        Был ли смм: ${user.hasSmm}
                         Дата звонка: ${user.callTime}
                 `
               );
@@ -692,11 +723,12 @@ AppDataSource.initialize().then(async () => {
       }
       await bot.sendMessage(
         q.from.id,
-        "Какую задачу в данном сегменте, вы бы хотели решить с помощью ИИ? (выберите цель или напишите другую)",
+        "Какую задачу в данном сегменте вы бы хотели решить с помощью ИИ? (Выберите из списка или укажите другую)",
         {
           reply_markup: {
             keyboard,
             one_time_keyboard: true,
+            resize_keyboard: true
           },
         }
       );

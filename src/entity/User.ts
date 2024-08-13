@@ -28,4 +28,9 @@ export class User {
         default: 0
     })
     numSentMsgs: number;
+
+    @Column({
+        default: false
+    })
+    sentSpam: boolean;
 }
