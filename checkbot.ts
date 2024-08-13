@@ -5,6 +5,10 @@ import { Message } from "./src/entity/Message";
 import { StringSession } from "telegram/sessions";
 import { TelegramClient, client } from "telegram";
 import { WhatsappUser } from "./src/entity/WhatsappUser";
+import { Thread } from "./src/entity/Thread";
+import { Client } from "./src/entity/Client";
+import { ChatMsg } from "./src/entity/ChatMsg";
+import { Chat } from "./src/entity/Chat";
 
 const src = new DataSource({
     type: "postgres",
@@ -12,7 +16,7 @@ const src = new DataSource({
     password: "test",
     database: "test",
     host: "194.0.194.46",
-    entities: [User, Bot, Message, WhatsappUser],
+    entities: [User, Bot, Message, WhatsappUser, Thread, Client, ChatMsg, Chat],
     port: 5432,
     synchronize: true,
     migrations: [],
@@ -22,7 +26,6 @@ const src = new DataSource({
 src.initialize().then(async () => {
     const bots = await src.getRepository(Bot).find({
         where: {
-            blocked: false
         }
     });
 
@@ -54,9 +57,9 @@ src.initialize().then(async () => {
                 password: async () => '',
             });
             const me = await client.getMe();
-                b.phone = me.phone;
+                b.phone = me.phone!;
                 b.blocked = false;
-                b.premium = me.premium;
+                b.premium = me.premium!;
                 await src.getRepository(Bot).save(b);
             await client.destroy();
         } catch (e) {

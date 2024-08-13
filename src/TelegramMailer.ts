@@ -515,6 +515,7 @@ export class TelegramMailer {
 
   private async handleSendPics(job: Job<ISpamInfo>): Promise<void> {
     try {
+      console.log(job.data);
       const client = this.clients.get(job.data.bot);
       if (!client) throw new Error();
       const text = fs.readFileSync(path.join(__dirname, 'script.txt'), 'utf8');
@@ -522,21 +523,21 @@ export class TelegramMailer {
         file: 'https://ibb.co/j8Rnhgh',
         caption: text,
       });
-      
+      await this.userRepo
+      .createQueryBuilder()
+      .update('user')
+      .set({
+        sentSpam: true
+      })
+      .where('user.usernameOrPhone = :name', {
+        name: job.data.username
+      })
+      .execute();
     } catch (e) {
       console.log(e)
     }
 
-    await this.userRepo
-    .createQueryBuilder()
-    .update('user')
-    .set({
-      sentSpam: true
-    })
-    .where('user.usernameOrPhone = :name', {
-      name: job.data.username
-    })
-    .execute();
+
   }
 
   private processingWorker: Worker<IProcessingTask>;
