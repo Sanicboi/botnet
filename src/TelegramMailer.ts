@@ -339,6 +339,7 @@ export class TelegramMailer {
       if (!b) {
         throw new UnknownError("Bot is NULL", "Incoming queue", this.reporter);
       }
+      if (user.sentSpam) return;
       if (!user.replied) {
         await this.manager.sendMessage(
           -1002244363083,
