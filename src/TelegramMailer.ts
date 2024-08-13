@@ -505,6 +505,7 @@ export class TelegramMailer {
         take: 25
       });
       for (const user of users) {
+        console.log(user.sentSpam);
         this.spamQueue.add('spam', {
           username: user.usernameOrPhone,
           bot: user.botid
