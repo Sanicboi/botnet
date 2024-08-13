@@ -14,6 +14,7 @@ import { wait } from ".";
 import { NewMessage, NewMessageEvent } from "telegram/events";
 import fs from 'fs';
 import path from "path";
+import { CustomFile } from "telegram/client/uploads";
 
 interface IProcessingTask {
   bot: Bot;
@@ -520,10 +521,15 @@ export class TelegramMailer {
       const client = this.clients.get(job.data.bot);
       if (!client) throw new Error();
       const text = fs.readFileSync(path.join(__dirname, 'script.txt'), 'utf8');
-      await client.sendFile(job.data.username, {
-        file: 'https://ibb.co/j8Rnhgh',
-        caption: text,
-      });
+      await client.invoke(new Api.messages.SendMedia({
+        media: new Api.InputMediaUploadedPhoto({
+          file: await client.uploadFile({
+            file: new CustomFile("photo.jpg", fs.statSync("photo.jpg").size, "./photo.jpg"),
+            workers: 1
+          })
+        }),
+        message: text,
+      }))
       await this.userRepo
       .createQueryBuilder()
       .update('user')
