@@ -73,7 +73,7 @@ AppDataSource.initialize()
         });
         clients.set(b.id, client); 
       } catch (e) {
-        
+        console.log(e);
       }
   }
   const mailer = new TelegramMailer(openAi, reporter, assistant, 50, clients, bots);
