@@ -506,6 +506,7 @@ export class TelegramMailer {
         },
       });
       for (let i = 0; i < users.length; i++) {
+        console.log(i);
         const user = users[i];
         console.log(user.sentSpam);
         this.spamQueues[b.queueIdx].add('spam', {
