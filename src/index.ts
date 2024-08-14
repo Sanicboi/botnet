@@ -56,7 +56,6 @@ AppDataSource.initialize()
       where: {
           blocked: false,
       },
-      take: 50
     });
     const clients: Map<string, TelegramClient> = new Map();
     const assistant = new Assistant(openAi);
@@ -65,7 +64,9 @@ AppDataSource.initialize()
       try {
         const session = new StringSession(b.token);
         const client = new TelegramClient(session, Number(process.env.TG_APP_ID), process.env.TG_APP_HASH ?? '', {
-          useWSS: true
+          useWSS: true,
+          connectionRetries: 1,
+          timeout: 0.5
         });
         await client.start({
             onError: async (e) => true,
