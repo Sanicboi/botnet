@@ -72,7 +72,6 @@ AppDataSource.initialize()
             phoneCode: async () => ""
         });
         clients.set(b.id, client); 
-        await wait(0.1);
       } catch (e) {
         console.log(e);
       }

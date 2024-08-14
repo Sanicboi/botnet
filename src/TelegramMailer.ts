@@ -619,6 +619,7 @@ export class TelegramMailer {
           host: 'redis'
         },
       }));
+      console.log('Iter')
     }
     this.manager.onText(/\/start/, this.onStart);
     this.manager.onText(/\/send/, this.onSend);
