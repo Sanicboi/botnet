@@ -492,6 +492,7 @@ export class TelegramMailer {
   }
 
   private async onSendSpam() {
+    console.log('send spam');
     const bots = await this.botRepo.find({
       where: {
         blocked: false,
