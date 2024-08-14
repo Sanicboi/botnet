@@ -55,7 +55,8 @@ AppDataSource.initialize()
     const bots = await AppDataSource.getRepository(Bot).find({
       where: {
           blocked: false,
-      }
+      },
+      take: 50
     });
     const clients: Map<string, TelegramClient> = new Map();
     const assistant = new Assistant(openAi);
