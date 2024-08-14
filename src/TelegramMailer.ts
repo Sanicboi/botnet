@@ -56,10 +56,10 @@ export class TelegramMailer {
       host: "redis",
     },
   });
-  private spamQueues: Queue<ISpamInfo>[];
+  private spamQueues: Queue<ISpamInfo>[] = [];
   private outQueues: Queue<IOutcomingTask>[] = [];
   private outWorkers: Worker<IOutcomingTask>[] = [];
-  private spamWorkers: Worker<ISpamInfo>[];
+  private spamWorkers: Worker<ISpamInfo>[] = [];
   private manager: TelegramBot = new TelegramBot(
     process.env.MAILER_TG_TOKEN ?? "",
     {
