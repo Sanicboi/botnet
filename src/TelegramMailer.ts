@@ -56,14 +56,10 @@ export class TelegramMailer {
       host: "redis",
     },
   });
-  private spamQueue: Queue<ISpamInfo> = new Queue('spam', {
-    connection: {
-      host: 'redis'
-    }
-  })
+  private spamQueues: Queue<ISpamInfo>[];
   private outQueues: Queue<IOutcomingTask>[] = [];
   private outWorkers: Worker<IOutcomingTask>[] = [];
-  private spamWorker: Worker<ISpamInfo>;
+  private spamWorkers: Worker<ISpamInfo>[];
   private manager: TelegramBot = new TelegramBot(
     process.env.MAILER_TG_TOKEN ?? "",
     {
@@ -340,7 +336,11 @@ export class TelegramMailer {
       if (!b) {
         throw new UnknownError("Bot is NULL", "Incoming queue", this.reporter);
       }
-      if (user.sentSpam) return;
+      if (user.sentSpam) {
+        await this.manager.sendMessage(-1002244363083, `#ответдобив ${user.usernameOrPhone}`);
+        await this.manager.sendMessage(-1002244363083, user.usernameOrPhone + ": " + job.data.text)
+        return;
+      }
       if (!user.replied) {
         await this.manager.sendMessage(
           -1002244363083,
@@ -505,13 +505,15 @@ export class TelegramMailer {
           sentSpam: false
         },
       });
-      for (const user of users) {
+      for (let i = 0; i < users.length; i++) {
+        const user = users[i];
         console.log(user.sentSpam);
-        this.spamQueue.add('spam', {
+        this.spamQueues[b.queueIdx].add('spam', {
           username: user.usernameOrPhone,
           bot: user.botid
         });
       }
+      await wait(0.5);
     }
   }
 
@@ -536,6 +538,7 @@ export class TelegramMailer {
         name: job.data.username
       })
       .execute();
+      await this.manager.sendMessage(2074310819, "#Добив");
     } catch (e) {
       console.log(e)
     }
@@ -599,15 +602,22 @@ export class TelegramMailer {
         concurrency: 10
       }
     );
-    this.spamWorker = new Worker('spam', this.handleSendPics.bind(this), {
-      connection: {
-        host: 'redis'
-      },
-      limiter: {
-        max: 1,
-        duration: 60000,
-      }
-    })
+    for (let i = 0; i < 50; i++) {
+      this.spamWorkers.push(new Worker('spam' + i, this.handleSendPics.bind(this), {
+        connection: {
+          host: 'redis'
+        },
+        limiter: {
+          max: 1,
+          duration: 60000,
+        }
+      }));
+      this.spamQueues.push(new Queue('spam' + i, {
+        connection: {
+          host: 'redis'
+        },
+      }));
+    }
     this.manager.onText(/\/start/, this.onStart);
     this.manager.onText(/\/send/, this.onSend);
     this.manager.onText(/\/reset/, this.onReset);

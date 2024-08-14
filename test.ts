@@ -18,7 +18,6 @@ import path from "path";
 import { Api, TelegramClient } from "telegram";
 import { StringSession } from "telegram/sessions";
 import { TotalList } from "telegram/Helpers";
-import input from 'input'
 import { Chat } from "./src/entity/Chat";
 import { Thread } from "./src/entity/Thread";
 // import { DataSource } from "typeorm";
@@ -41,80 +40,100 @@ const src = new DataSource({
     migrations: [],
     subscribers: [],
 });
-// process.env.WEBHOOK_URL = ''
-// src.initialize().then(async () => {
-//     const users = await src.getRepository(User).find({
-//         where: {
-//             replied: true
-//         }
-//     });
-//     for (const u of users) {
-//         try {
-//             await Bitrix.addContact(u.contactId, u.dealId);
-//             await new Promise((resolve, reject) => setTimeout(resolve, 500))
-//         } catch (err) {
-//             console.log(err);
-//         }
-//     }
-// });
+src.initialize().then(async () => {
+    const users = await src.getRepository(User).find({
+        where: {
+            sentSpam: true
+        }
+    });
+    for (const u of users) {
+        try {
+            const bot = await src.getRepository(Bot).findOne({
+                where: {
+                    id: u.botid
+                }
+            });
+            const session = new StringSession(bot!.token);
+            const client = new TelegramClient(session, 28082768, "4bb35c92845f136f8eee12a04c848893", {
+                useWSS: true
+            });
+            await client.start({
+                onError: async () => true,
+                phoneCode: async () => '',
+                phoneNumber: async () => ''
+            })
+            let msgs = await client.getMessages(u.usernameOrPhone);
+            msgs = msgs.sort((a, b) => a.date > b.date ? 1 : -1);
+            if (msgs[0].sender!.className === 'User') {
+                //@ts-ignore
+                    if (msgs[0].sender!.username === u.usernameOrPhone) {
+                        fs.appendFileSync(path.join(__dirname, 'result.txt'), u.usernameOrPhone);
+                    }
+            }
+            await client.disconnect();
+        } catch (err) {
+            console.log(err);
+        }
+    }
+});
     
 
 
 //});
  
 
-src.initialize().then(async () => {
-    const bots = await src.getRepository(Bot).find({
-        where: {
-            blocked: false,
-            send: true
-        }
-    })
-    let amount = 0;
-    for (const b of bots) {
-        try {
-            const session = new StringSession(b.token);
-            const client = new TelegramClient(session, 28082768, "4bb35c92845f136f8eee12a04c848893", {useWSS: true});
-            await client.start({
-                onError(err) {
-                    console.log(err);
-                },
-                phoneCode: async () => input.text("Code"),
-                phoneNumber: async () =>{ console.log(b.id + ' Blocked'); await client.destroy(); return ''},
-                password: async () => input.text("Password"),
-            }); 
+// src.initialize().then(async () => {
+//     const bots = await src.getRepository(Bot).find({
+//         where: {
+//             blocked: false,
+//             send: true
+//         }
+//     })
+//     let amount = 0;
+//     for (const b of bots) {
+//         try {
+//             const session = new StringSession(b.token);
+//             const client = new TelegramClient(session, 28082768, "4bb35c92845f136f8eee12a04c848893", {useWSS: true});
+//             await client.start({
+//                 onError(err) {
+//                     console.log(err);
+//                 },
+//                 phoneCode: async () => input.text("Code"),
+//                 phoneNumber: async () =>{ console.log(b.id + ' Blocked'); await client.destroy(); return ''},
+//                 password: async () => input.text("Password"),
+//             }); 
             
-            const users = await src.getRepository(User).find({
-                where: {
-                    botid: b.id
-                }
-            });
-            for (const u of users) {
-                try {
-                let result = `\n\nДиалог с ${u.usernameOrPhone}:\n\n`;
-                const msgs = await client.getMessages(u.usernameOrPhone);
-                for (const msg of msgs) {
-                    if (msg.sender.className === 'User') {
-                        result += `[${msg.sender.username}]\n${msg.text}`;
-                    }
-                }
-                if (msgs.length > 0) fs.appendFileSync(path.join(__dirname, 'export.txt'), result);
-                await new Promise((resolve, reject) => setTimeout(resolve, 2000))
-                } catch (e) {
+//             const users = await src.getRepository(User).find({
+//                 where: {
+//                     botid: b.id
+//                 }
+//             });
+//             for (const u of users) {
+//                 try {
+//                 let result = `\n\nДиалог с ${u.usernameOrPhone}:\n\n`;
+//                 const msgs = await client.getMessages(u.usernameOrPhone);
+//                 for (const msg of msgs) {
+//                     if (msg.sender.className === 'User') {
+//                         result += `[${msg.sender.username}]\n${msg.text}`;
+//                     }
+//                 }
+//                 if (msgs.length > 0) fs.appendFileSync(path.join(__dirname, 'export.txt'), result);
+//                 await new Promise((resolve, reject) => setTimeout(resolve, 2000))
+//                 } catch (e) {
 
-                }
-            }
+//                 }
+//             }
             
             
-            await client.disconnect();
-        } catch (err) {
-            console.log(err);
-        }
-    }
+//             await client.disconnect();
+//         } catch (err) {
+//             console.log(err);
+//         }
+//     }
 
 
 
-});
+// });
 
 
 
