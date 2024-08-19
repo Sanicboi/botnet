@@ -1,7 +1,10 @@
 import TgBot from "node-telegram-bot-api";
 import { Client } from "./entity/Client";
 import { AppDataSource } from "./data-source";
-import { wait } from ".";
+
+const wait = async (s: number) => {
+  await new Promise((resolve, reject) => setTimeout(resolve, 1000 * s));
+};
 
 AppDataSource.initialize().then(async () => {
   const bot = new TgBot("7438649358:AAEOpoCf_Anga0e8oaIsZkKL3Va3DjsOE_I", {
