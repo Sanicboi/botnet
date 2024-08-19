@@ -2,7 +2,6 @@ import fs from 'fs';
 import path from 'path';
 import { TelegramClient } from 'telegram';
 import { StringSession } from 'telegram/sessions';
-import input from 'input';
 import { DataSource } from 'typeorm';
 import { User } from './src/entity/User';
 import { Bot } from './src/entity/Bot';
@@ -29,7 +28,6 @@ import { Message } from './src/entity/Message';
                     return '';
                  },
                 phoneNumber: async () => n,
-                password: async () => input.text("Password"),
             }); 
         } catch (err) {
             console.log(err);

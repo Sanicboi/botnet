@@ -1,32 +1,23 @@
 import TelegramBot from "node-telegram-bot-api";
 import OpenAI from "openai";
 import { IsNull, Repository } from "typeorm";
-import { Bot } from "./entity/Bot";
-import { AppDataSource } from "./data-source";
-import { User } from "./entity/User";
+import { Bot } from "../entity/Bot";
+import { AppDataSource } from "../data-source";
+import { User } from "../entity/User";
 import { Job, Queue, Worker } from "bullmq";
-import { InvalidInputError, UnknownError } from "./utils/Errors";
-import { Message } from "./entity/Message";
+import { InvalidInputError, UnknownError } from "../utils/Errors";
+import { Message } from "../entity/Message";
 import { Api, TelegramClient } from "telegram";
-import { Bitrix } from "./Bitrix";
-import { Assistant, IData } from "./Assistant";
-import { wait } from ".";
+import { Bitrix } from "../Bitrix";
+import { Assistant, IData } from "../Assistant";
+import { wait } from "..";
 import { NewMessage, NewMessageEvent } from "telegram/events";
 import fs from 'fs';
 import path from "path";
-import { CustomFile } from "telegram/client/uploads";
 
-interface IProcessingTask {
-  bot: Bot;
-  user: User;
-}
 
-interface IOutcomingTask {
-  bot: string;
-  text: string;
-  user: string;
-  first?: boolean;
-}
+
+
 
 interface IIncomingTask {
   bot: string;

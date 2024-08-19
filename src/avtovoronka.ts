@@ -1,6 +1,7 @@
 import TgBot from "node-telegram-bot-api";
 import { Client } from "./entity/Client";
 import { AppDataSource } from "./data-source";
+import { wait } from ".";
 
 AppDataSource.initialize().then(async () => {
   const bot = new TgBot("7438649358:AAEOpoCf_Anga0e8oaIsZkKL3Va3DjsOE_I", {
@@ -18,6 +19,7 @@ AppDataSource.initialize().then(async () => {
     );
   });
   bot.onText(/./, async (msg) => {
+    await wait(0.5);
     if (!msg.text!.startsWith("/")) {
       const user = await userRepo.findOneBy({
         chatId: String(msg.from!.id),
@@ -35,6 +37,7 @@ AppDataSource.initialize().then(async () => {
             msg.from!.id,
             `Ого! Это очень востребованная сфера`
           );
+          await wait(2);
           await bot.sendMessage(
             msg.from!.id,
             `Подскажи, какой штат сотрудников в бизнесе?`
@@ -42,6 +45,7 @@ AppDataSource.initialize().then(async () => {
         } else if (!user.employees) {
           user.employees = msg.text!;
           await bot.sendMessage(msg.from!.id, "Супер");
+          await wait(1);
           await bot.sendMessage(msg.from!.id, "Какой текущий оборот бизнеса (в денежном эквиваленте)?", {
             reply_markup: {
               keyboard: [
@@ -336,6 +340,7 @@ AppDataSource.initialize().then(async () => {
             } else if (!user.monthlyV) {
               user.monthlyV = msg.text!;
               await bot.sendMessage(msg.from!.id, "Отлично, зафиксировал");
+              await wait(1);
               await bot.sendMessage(
                 msg.from!.id,
                 "Я уже передал техническое задание нашим специалистам. В ближайшее время необходимо связаться для уточнения деталей.\nНапишите дату и время , удобную для звонка!"
@@ -343,6 +348,7 @@ AppDataSource.initialize().then(async () => {
             } else if (!user.callTime) {
               user.callTime = msg.text!;
               await bot.sendMessage(msg.from!.id, "Ожидайте звонка))");
+              await wait(1);
               await bot.sendMessage(msg.from!.id, "До скорых встреч");
               await bot.sendMessage(
                 -1002242067427,
@@ -453,6 +459,7 @@ AppDataSource.initialize().then(async () => {
             } else if (!user.goal) {
               user.goal = msg.text!;
               await bot.sendMessage(msg.from!.id, "Отлично, зафиксировал!");
+              await wait(1)
               await bot.sendMessage(
                 msg.from!.id,
                 "Я уже передал техническое задание нашим специалистам. В ближайшее время необходимо связаться для уточнения деталей.\nНапишите дату и время , удобную для звонка!"
@@ -460,6 +467,7 @@ AppDataSource.initialize().then(async () => {
             } else if (!user.callTime) {
               user.callTime = msg.text!;
               await bot.sendMessage(msg.from!.id, "Ожидайте звонка))");
+              await wait(1);
               await bot.sendMessage(msg.from!.id, "До скорых встреч");
               await bot.sendMessage(
                 -1002242067427,
@@ -500,7 +508,7 @@ AppDataSource.initialize().then(async () => {
             } else if (user.knowsCommenting === null) {
               user.knowsCommenting = msg.text === "Да";
               if (!user.knowsCommenting) {
-                await bot.sendMessage(msg.from!.id, "Инфа");
+                await bot.sendDocument(msg.from!.id, 'info.pdf');
               }
               await bot.sendMessage(
                 msg.from!.id,
@@ -533,6 +541,7 @@ AppDataSource.initialize().then(async () => {
             } else if (!user.goal) {
               user.goal = msg.text!;
               await bot.sendMessage(msg.from!.id, "Отлично, зафиксировал!");
+              await wait(1);
               await bot.sendMessage(
                 msg.from!.id,
                 "Для более конструктивной работы, я предлагаю созвониться. Познакомимся, заодно обсудим вашего будущего сотрудника. Подскажите, когда вам будет удобно? Для регистрации встречи, напишите удобное время и дату"
@@ -540,6 +549,7 @@ AppDataSource.initialize().then(async () => {
             } else if (!user.callTime) {
               user.callTime = msg.text!;
               await bot.sendMessage(msg.from!.id, "Ожидайте звонка))");
+              await wait(1);
               await bot.sendMessage(msg.from!.id, "До скорых встреч");
               await bot.sendMessage(
                 -1002242067427,
@@ -592,6 +602,7 @@ AppDataSource.initialize().then(async () => {
             } else if (!user.goal) {
               user.goal = msg.text!;
               await bot.sendMessage(msg.from!.id, "Oтлично, зафиксировал!");
+              await wait(1);
               await bot.sendMessage(
                 msg.from!.id,
                 "Для более конструктивной работы, я предлагаю созвониться. Познакомимся, заодно обсудим вашего будущего сотрудника. Подскажите, когда вам будет удобно? Для регистрации встречи, напишите удобное время и дату"
@@ -599,6 +610,7 @@ AppDataSource.initialize().then(async () => {
             } else if (!user.callTime) {
               user.callTime = msg.text!;
               await bot.sendMessage(msg.from!.id, "Ожидайте звонка))");
+              await wait(1);
               await bot.sendMessage(msg.from!.id, "До скорых встреч");
               await bot.sendMessage(
                 -1002242067427,
