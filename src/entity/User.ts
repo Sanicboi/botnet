@@ -1,4 +1,7 @@
-import { Column, Entity, PrimaryColumn } from "typeorm";
+import { Column, Entity, JoinTable, ManyToMany, OneToMany, OneToOne, PrimaryColumn } from "typeorm";
+import { Bot } from "./Bot";
+import { CascadeUser } from "./CascadeUser";
+import { SpamUser } from "./SpamUser";
 
 
 @Entity()
@@ -6,31 +9,20 @@ export class User {
     @PrimaryColumn()
     usernameOrPhone: string;
 
-    @Column({nullable: true})
-    botid: string;
-
-    @Column({default: false})
-    replied: boolean;
-
-    @Column({nullable: true})
-    threadId: string;
-
-    @Column({default: false})
-    finished: boolean;
-
-    @Column({nullable: true})
-    contactId: number;
-
-    @Column({nullable: true})
-    dealId: number;
-
-    @Column({
-        default: 0
-    })
-    numSentMsgs: number;
 
     @Column({
         default: false
     })
-    sentSpam: boolean;
+    sent: boolean;
+
+    @OneToOne(() => CascadeUser, (cascade) => cascade.user, {
+        cascade: true
+    })
+    cascade: CascadeUser;
+
+    @OneToOne(() => SpamUser, (spam) => spam.user, {
+        cascade: true
+    })
+    spam: SpamUser;
+
 }

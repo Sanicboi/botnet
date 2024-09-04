@@ -7,6 +7,8 @@ import { DataSource, Repository } from "typeorm";
 import { UnknownError } from "../utils/Errors";
 import TelegramBot from "node-telegram-bot-api";
 import { Sender } from "./Sender";
+import { AppDataSource } from "../data-source";
+import { CascadeUser } from "../entity/CascadeUser";
 
 interface IProcessingTask {
   bot: Bot;
@@ -24,11 +26,10 @@ export class Processor {
   constructor(
     private clients: Map<string, TelegramClient>,
     private openai: OpenAI,
-    private src: DataSource,
     private reporter: TelegramBot,
     private sender: Sender
   ) {
-    this.userRepo = src.getRepository(User);
+    this.userRepo = AppDataSource.getRepository(User);
     this.handler = this.handler.bind(this);
     this.process = this.process.bind(this);
     this.queue = new Queue('proc', {
@@ -73,8 +74,13 @@ export class Processor {
           },
         ],
       });
-      const user = await this.userRepo.findOneBy({
-        usernameOrPhone: job.data.user.usernameOrPhone,
+      const user = await this.userRepo.findOne({
+        where: {
+          usernameOrPhone: job.data.user.usernameOrPhone,
+        },
+        relations: {
+          cascade: true
+        }
       });
 
       if (!user)
@@ -83,11 +89,10 @@ export class Processor {
           "Processing queue",
           this.reporter
         );
-
-      user.threadId = thread.id;
-      user.botid = job.data.bot.id;
+      user.cascade = new CascadeUser();
+      user.cascade.threadId = thread.id;
+      user.cascade.bot = job.data.bot;
       await this.userRepo.save(user);
-
       await this.sender.add(job.data.bot.queueIdx, {
         bot: job.data.bot.id,
         text: res.choices[0].message.content!,

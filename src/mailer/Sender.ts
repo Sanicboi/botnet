@@ -6,6 +6,7 @@ import { DataSource, Repository } from "typeorm";
 import { Bot } from "../entity/Bot";
 import { UnknownError } from "../utils/Errors";
 import TelegramBot from "node-telegram-bot-api";
+import { AppDataSource } from "../data-source";
 
 interface IOutcomingTask {
   bot: string;
@@ -17,18 +18,15 @@ interface IOutcomingTask {
 export class Sender {
   private outQueues: Queue<IOutcomingTask>[] = [];
   private outWorkers: Worker<IOutcomingTask>[] = [];
-  private msgRepo: Repository<Message>;
-  private botRepo: Repository<Bot>;
+  private msgRepo: Repository<Message> = AppDataSource.getRepository(Message);
+  private botRepo: Repository<Bot> = AppDataSource.getRepository(Bot);
 
   constructor(
     private queueCount: number,
     private manager: Manager,
     private clients: Map<string, TelegramClient>,
-    private src: DataSource,
     private reporter: TelegramBot
   ) {
-    this.msgRepo = src.getRepository(Message);
-    this.botRepo = src.getRepository(Bot);
 
     this.handler = this.handler.bind(this);
     this.add = this.add.bind(this);
@@ -49,7 +47,7 @@ export class Sender {
           },
           concurrency: 1,
           limiter: {
-            duration: 60000 * 5,
+            duration: 1000 * 5,
             max: 1,
           },
         })

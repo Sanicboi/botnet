@@ -1,4 +1,4 @@
-import TelegramBot from "node-telegram-bot-api";
+import TelegramBot, { Message } from "node-telegram-bot-api";
 
 export class Manager {
   private bot: TelegramBot;
@@ -22,5 +22,9 @@ export class Manager {
 
   public async reportToAnquets(text: string) {
     await this.bot.sendMessage(-1002244363083, text);
+  }
+
+  public onText(r: RegExp, cb: (msg: Message) => Promise<any>) {
+    return this.bot.onText(r, cb);
   }
 }

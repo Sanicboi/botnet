@@ -13,12 +13,10 @@ import { Message } from "./entity/Message";
 // import { Whatsapp } from "./Whatsapp";
 import { WhatsappUser } from "./entity/WhatsappUser";
 import { Bitrix } from "./Bitrix";
-import { ChatMsg } from "./entity/ChatMsg";
 import cron from "node-cron";
 import { Chat } from "./entity/Chat";
-import { Thread } from "./entity/Thread";
-import { TelegramMailer } from "./TelegramMailer";
 import { Assistant } from "./Assistant";
+import { TelegramMailer } from "./mailer/TelegramMailer";
 const openAi = new OpenAI({
   apiKey: process.env.OPENAI_KEY,
 });

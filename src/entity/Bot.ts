@@ -1,5 +1,7 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { Thread } from "./Thread";
+import { CascadeUser } from "./CascadeUser";
+import { SpamUser } from "./SpamUser";
+import { CommentChannel } from "./CommentChannel";
 
 @Entity()
 export class Bot {
@@ -40,12 +42,15 @@ export class Bot {
     @Column({default: 0})
     queueIdx: number;
 
-    @Column({default: 4})
-    quota: number;
-
     @Column({default: 0})
     sentMsgs: number;
 
-    @OneToMany(() => Thread, (thread) => thread.bot)
-    threads: Thread[];
+    @OneToMany(() => CascadeUser, (cascadeUser) => cascadeUser.bot)
+    cascades: CascadeUser[];
+
+    @OneToMany(() => SpamUser, (spamUser) => spamUser.bot)
+    spams: SpamUser[];
+
+    @OneToMany(() => CommentChannel, (c) => c.bot)
+    comments: CommentChannel[];
 }

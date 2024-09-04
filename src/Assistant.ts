@@ -28,12 +28,12 @@ export class Assistant {
     onRequresAction: Callback
   ): Promise<string[]> {
     let result: string[] = [];
-    await this.openai.beta.threads.messages.create(user.threadId, {
+    await this.openai.beta.threads.messages.create(user.cascade.threadId, {
       role: "user",
       content: msg,
     });
 
-    const run = this.openai.beta.threads.runs.stream(user.threadId, {
+    const run = this.openai.beta.threads.runs.stream(user.cascade.threadId, {
       assistant_id:
         bot.gender === "male"
           ? "asst_8RgJFwUqF11WAfl4uMcOlufE"
@@ -62,7 +62,7 @@ export class Assistant {
       );
       await onRequresAction(msg, user, bot, data);
       await this.openai.beta.threads.runs
-        .submitToolOutputsStream(user.threadId, finalRun.id, {
+        .submitToolOutputsStream(user.cascade.threadId, finalRun.id, {
           tool_outputs: [
             {
               output: "Встреча записана.",

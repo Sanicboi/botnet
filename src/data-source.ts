@@ -4,10 +4,12 @@ import { User } from "./entity/User"
 import { Bot } from "./entity/Bot"
 import { Message } from "./entity/Message"
 import { WhatsappUser } from "./entity/WhatsappUser"
-import { ChatMsg } from "./entity/ChatMsg"
-import { Thread } from "./entity/Thread"
 import { Chat } from "./entity/Chat"
 import { Client } from "./entity/Client"
+import { Channel } from "./entity/Channel"
+import { CommentChannel } from "./entity/CommentChannel"
+import { CascadeUser } from "./entity/CascadeUser"
+import { SpamUser } from "./entity/SpamUser"
 
 export const AppDataSource = new DataSource({
     type: "postgres",
@@ -18,7 +20,7 @@ export const AppDataSource = new DataSource({
     database: "test",
     synchronize: true,
     logging: false,
-    entities: [User, Bot, Message, WhatsappUser, ChatMsg, Thread, Chat, Client],
+    entities: [User, Bot, Message, WhatsappUser, Chat, Client, Channel, CommentChannel, CascadeUser, SpamUser],
     migrations: [],
     subscribers: [],
 })
