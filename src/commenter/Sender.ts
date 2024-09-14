@@ -33,9 +33,9 @@ export class Sender {
     private async onSend(job: Job<ISendComment>) {
         console.log('com job');
         const client = this.clients.get(job.data.botId);
-
+        console.log(client);
         try {
-            await client?.sendMessage(job.data.channel.id, {
+            await client!.sendMessage(job.data.channel.id, {
                 message: job.data.comment,
                 commentTo: job.data.postId
             });
