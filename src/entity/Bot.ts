@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { CascadeUser } from "./CascadeUser";
 import { SpamUser } from "./SpamUser";
 import { CommentChannel } from "./CommentChannel";
@@ -56,5 +56,6 @@ export class Bot {
     comments: CommentChannel[];
 
     @ManyToMany(() => Chat, (chat) => chat.bots)
+    @JoinTable()
     chats: Chat[];
 }
