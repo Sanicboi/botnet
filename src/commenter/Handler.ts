@@ -17,6 +17,7 @@ export class Handler {
 
 
     public async onMessage(msg: NewMessageEvent, bot: Bot) {
+        console.log(msg.isChannel);
         if (msg.isChannel) {
             const channel = await this.repo.findOne({
                 where: {
