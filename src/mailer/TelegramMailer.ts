@@ -56,10 +56,7 @@ export class TelegramMailer {
     bots: Bot[]
   ) {
     this.setup();
-    for (const b of bots) {
-      const client = clients.get(b.id);
-      client!.addEventHandler((e) => (this.onMessage(e, b)), new NewMessage());
-    }
+
     this.sender = new Sender(queueCount, this.manager, this.clients, this.reporter);
     this.handler = new Handler(this.clients, this.reporter, this.manager, this.assistant, this.sender);
     this.processor = new Processor(this.clients, this.openai, this.reporter, this.sender);

@@ -8,7 +8,6 @@ import { Bot } from "./entity/Bot";
 import { User } from "./entity/User";
 import TgBot from "node-telegram-bot-api";
 import { Job, Queue, Worker } from "bullmq";
-import { IsNull } from "typeorm";
 import { Message } from "./entity/Message";
 // import { Whatsapp } from "./Whatsapp";
 import { WhatsappUser } from "./entity/WhatsappUser";
@@ -17,6 +16,7 @@ import cron from "node-cron";
 import { Chat } from "./entity/Chat";
 import { Assistant } from "./Assistant";
 import { TelegramMailer } from "./mailer/TelegramMailer";
+import { Commenter } from "./commenter/Commenter";
 const openAi = new OpenAI({
   apiKey: process.env.OPENAI_KEY,
 });
@@ -77,5 +77,13 @@ AppDataSource.initialize()
       }
   }
   const mailer = new TelegramMailer(openAi, reporter, assistant, 50, clients, bots);
+  const commenter = new Commenter(clients, assistant);
+  for (const b of bots) {
+    const client = clients.get(b.id);
+    client!.addEventHandler(async (e) => {
+      await mailer.onMessage(e, b);
+      await commenter.onMessage(e, b);
+    }, new NewMessage());
+  }
   })
   .catch((error) => console.log(error));
