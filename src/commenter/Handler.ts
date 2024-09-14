@@ -29,6 +29,8 @@ export class Handler {
                     }
                 }
             });
+            console.log(channel?.commentChannel.bot.id);
+            console.log(bot.id);
             if (bot.id === channel?.commentChannel.bot.id) {
                 const result = await this.assistant.commentPost(msg.message.text);
                 for (const m of result) {
