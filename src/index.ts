@@ -17,6 +17,7 @@ import { Chat } from "./entity/Chat";
 import { Assistant } from "./Assistant";
 import { TelegramMailer } from "./mailer/TelegramMailer";
 import { Commenter } from "./commenter/Commenter";
+import { Seeder } from "./seeder/Seeder";
 const openAi = new OpenAI({
   apiKey: process.env.OPENAI_KEY,
 });
@@ -78,6 +79,11 @@ AppDataSource.initialize()
   }
   const mailer = new TelegramMailer(openAi, reporter, assistant, 50, clients, bots);
   const commenter = new Commenter(clients, assistant);
+  const seeder = new Seeder(clients);
+  reporter.onText(/\/seed/, () => {
+    seeder.onSeed();
+  })
+
   for (const b of bots) {
     const client = clients.get(b.id);
     client!.addEventHandler(async (e) => {

@@ -23,7 +23,7 @@ export class Sender {
         },
         concurrency: 1,
         limiter: {
-            duration: 10000,
+            duration: 30000,
             max: 1
         }
     });
