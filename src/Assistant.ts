@@ -89,7 +89,7 @@ export class Assistant {
     });
 
     const msgs = await this.openai.beta.threads.runs.stream(thread.id, {
-      assistant_id: ''
+      assistant_id: 'asst_GZDzMxU4ZWMJvmP2umCK9ud4'
     }).finalMessages();
 
     await this.openai.beta.threads.del(thread.id);
