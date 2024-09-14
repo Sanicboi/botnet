@@ -31,6 +31,7 @@ export class Sender {
     }
 
     private async onSend(job: Job<ISendComment>) {
+        console.log('com job');
         const client = this.clients.get(job.data.botId);
 
         try {
