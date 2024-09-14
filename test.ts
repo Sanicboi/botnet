@@ -19,7 +19,6 @@ import { Api, TelegramClient } from "telegram";
 import { StringSession } from "telegram/sessions";
 import { TotalList } from "telegram/Helpers";
 import { Chat } from "./src/entity/Chat";
-import { Thread } from "./src/entity/Thread";
 //@ts-ignore
 import input from 'input';
 // import { DataSource } from "typeorm";

@@ -77,4 +77,26 @@ export class Assistant {
     }
     return result;
   };
+
+  public async commentPost(text: string): Promise<string[]> {
+    const thread = await this.openai.beta.threads.create({
+      messages: [
+        {
+          role: 'user',
+          content: text
+        }
+      ]
+    });
+
+    const msgs = await this.openai.beta.threads.runs.stream(thread.id, {
+      assistant_id: ''
+    }).finalMessages();
+
+    await this.openai.beta.threads.del(thread.id);
+
+    return msgs.map(el => {
+      if (el.content[0].type === 'text') return el.content[0].text.value;
+      return '';
+    })
+  }
 }

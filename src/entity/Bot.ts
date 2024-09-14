@@ -1,7 +1,8 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { CascadeUser } from "./CascadeUser";
 import { SpamUser } from "./SpamUser";
 import { CommentChannel } from "./CommentChannel";
+import { Chat } from "./Chat";
 
 @Entity()
 export class Bot {
@@ -53,4 +54,7 @@ export class Bot {
 
     @OneToMany(() => CommentChannel, (c) => c.bot)
     comments: CommentChannel[];
+
+    @ManyToMany(() => Chat, (chat) => chat.bots)
+    chats: Chat[];
 }
