@@ -18,6 +18,7 @@ export class Commenter {
     }
 
     public async onMessage(msg: NewMessageEvent, bot: Bot) {
+        console.log(msg);
         await this.handler.onMessage(msg, bot);
     }
 }
