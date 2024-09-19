@@ -31,11 +31,17 @@ export class Smm {
 
     private async onText(msg: TelegramBot.Message) {
         if (!msg.text!.startsWith('/')) {
-            const user = await this.repo.findOne({
+            let user = await this.repo.findOne({
                 where: {
                     id: String(msg.from!.id)
                 }
             });
+            if (!user) {
+                user = new SmmUser();
+                user.id = String(msg.from!.id);
+                user.threadId = await this.model.createThread()
+            }
+            await this.repo.save(user);
             const response = await this.model.run(user!.threadId, msg.text!);
             for (const message of response) {
                 await this.bot.sendMessage(msg.from!.id, message);
