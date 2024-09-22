@@ -80,8 +80,9 @@ AppDataSource.initialize()
   }
   const mailer = new TelegramMailer(openAi, reporter, assistant, 50, clients, bots);
   const commenter = new Commenter(clients, assistant);
-  const seeder = new Seeder(clients);
   const smm = new Smm(openAi);
+  const seeder = new Seeder(clients, smm.bot);
+
   reporter.onText(/\/seed/, () => {
     seeder.onSeed();
   })

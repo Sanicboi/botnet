@@ -9,7 +9,7 @@ import OpenAI from "openai";
 
 export class Smm {
 
-    private bot: TelegramBot = new TelegramBot(process.env.SMM_TOKEN ?? '', {
+    public bot: TelegramBot = new TelegramBot(process.env.SMM_TOKEN ?? '', {
         polling: true
     });
     private repo: Repository<SmmUser> = AppDataSource.getRepository(SmmUser);
