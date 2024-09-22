@@ -32,6 +32,7 @@ export class Seeder {
             }
         });
         for (const chat of chats) {
+            console.log(chat.bots);
             await this.sender.send(chat.bots[0], 'Соси хуй', chat);
         }
     }
