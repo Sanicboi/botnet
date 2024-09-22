@@ -26,7 +26,9 @@ export class Seeder {
     public async onSeed() {
         const chats = await this.chatRepo.find({
             relations: {
-                bots: true
+                bots: {
+                    chats: true
+                }
             }
         });
         for (const chat of chats) {
@@ -37,7 +39,9 @@ export class Seeder {
     public async onSeedSmart() {
         const chats = await this.chatRepo.find({
             relations: {
-                bots: true
+                bots: {
+                    chats: true
+                }
             }
         });
         for (const chat of chats) {
