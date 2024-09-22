@@ -73,6 +73,7 @@ AppDataSource.initialize()
             phoneNumber: async () => "",
             phoneCode: async () => ""
         });
+        console.log((await client.getMe()).username);
         clients.set(b.id, client); 
       } catch (e) {
         console.log(e);
