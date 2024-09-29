@@ -9,6 +9,7 @@ import TelegramBot from "node-telegram-bot-api";
 import { Sender } from "./Sender";
 import { AppDataSource } from "../data-source";
 import { CascadeUser } from "../entity/CascadeUser";
+import { Randomiser } from "./Randomiser";
 
 interface IProcessingTask {
   bot: Bot;
@@ -52,24 +53,11 @@ export class Processor {
   private async handler(job: Job<IProcessingTask>) {
     try {
       const client = this.clients.get(job.data.bot.id);
-      const res = await this.openai.chat.completions.create({
-        messages: [
-          {
-            role: "user",
-            content: `ТЕБЯ ЗОВУТ ${
-              (
-                await client!.getMe()
-              ).firstName
-            }. Если у тебя женское имя, напиши от него. Перепиши синонимично это сообщение, заменив 15 слов синонимами, но сохранив мысль: ${startMessage}`,
-          },
-        ],
-        model: "gpt-4o-mini",
-        temperature: 1,
-      });
+      const result = await Randomiser.randomise(startMessage, (await client!.getMe()).firstName!)
       const thread = await this.openai.beta.threads.create({
         messages: [
           {
-            content: res.choices[0].message.content!,
+            content: result,
             role: "assistant",
           },
         ],
@@ -95,7 +83,7 @@ export class Processor {
       await this.userRepo.save(user);
       await this.sender.add(job.data.bot.queueIdx, {
         bot: job.data.bot.id,
-        text: res.choices[0].message.content!,
+        text: result,
         user: job.data.user.usernameOrPhone,
         first: true,
       });

@@ -7,6 +7,7 @@ import { Bot } from "../entity/Bot";
 import { UnknownError } from "../utils/Errors";
 import TelegramBot from "node-telegram-bot-api";
 import { AppDataSource } from "../data-source";
+import { wait } from "..";
 
 interface IOutcomingTask {
   bot: string;
@@ -47,7 +48,7 @@ export class Sender {
           },
           concurrency: 1,
           limiter: {
-            duration: 1000 * 5,
+            duration: 60000 * 3,
             max: 1,
           },
         })
@@ -56,6 +57,7 @@ export class Sender {
   }
 
   private async handler(job: Job<IOutcomingTask>) {
+    await wait(Math.random() * 60 * 4)
     const client = this.clients.get(job.data.bot);
     job.data.text = job.data.text.replaceAll(/【.+】/g, "").replaceAll("#", "");
     try {

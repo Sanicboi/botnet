@@ -19,7 +19,8 @@ import { TelegramMailer } from "./mailer/TelegramMailer";
 import { Commenter } from "./commenter/Commenter";
 import { Seeder } from "./seeder/Seeder";
 import { Smm } from "./smm/Smm";
-const openAi = new OpenAI({
+import { CrossMailer } from "./crossmailer/CrossMailer";
+export const openAi = new OpenAI({
   apiKey: process.env.OPENAI_KEY,
 });
 
@@ -83,9 +84,12 @@ AppDataSource.initialize()
   const commenter = new Commenter(clients, assistant);
   const smm = new Smm(openAi);
   const seeder = new Seeder(clients, smm.bot);
-
+  const heater = new CrossMailer(clients);
   reporter.onText(/\/seed/, () => {
     seeder.onSeed();
+  })
+  reporter.onText(/\/heat/, () => {
+    heater.onHeat();
   })
 
   for (const b of bots) {

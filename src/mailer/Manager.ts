@@ -17,11 +17,11 @@ export class Manager {
   }
 
   public async reportToLogs(text: string) {
-    await this.bot.sendMessage(-1002201795929, text);
+    await this.bot.sendMessage(-4570252028, text);
   }
 
   public async reportToAnquets(text: string) {
-    await this.bot.sendMessage(-1002244363083, text);
+    await this.bot.sendMessage(-4589734589, text);
   }
 
   public onText(r: RegExp, cb: (msg: Message) => Promise<any>) {
