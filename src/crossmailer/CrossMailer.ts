@@ -45,11 +45,13 @@ export class CrossMailer {
     }
 
     private async onJob(job: Job<IJob>) {
+        console.log('Heat job');
         const client = this.clients.get(job.data.from)!;
         const rec = this.clients.get(job.data.to)!;
         await client.sendMessage((await rec.getMe()).username!, {
             message: job.data.msg
         });
+        console.log('Sent');
     }
 
     public async onHeat() {
