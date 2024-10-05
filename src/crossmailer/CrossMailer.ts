@@ -48,7 +48,9 @@ export class CrossMailer {
         console.log('Heat job');
         const client = this.clients.get(job.data.from)!;
         const rec = this.clients.get(job.data.to)!;
-        await client.sendMessage((await rec.getMe()).username!, {
+        const recP = await rec.getMe();
+        console.log(recP.username);
+        await client.sendMessage(recP.username!, {
             message: job.data.msg
         });
         console.log('Sent');
@@ -62,6 +64,7 @@ export class CrossMailer {
         });
 
         for (const bot of bots) {
+            console.log('Bot iter')
             const other = bots.filter(el => el.id !== bot.id);
             for (let i = 0; i < 5; i++) {
                 const rnd = Math.round(Math.random() * 3);
