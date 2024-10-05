@@ -50,9 +50,9 @@ export class CrossMailer {
         const rec = this.clients.get(job.data.to)!;
         const recP = await rec.getMe();
         console.log(recP.username);
-        await client.sendMessage(recP.username!, {
-            message: job.data.msg
-        });
+        // await client.sendMessage(recP.username!, {
+        //     message: job.data.msg
+        // });
         console.log('Sent');
     }
 
