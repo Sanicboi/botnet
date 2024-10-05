@@ -35,7 +35,7 @@ export class CrossMailer {
     constructor(private clients: Map<string, TelegramClient>) {
         this.worker = new Worker('heat', this.onJob.bind(this), {
             limiter: {
-                duration: 30000,
+                duration: 60000,
                 max: 1
             },
             connection: {
