@@ -48,7 +48,7 @@ export class Sender {
           },
           concurrency: 1,
           limiter: {
-            duration: 60000 * 3,
+            duration: 60000 * 1,
             max: 1,
           },
         })
@@ -57,7 +57,9 @@ export class Sender {
   }
 
   private async handler(job: Job<IOutcomingTask>) {
-    await wait(Math.random() * 60 * 4)
+    if (job.data.first) {
+      await wait(Math.random() * 60 * 4)
+    }
     const client = this.clients.get(job.data.bot);
     job.data.text = job.data.text.replaceAll(/【.+】/g, "").replaceAll("#", "");
     try {
