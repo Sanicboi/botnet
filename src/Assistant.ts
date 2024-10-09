@@ -35,9 +35,10 @@ export class Assistant {
 
     const run = this.openai.beta.threads.runs.stream(user.cascade.threadId, {
       assistant_id:
-        bot.gender === "male"
-          ? "asst_8RgJFwUqF11WAfl4uMcOlufE"
-          : "asst_LNGeR2YXA5i8i4HluS549xg5",
+        // bot.gender === "male"
+        //   ? "asst_8RgJFwUqF11WAfl4uMcOlufE"
+        //   : "asst_LNGeR2YXA5i8i4HluS549xg5",
+        'asst_vK4VgYVrZdCWp0GW52RG7uTN'
     });
     const msgsBefore = await run.finalMessages();
     result.push(
@@ -89,7 +90,7 @@ export class Assistant {
     });
 
     const msgs = await this.openai.beta.threads.runs.stream(thread.id, {
-      assistant_id: 'asst_GZDzMxU4ZWMJvmP2umCK9ud4'
+      assistant_id: 'asst_vK4VgYVrZdCWp0GW52RG7uTN'
     }).finalMessages();
 
     await this.openai.beta.threads.del(thread.id);
