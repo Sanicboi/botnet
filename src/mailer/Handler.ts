@@ -77,12 +77,12 @@ export class Handler {
         throw new UnknownError("Bot is NULL", "Incoming queue", this.reporter);
       }
       if (user.cascade && !user.cascade.replied) {
-        await this.manager.reportToAnquets(`Получен ответ (каскад) от клиента ${user.usernameOrPhone}`);
+        //await this.manager.reportToAnquets(`Получен ответ (каскад) от клиента ${user.usernameOrPhone}`);
         user.cascade.replied = true; 
       }
 
       if (user.spam && !user.spam.replied) {
-        await this.manager.reportToAnquets(`Получен ответ (спам) от клиента ${user.usernameOrPhone}`);
+        //await this.manager.reportToAnquets(`Получен ответ (спам) от клиента ${user.usernameOrPhone}`);
         user.spam.replied = true;
       }
 
@@ -137,6 +137,6 @@ export class Handler {
     ) {
       user.cascade.finished = true;
     await this.userRepo.save(user);
-    await this.manager.reportToAnquets(`Согласована встреча с клиентом. Номер телефона бота: ${bot.phone}\nКлиент:${user.usernameOrPhone}`);
+    //await this.manager.reportToAnquets(`Согласована встреча с клиентом. Номер телефона бота: ${bot.phone}\nКлиент:${user.usernameOrPhone}`);
     }
 }

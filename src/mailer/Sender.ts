@@ -71,9 +71,9 @@ export class Sender {
       await client!.sendMessage(job.data.user, {
         message: job.data.text,
       });
-      await this.manager.reportToLogs(
-        `Отправлено сообщение. От: ${m.botphone}. К: ${m.username}`
-      );
+      //await this.manager.reportToLogs(
+      //  `Отправлено сообщение. От: ${m.botphone}. К: ${m.username}`
+      //);
       if (job.data.first) {
         const obj = await this.botRepo.findOneBy({
           id: job.data.bot,
