@@ -2,52 +2,36 @@
 import input from "input";
 import { TelegramClient } from "telegram";
 import { StringSession } from "telegram/sessions";
-import { DataSource } from "typeorm";
-import { User } from "./src/entity/User";
-import { Bot } from "./src/entity/Bot";
-import { Message } from "./src/entity/Message";
-import { WhatsappUser } from "./src/entity/WhatsappUser";
-import { Thread } from "./src/entity/Thread";
-import { Chat } from "./src/entity/Chat";
+import fs from 'fs';
+import path from 'path';
+import { NewMessage, NewMessageEvent } from "telegram/events";
+import TelegramBot from "node-telegram-bot-api";
 
-const src = new DataSource({
-  type: "postgres",
-  username: "test",
-  password: "test",
-  database: "test",
-  host: "194.0.194.46",
-  entities: [User, Bot, Message, WhatsappUser, Thread, Chat],
-  port: 5432,
-  synchronize: true,
-  migrations: [],
-  subscribers: [],
+const bots = fs.readFileSync(path.join(__dirname, 'signup', 'tokens.txt'), 'utf8').split('\n');
+const b = new TelegramBot('7347879515:AAGfiiuwBzlgFHHASnBnjxkwNPUooFXO3Qc', {
+  polling: true
 });
+(async() => {
+  for (const bot of bots) {
+    if (!bot) continue;
+    const session = new StringSession(bot);
+    const client = new TelegramClient(session, 28082768, '4bb35c92845f136f8eee12a04c848893', {});
+    try {
+      await client.start({
+        phoneCode: async () => '',
+        phoneNumber: async () => '',
+        onError: () => {} 
+      });
 
-src.initialize().then(async () => {
-  try {
-    const session = new StringSession("");
-    const client = new TelegramClient(
-      session,
-      28082768,
-      "4bb35c92845f136f8eee12a04c848893",
-      { useWSS: true }
-    );
-    await client.start({
-      onError(err) {
-        console.log(err);
-      },
-      phoneCode: async () => input.text("Code"),
-      phoneNumber: async () => input.text("Phone Number"),
-      password: async () => input.text("Password"),
-    });
-    const bot = new Bot();
-    // @ts-ignore
-    bot.token = client.session.save();
-    bot.gender = (await input.text("Gender")) == 'm' ? 'male' : 'female';
-    console.log(bot.gender);
-    await src.getRepository(Bot).save(bot);
-    await client.destroy();
-  } catch (err) {
-    console.log(err);
+      client.addEventHandler(async (e: NewMessageEvent)=> {
+        try {
+          await b.sendMessage(1391491967, e.message.text);
+        } catch (error) {
+          console.log(error);
+        }
+      },new NewMessage())
+    } catch (error) {
+      
+    }
   }
-});
+})()

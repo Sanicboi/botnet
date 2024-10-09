@@ -9,4 +9,11 @@ export class SmmUser {
 
     @Column()
     threadId: string;
+
+    @Column({nullable: true})
+    category: string;
+
+    @Column({nullable: true})
+    style: string;
+
 }

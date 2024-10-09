@@ -79,7 +79,7 @@ import input from 'input';
 // });
     
 (async () => {
-    const numbers = fs.readFileSync(path.join(__dirname, 'signup', 'bots.txt'), 'utf8').split('\n');
+    const numbers = fs.readFileSync(path.join(__dirname, 'signup', 'bots.txt'), 'utf8').split('\n').map(el => el.trim());
 
 
     for (const n of numbers) {
