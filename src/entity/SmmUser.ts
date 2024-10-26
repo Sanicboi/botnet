@@ -1,19 +1,16 @@
-import {Column, Entity, PrimaryColumn} from 'typeorm';
+import { Column, Entity, PrimaryColumn } from "typeorm";
 
-
-@Entity() 
+@Entity()
 export class SmmUser {
-    
-    @PrimaryColumn()
-    id: string;
+  @PrimaryColumn()
+  id: string;
 
-    @Column()
-    threadId: string;
+  @Column()
+  threadId: string;
 
-    @Column({nullable: true})
-    category: string;
+  @Column({ nullable: true })
+  category: string;
 
-    @Column({nullable: true})
-    style: string;
-
+  @Column({ nullable: true })
+  style: string;
 }

@@ -1,23 +1,26 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from "typeorm";
-
-
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+} from "typeorm";
 
 @Entity()
 export class Message {
-    @PrimaryGeneratedColumn()
-    id: number;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @Column({
-        type: 'text'
-    })
-    text: string;
+  @Column({
+    type: "text",
+  })
+  text: string;
 
-    @Column()
-    botphone: string;
+  @Column()
+  botphone: string;
 
-    @Column()
-    username: string;
+  @Column()
+  username: string;
 
-    @CreateDateColumn()
-    date: Date;
+  @CreateDateColumn()
+  date: Date;
 }

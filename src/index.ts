@@ -7,19 +7,12 @@ import OpenAI from "openai";
 import { Bot } from "./entity/Bot";
 import { User } from "./entity/User";
 import TgBot from "node-telegram-bot-api";
-import { Job, Queue, Worker } from "bullmq";
-import { Message } from "./entity/Message";
-// import { Whatsapp } from "./Whatsapp";
-import { WhatsappUser } from "./entity/WhatsappUser";
-import { Bitrix } from "./Bitrix";
-import cron from "node-cron";
-import { Chat } from "./entity/Chat";
-import { Assistant } from "./Assistant";
-import { TelegramMailer } from "./mailer/TelegramMailer";
-import { Commenter } from "./commenter/Commenter";
-import { Seeder } from "./seeder/Seeder";
-import { Smm } from "./smm/Smm";
-import { CrossMailer } from "./crossmailer/CrossMailer";
+import { Assistant } from "./bots/Assistant";
+import { TelegramMailer } from "./bots/mailer/TelegramMailer";
+import { Commenter } from "./bots/commenter/Commenter";
+import { Seeder } from "./bots/seeder/Seeder";
+import { Smm } from "./ai/smm/Smm";
+import { CrossMailer } from "./bots/crossmailer/CrossMailer";
 export const openAi = new OpenAI({
   apiKey: process.env.OPENAI_KEY,
 });
@@ -29,33 +22,13 @@ export const wait = async (s: number) => {
 };
 AppDataSource.initialize()
   .then(async () => {
-    const reporter = new TgBot(process.env.REPORTER_TG_TOKEN ?? '', {
+    const reporter = new TgBot(process.env.REPORTER_TG_TOKEN ?? "", {
       polling: true,
     });
 
-    // const whatsapp = new Whatsapp(openAi, AppDataSource, manager, determiner);
-
-    
-    // manager.onText(/\/whatsapp/, async () => {
-    //   console.log("sending");
-    //   const users = await AppDataSource.getRepository(WhatsappUser).find({
-    //     take: 150,
-    //     where: {
-    //       finished: false,
-    //       threadId: IsNull(),
-    //     },
-    //   });
-
-    //   for (const user of users) {
-    //     await whatsapp.schedule(user.phone);
-    //   }
-    // });
- 
-
-    // whatsapp.listen();
     const bots = await AppDataSource.getRepository(Bot).find({
       where: {
-          blocked: false,
+        blocked: false,
       },
     });
     const clients: Map<string, TelegramClient> = new Map();
@@ -64,40 +37,52 @@ AppDataSource.initialize()
     for (const b of bots) {
       try {
         const session = new StringSession(b.token);
-        const client = new TelegramClient(session, Number(process.env.TG_APP_ID), process.env.TG_APP_HASH ?? '', {
-          useWSS: true,
-          connectionRetries: 1,
-          timeout: 0.5
-        });
+        const client = new TelegramClient(
+          session,
+          Number(process.env.TG_APP_ID),
+          process.env.TG_APP_HASH ?? "",
+          {
+            useWSS: true,
+            connectionRetries: 1,
+            timeout: 0.5,
+          },
+        );
         await client.start({
-            onError: async (e) => true,
-            phoneNumber: async () => "",
-            phoneCode: async () => ""
+          onError: async (e) => true,
+          phoneNumber: async () => "",
+          phoneCode: async () => "",
         });
         console.log((await client.getMe()).username);
-        clients.set(b.id, client); 
+        clients.set(b.id, client);
       } catch (e) {
         console.log(e);
       }
-  }
-  const mailer = new TelegramMailer(openAi, reporter, assistant, 50, clients, bots);
-  const commenter = new Commenter(clients, assistant);
-  const smm = new Smm(openAi);
-  const seeder = new Seeder(clients, smm.bot);
-  const heater = new CrossMailer(clients);
-  reporter.onText(/\/seed/, () => {
-    seeder.onSeed();
-  })
-  reporter.onText(/\/heat/, () => {
-    heater.onHeat();
-  })
+    }
+    const mailer = new TelegramMailer(
+      openAi,
+      reporter,
+      assistant,
+      50,
+      clients,
+      bots,
+    );
+    const commenter = new Commenter(clients, assistant);
+    const smm = new Smm(openAi);
+    const seeder = new Seeder(clients, smm.bot);
+    const heater = new CrossMailer(clients);
+    reporter.onText(/\/seed/, () => {
+      seeder.onSeed();
+    });
+    reporter.onText(/\/heat/, () => {
+      heater.onHeat();
+    });
 
-  for (const b of bots) {
-    const client = clients.get(b.id);
-    client!.addEventHandler(async (e) => {
-      await mailer.onMessage(e, b);
-      await commenter.onMessage(e, b);
-    }, new NewMessage());
-  }
+    for (const b of bots) {
+      const client = clients.get(b.id);
+      client!.addEventHandler(async (e) => {
+        await mailer.onMessage(e, b);
+        await commenter.onMessage(e, b);
+      }, new NewMessage());
+    }
   })
   .catch((error) => console.log(error));

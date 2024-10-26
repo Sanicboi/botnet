@@ -1,4 +1,4 @@
-version: '3.0'
+version: "3.0"
 services:
   bots1:
     restart: always
@@ -19,10 +19,9 @@ services:
   redis:
     image: redis
     restart: always
-    ports: 
-     - "6379:6379"
+    ports:
+      - "6379:6379"
   voronka:
     restart: always
     build: .
     command: npm run voronka
-
