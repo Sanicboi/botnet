@@ -3,7 +3,7 @@ import { Handler } from "./Handler";
 import { Sender } from "./Sender";
 import { Assistant } from "../Assistant";
 import { NewMessageEvent } from "telegram/events";
-import { Bot } from "../entity/Bot";
+import { Bot } from "../../entity/Bot";
 
 export class Commenter {
   private handler: Handler;

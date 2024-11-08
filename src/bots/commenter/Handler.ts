@@ -1,11 +1,11 @@
 import { TelegramClient } from "telegram";
 import { NewMessageEvent } from "telegram/events";
-import { Bot } from "../entity/Bot";
+import { Bot } from "../../entity/Bot";
 import { Assistant } from "../Assistant";
 import { Sender } from "./Sender";
 import { Repository } from "typeorm";
-import { Channel } from "../entity/Channel";
-import { AppDataSource } from "../data-source";
+import { Channel } from "../../entity/Channel";
+import { AppDataSource } from "../../data-source";
 
 export class Handler {
   private repo: Repository<Channel> = AppDataSource.getRepository(Channel);

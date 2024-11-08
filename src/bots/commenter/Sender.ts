@@ -1,5 +1,5 @@
 import { TelegramClient } from "telegram";
-import { Channel } from "../entity/Channel";
+import { Channel } from "../../entity/Channel";
 import { Job, Queue, Worker } from "bullmq";
 
 interface ISendComment {

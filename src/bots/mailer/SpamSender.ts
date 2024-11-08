@@ -1,13 +1,13 @@
 import { Repository } from "typeorm";
-import { Bot } from "../entity/Bot";
-import { AppDataSource } from "../data-source";
-import { User } from "../entity/User";
+import { Bot } from "../../entity/Bot";
+import { AppDataSource } from "../../data-source";
+import { User } from "../../entity/User";
 import { Job, Queue, Worker } from "bullmq";
-import { wait } from "..";
-import { MessgaeFormatter } from "../utils/MessageFormatter";
+import { wait } from "../..";
+import { MessageFormatter } from "../../utils/MessageFormatter";
 import { Manager } from "./Manager";
 import { TelegramClient } from "telegram";
-import { SpamUser } from "../entity/SpamUser";
+import { SpamUser } from "../../entity/SpamUser";
 
 interface ISpamInfo {
   username: string;
@@ -81,7 +81,7 @@ export class SpamSender {
     try {
       const client = this.clients.get(job.data.bot);
       if (!client) throw new Error();
-      await MessgaeFormatter.sendTextFromFile(
+      await MessageFormatter.sendTextFromFile(
         job.data.username,
         "script.txt",
         client,

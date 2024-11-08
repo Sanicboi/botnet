@@ -1,7 +1,7 @@
 import TelegramBot from "node-telegram-bot-api";
 import { Repository } from "typeorm";
-import { SmmUser } from "../entity/SmmUser";
-import { AppDataSource } from "../data-source";
+import { SmmUser } from "../../entity/SmmUser";
+import { AppDataSource } from "../../data-source";
 import { SmmModel } from "./SmmModel";
 import OpenAI from "openai";
 

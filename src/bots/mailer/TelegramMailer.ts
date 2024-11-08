@@ -1,11 +1,11 @@
 import TelegramBot from "node-telegram-bot-api";
 import OpenAI from "openai";
 import { Repository } from "typeorm";
-import { Bot } from "../entity/Bot";
-import { AppDataSource } from "../data-source";
-import { User } from "../entity/User";
-import { InvalidInputError, UnknownError } from "../utils/Errors";
-import { Message } from "../entity/Message";
+import { Bot } from "../../entity/Bot";
+import { AppDataSource } from "../../data-source";
+import { User } from "../../entity/User";
+import { InvalidInputError, UnknownError } from "../../utils/Errors";
+import { Message } from "../../entity/Message";
 import { TelegramClient } from "telegram";
 import { Assistant, IData } from "../Assistant";
 import { NewMessageEvent } from "telegram/events";
@@ -13,7 +13,7 @@ import { Sender } from "./Sender";
 import { Handler } from "./Handler";
 import { Processor } from "./Processor";
 import { Manager } from "./Manager";
-import { CascadeUser } from "../entity/CascadeUser";
+import { CascadeUser } from "../../entity/CascadeUser";
 import { SpamSender } from "./SpamSender";
 
 const startMessage =
@@ -28,12 +28,17 @@ const dobiv3 = "Если Вам неинтересно, можем отложи�
 export class TelegramMailer {
   private botRepo: Repository<Bot> = AppDataSource.getRepository(Bot);
   private userRepo: Repository<User> = AppDataSource.getRepository(User);
-  private msgRepo: Repository<Message> = AppDataSource.getRepository(Message);
   private sender: Sender;
   private handler: Handler;
   private processor: Processor;
   private spamSender: SpamSender;
   private manager: Manager = new Manager();
+  private bot: TelegramBot = new TelegramBot(
+    process.env.MAILER_BOT_TOKEN ?? "",
+    {
+      polling: true,
+    },
+  );
 
   constructor(
     private openai: OpenAI,
@@ -177,6 +182,8 @@ export class TelegramMailer {
   private async onSendSpam() {
     await this.spamSender.sendSpam();
   }
+
+  private async onStart(msg: TelegramBot.Message) {}
 
   public setup() {
     this.onSend = this.onSend.bind(this);

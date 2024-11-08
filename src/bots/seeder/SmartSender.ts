@@ -1,6 +1,6 @@
-import { wait } from "..";
-import { Bot } from "../entity/Bot";
-import { Chat } from "../entity/Chat";
+import { wait } from "../..";
+import { Bot } from "../../entity/Bot";
+import { Chat } from "../../entity/Chat";
 import { Sender } from "./Sender";
 
 export class SmartSender {

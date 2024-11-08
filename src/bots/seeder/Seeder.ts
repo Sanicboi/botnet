@@ -1,7 +1,7 @@
 import { TelegramClient } from "telegram";
 import { Repository } from "typeorm";
-import { Chat } from "../entity/Chat";
-import { AppDataSource } from "../data-source";
+import { Chat } from "../../entity/Chat";
+import { AppDataSource } from "../../data-source";
 import { Sender } from "./Sender";
 import { SmartSender } from "./SmartSender";
 import TelegramBot from "node-telegram-bot-api";

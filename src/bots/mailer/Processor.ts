@@ -1,14 +1,14 @@
 import { Job, Queue, Worker } from "bullmq";
-import { Bot } from "../entity/Bot";
-import { User } from "../entity/User";
+import { Bot } from "../../entity/Bot";
+import { User } from "../../entity/User";
 import { TelegramClient } from "telegram";
 import OpenAI from "openai";
 import { DataSource, Repository } from "typeorm";
-import { UnknownError } from "../utils/Errors";
+import { UnknownError } from "../../utils/Errors";
 import TelegramBot from "node-telegram-bot-api";
 import { Sender } from "./Sender";
-import { AppDataSource } from "../data-source";
-import { CascadeUser } from "../entity/CascadeUser";
+import { AppDataSource } from "../../data-source";
+import { CascadeUser } from "../../entity/CascadeUser";
 import { Randomiser } from "./Randomiser";
 
 interface IProcessingTask {

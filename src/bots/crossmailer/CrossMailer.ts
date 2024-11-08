@@ -1,7 +1,7 @@
 import { TelegramClient } from "telegram";
 import { Repository } from "typeorm";
-import { Bot } from "../entity/Bot";
-import { AppDataSource } from "../data-source";
+import { Bot } from "../../entity/Bot";
+import { AppDataSource } from "../../data-source";
 import { Job, Queue, Worker } from "bullmq";
 
 interface IJob {

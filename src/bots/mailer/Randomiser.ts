@@ -1,4 +1,4 @@
-import { openAi } from "..";
+import { openAi } from "../..";
 
 export class Randomiser {
   public static async randomise(

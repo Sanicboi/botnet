@@ -1,14 +1,14 @@
 import { Job, Queue, Worker } from "bullmq";
 import { Api, TelegramClient } from "telegram";
 import { NewMessageEvent } from "telegram/events";
-import { Bot } from "../entity/Bot";
+import { Bot } from "../../entity/Bot";
 import { Repository } from "typeorm";
-import { User } from "../entity/User";
-import { AppDataSource } from "../data-source";
-import { UnknownError } from "../utils/Errors";
+import { User } from "../../entity/User";
+import { AppDataSource } from "../../data-source";
+import { UnknownError } from "../../utils/Errors";
 import TelegramBot from "node-telegram-bot-api";
 import { Manager } from "./Manager";
-import { wait } from "..";
+import { wait } from "../..";
 import { Assistant, IData } from "../Assistant";
 import { Sender } from "./Sender";
 

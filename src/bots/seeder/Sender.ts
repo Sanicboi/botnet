@@ -1,7 +1,7 @@
 import { Job, Queue, Worker } from "bullmq";
 import { TelegramClient } from "telegram";
-import { Bot } from "../entity/Bot";
-import { Chat } from "../entity/Chat";
+import { Bot } from "../../entity/Bot";
+import { Chat } from "../../entity/Chat";
 
 export interface IChatData {
   chatId: string;
