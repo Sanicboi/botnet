@@ -1,4 +1,7 @@
-import TelegramBot, { InlineKeyboardButton, Message } from "node-telegram-bot-api";
+import TelegramBot, {
+  InlineKeyboardButton,
+  Message,
+} from "node-telegram-bot-api";
 import { MessageFormatter } from "../utils/MessageFormatter";
 import pino from "pino";
 import { AppDataSource } from "../data-source";
@@ -23,7 +26,7 @@ bot
     },
     {
       description: "Нейро-сотрудники",
-      command: "aiproducts"
+      command: "aiproducts",
     },
     {
       description: "Наши социальные сети",
@@ -38,16 +41,8 @@ bot
       command: "session",
     },
     {
-      description: "Партнерская программа",
-      command: "partnership",
-    },
-    {
       description: "Доступ к GPT",
       command: "gpt",
-    },
-    {
-      description: "Поддержка",
-      command: "support",
     },
   ])
   .catch((err) => console.log(err));
@@ -66,7 +61,12 @@ bot.onText(/\/start/, async (msg) => {
     msg.from.id,
     `Привет, ${msg.from.username ?? msg.from.first_name}`,
   );
-  await MessageFormatter.sendImageFromFileBot('chris.jpg', bot, msg.from!.id, `Меня зовут Крис.🚀\nЯ AI менеджер компании SmartComarde.\nЯ буду Вашим проводником в мир AI технологий🧬\n\nКак показывает практика:  Внедрение AI-оптимизации в бизнес, способно увеличить эффективность метрик и показателей более чем на 40%.\n\nВыбирайте категорию меню ниже))\n\nP.S. Не забудьте забрать бесплатные материалы, которые будут полезны уже сейчас 🎁`);
+  await MessageFormatter.sendImageFromFileBot(
+    "chris.jpg",
+    bot,
+    msg.from!.id,
+    `Меня зовут Крис.🚀\nЯ AI менеджер компании SmartComarde.\nЯ буду Вашим проводником в мир AI технологий🧬\n\nКак показывает практика:  Внедрение AI-оптимизации в бизнес, способно увеличить эффективность метрик и показателей более чем на 40%.\n\nВыбирайте категорию меню ниже))\n\nP.S. Не забудьте забрать бесплатные материалы, которые будут полезны уже сейчас 🎁`,
+  );
 });
 
 bot.onText(/\/about/, async (msg) => {
@@ -75,11 +75,10 @@ bot.onText(/\/about/, async (msg) => {
 
 bot.onText(/\/products/, async (msg) => {
   try {
-    await MessageFormatter.sendImageFromFileBot(
-      "products.jpg",
+    await MessageFormatter.sendTextFromFileBot(
       bot,
+      "products.txt",
       msg.from!.id,
-      MessageFormatter.readTextFromFile("products.txt"),
       {
         reply_markup: {
           inline_keyboard: [
@@ -109,17 +108,16 @@ bot.onText(/\/products/, async (msg) => {
             ],
             [
               {
-                text: 'Создай своего нейро-сотрудника',
-                callback_data: 'create'
-              }
+                text: "Создай своего нейро-сотрудника",
+                callback_data: "create",
+              },
             ],
             [
-                {
-                    text: 'Другое',
-                    callback_data: 'other'
-                }
+              {
+                text: "Другое",
+                callback_data: "other",
+              },
             ],
-
           ],
         },
       },
@@ -133,51 +131,45 @@ bot.on("callback_query", async (q) => {
   let caption = "";
 
   switch (q.data) {
-    case "mp":   
+    case "mp":
     case "create":
     case "leadgen":
     case "sales":
-    case "smm":  
+    case "smm":
     case "call":
     case "attorney":
     case "programmes":
     case "copywriting":
-    case "session":
     case "other":
     case "question":
-      await MessageFormatter.sendTextFromFileBot(bot, q.data + ".txt", q.from.id, q.data == 'other' ? {
-        reply_markup: {
-          inline_keyboard: [
-            [
-              {
-                text: 'Ответить на вопросы',
-                callback_data: 'question'
-              }
-            ]
-          ]
-        }
-      } : undefined);
-      if (q.data == 'question') {
+      await MessageFormatter.sendTextFromFileBot(
+        bot,
+        q.data + ".txt",
+        q.from.id,
+      );
+      if (q.data == "question") {
         const user = await AppDataSource.getRepository(Client).findOneBy({
-          chatId: String(q.from.id)
+          chatId: String(q.from.id),
         });
         if (user) {
-          user.qt = 'a';
+          user.qt = "a";
           await AppDataSource.getRepository(Client).save(user);
         }
       }
       return;
-    
+
     case "check":
       try {
-        // const u = await bot.getChatMember(+(process.env.PROMO ?? ''), q.from.id);
-        // if (!u) throw new Error();
+        const u = await bot.getChatMember(-1002458365675, q.from.id);
+        if (!u) throw new Error();
         await MessageFormatter.sendTextFromFileBot(bot, "check.txt", q.from.id);
       } catch (error) {
         await bot.sendMessage(
           q.from.id,
           "Не вижу твоей подписки. Подпишись, чтобы получить материалы!)",
         );
+      } finally {
+        return;
       }
   }
   await MessageFormatter.sendImageFromFileBot(
@@ -203,7 +195,6 @@ bot.on("callback_query", async (q) => {
   );
 });
 
-
 bot.onText(/\/social/, async (msg) => {
   await MessageFormatter.sendTextFromFileBot(bot, "social.txt", msg.from!.id);
 });
@@ -219,7 +210,7 @@ bot.onText(/\/presents/, async (msg) => {
           [
             {
               text: "Канал",
-              url: "https://google.com",
+              url: "t.me/SmartComrade1",
             },
           ],
           [
@@ -301,7 +292,6 @@ bot.onText(/./, async (msg) => {
   }
 });
 
-
 bot.onText(/\/aiproducts/, async (msg: Message) => {
   // await bot.sendMessage(msg.from!.id, 'Чтобы мне дать максимально конструктивный ответ, укажите категорию оптимизации:', {
   //   reply_markup: {
@@ -333,5 +323,24 @@ bot.onText(/\/aiproducts/, async (msg: Message) => {
   //     ]
   //   }
   // });
-  await MessageFormatter.sendTextFromFileBot(bot, 'aiproducts.txt', msg.from!.id);
-})
+  await MessageFormatter.sendTextFromFileBot(
+    bot,
+    "aiproducts.txt",
+    msg.from!.id,
+  );
+});
+
+bot.onText(/\/session/, async (msg) => {
+  await MessageFormatter.sendTextFromFileBot(bot, "session.txt", msg.from!.id, {
+    reply_markup: {
+      inline_keyboard: [
+        [
+          {
+            text: "Ответить на вопросы",
+            callback_data: "question",
+          },
+        ],
+      ],
+    },
+  });
+});
