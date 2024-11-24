@@ -64,11 +64,11 @@ export class Handler {
             });
             if (!user) throw new Error("User not found");
             const cost = ((j.tokenCount / 1000000) * (user.model === 'gpt-4o-mini' ? 0.6 : user.model === 'gpt-4o' ? 10 : 30) * 100);
-            if (user.leftForToday >= 0) {
+            if (user.leftForToday > 0) {
               logger.info("Case 1");
               user.leftForToday -= cost;
               user.leftForToday = Math.max(0, user.leftForToday);
-            } else if (user.addBalance >= 0) {
+            } else if (user.addBalance > 0) {
               logger.info("Case 2");
               user.addBalance -= cost;
               user.addBalance = Math.max(0, user.addBalance);
