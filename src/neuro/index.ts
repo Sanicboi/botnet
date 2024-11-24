@@ -111,7 +111,7 @@ bot.onText(/\/neuro/, async (msg) => {
 
 bot.on("callback_query", async (q) => {
   try {
-    await tryDeletePrevious(q.message!.message_id, q.message!.chat.id);
+    await tryDeletePrevious(q.message!.message_id + 1, q.message!.chat.id);
     if (q.data!.startsWith("a-")) {
       const actions = await manager.find(Action, {
         where: {
