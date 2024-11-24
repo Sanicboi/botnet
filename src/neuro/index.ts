@@ -243,7 +243,25 @@ bot.on("callback_query", async (q) => {
             ],
             [
               {
-                text: 'PRO+'
+                text: 'PRO+ (790₽)',
+                callback_data: 'sub-pro+'
+              }
+            ],
+            [
+              {
+                text: 'Premium (1 490₽)',
+                callback_data: 'sub-premium'
+              }
+            ],
+            [
+              {
+                text: 'Exclusive (3 490₽)',
+                callback_data: 'sub-exclusive'
+              }
+            ],
+            [
+              {
+                text: 'Назад',
               }
             ]
           ]
