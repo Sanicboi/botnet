@@ -127,6 +127,12 @@ bot.on("callback_query", async (q) => {
           },
         ]);
       }
+      result.push([
+        {
+          text: "Назад",
+          callback_data: 'menu'
+        }
+      ]);
       await bot.sendMessage(q.from.id, "Выберите функцию", {
         reply_markup: {
           inline_keyboard: result,
@@ -161,6 +167,12 @@ bot.on("callback_query", async (q) => {
                 callback_data: "gen",
               },
             ],
+            [
+              {
+                text: "Назад",
+                callback_data: "menu"
+              }
+            ]
           ],
         },
       });
@@ -186,6 +198,12 @@ bot.on("callback_query", async (q) => {
                 callback_data: "res-1792x1024",
               },
             ],
+            [
+              {
+                text: "Назад",
+                callback_data: "images"
+              }
+            ]
           ],
         },
       });
@@ -231,6 +249,43 @@ bot.on("callback_query", async (q) => {
           ]
         }
       })
+    } else if (q.data === "menu") {
+      const user = await manager.findOneBy(User, {
+        chatId: String(q.from.id)
+      });
+      if (!user) return;
+      if (user.usingImageGeneration) {
+        user.usingImageGeneration = false;
+        await manager.save(user);
+      }
+
+    const assistants = await manager.find(Assistant);
+    let result: InlineKeyboardButton[][] = [];
+    let u = await manager.findOneBy(User, {
+      chatId: String(q.from.id),
+    });
+    for (const a of assistants) {
+      result.push([
+        {
+          text: a.name,
+          callback_data: `a-${a.id}`,
+        },
+      ]);
+    }
+
+    result.push([
+      {
+        text: "Дизайн и генерация картинок",
+        callback_data: "images",
+      },
+    ]);
+
+    await bot.sendMessage(q.from.id, "Выберите категорию сотрудников", {
+      reply_markup: {
+        inline_keyboard: result,
+      },
+    });
+
     }
   } catch (err) {
     logger.fatal(err);
@@ -293,8 +348,11 @@ bot.onText(/\/start/, async (msg) => {
     user.chatId = String(msg.from!.id);
     user.addBalance += 1.7;
     await manager.save(user);
+  } else if (user.usingImageGeneration) {
+    user.usingImageGeneration = false;
+    await manager.save(user);
   }
-
+  
   await bot.sendMessage(msg.from!.id, "Привет! На связи SmartComarde. Готов улучшить продуктивность своего бизнеса с помощью ИИ? Выбирай категорию меню ниже.");
 })
 
@@ -311,6 +369,10 @@ bot.onText(/\/deletecontext/, async (msg) => {
       },
     });
     if (!u) return;
+    if (u.usingImageGeneration) {
+      u.usingImageGeneration = false;
+      await manager.save(u);
+    }
 
     const t = u.threads.find((t) => t.actionId === u.actionId);
 
