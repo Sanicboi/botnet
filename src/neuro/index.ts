@@ -286,6 +286,83 @@ bot.on("callback_query", async (q) => {
       },
     });
 
+    } else if (q.data === 'change-model') {
+      await bot.sendMessage(q.from.id, 'Выберите модель', {
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: 'GPT 4 Omni mini',
+                callback_data: 'model-gpt-4o-mini'
+              }
+            ],
+            [
+              {
+                text: 'GPT 4 Omni',
+                callback_data: 'model-gpt-4o'
+              }
+            ],
+            [
+              {
+                text: 'GPT 4 Turbo',
+                callback_data: 'model-gpt-4-turbo'
+              }
+            ],
+            [
+              {
+                text: 'Назад',
+                callback_data: 'settings'
+              }
+            ]
+          ]
+        }
+      });
+    } else if (q.data?.startsWith('model-')) {
+      const model = q.data.substring(6);
+      const user = await manager.findOneBy(User, {
+        chatId: String(q.from.id)
+      });
+      if (!user) return;
+      //@ts-ignore
+      user.model = model;
+      await manager.save(user);
+      await bot.sendMessage(q.from.id, 'Модель успешно изменена', {
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: 'Назад',
+                callback_data: 'settings'
+              }
+            ]
+          ]
+        }
+      });
+    } else if (q.data === 'settings') {
+      await bot.sendMessage(q.from.id, "Настройки ⚙️", {
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: "Изменить модель",
+                callback_data: "change-model",
+              },
+            ],
+            [
+              {
+                text: "Изменить имя",
+                callback_data: "change-name",
+              },
+            ],
+            [
+              {
+                text: "Подсчет токенов",
+                callback_data: "change-count",
+              },
+            ],
+          ],
+        },
+      });
     }
   } catch (err) {
     logger.fatal(err);
