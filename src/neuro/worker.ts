@@ -63,13 +63,12 @@ export class Handler {
               chatId: j.userId
             });
             if (!user) throw new Error("User not found");
-            logger.info(j.tokenCount, "Token count");
-            logger.info(((j.tokenCount / 1000000) * (user.model === 'gpt-4o-mini' ? 0.6 : user.model === 'gpt-4o' ? 10 : 30) * 100), "Token cost");
+            const cost = ((j.tokenCount / 1000000) * (user.model === 'gpt-4o-mini' ? 0.6 : user.model === 'gpt-4o' ? 10 : 30) * 100);
             if (user.leftForToday >= 0) {
-              user.leftForToday -= (j.tokenCount / 1000000) * (user.model === 'gpt-4o-mini' ? 0.6 : user.model === 'gpt-4o' ? 10 : 30) * 100;
+              user.leftForToday -= cost;
               user.leftForToday = Math.max(0, user.leftForToday);
             } else if (user.addBalance >= 0) {
-              user.addBalance -= (j.tokenCount / 1000000) * (user.model === 'gpt-4o-mini' ? 0.6 : user.model === 'gpt-4o' ? 10 : 30) * 100;
+              user.addBalance -= cost;
               user.addBalance = Math.max(0, user.addBalance);
             }
             await manager.save(user);
@@ -92,6 +91,7 @@ export class Handler {
                 );
               }
             }
+            await bot.sendMessage(j.userId, `Отчет о задаче (Для тестов):\n\nКоличество реальных токенов (входные + выходные): ${j.tokenCount}\nЧто будет списано с баланса пользователя (завышено, входные токены считаются по стоимости выходных): ${cost}\nОна же, только в смарттокенах:${0.00034*cost}\nБаланс в рублях после решения задачи:${user.addBalance}\nВ смарттокенах: ${0.00034*user.addBalance}`);
           } else if (j.task === "image") {
             await bot.sendPhoto(+j.userId, j.imageUrl, {
               caption: "Результат",
@@ -125,6 +125,7 @@ export class Handler {
               },
             });
           }
+          
         } catch (err) {
           logger.fatal(err);
         }
