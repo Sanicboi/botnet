@@ -72,7 +72,7 @@ export class Handler {
               user.addBalance -= (j.tokenCount / 1000000) * (user.model === 'gpt-4o-mini' ? 0.6 : user.model === 'gpt-4o' ? 10 : 30) * 100;
               user.addBalance = Math.max(0, user.addBalance);
             }
-
+            await manager.save(user);
 
             for (const m of j.messages) {
               if (act?.format === "text") {

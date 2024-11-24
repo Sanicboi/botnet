@@ -294,7 +294,7 @@ bot.on("callback_query", async (q) => {
 
 bot.onText(/./, async (msg) => {
   try {
-    await tryDeletePrevious(msg.message_id, msg.from!.id);
+    // await tryDeletePrevious(msg.message_id, msg.from!.id);
     if (!msg.text!.startsWith("/")) {
       const u = await manager.findOne(User, {
         where: {
