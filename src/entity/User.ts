@@ -1,33 +1,89 @@
 import {
   Column,
   Entity,
-  JoinTable,
-  ManyToMany,
+  JoinColumn,
+  ManyToOne,
   OneToMany,
   OneToOne,
   PrimaryColumn,
 } from "typeorm";
-import { Bot } from "./Bot";
-import { CascadeUser } from "./CascadeUser";
-import { SpamUser } from "./SpamUser";
+import { Thread } from "./assistants/Thread";
+import { Action } from "./assistants/Action";
+import OpenAI from "openai";
 
 @Entity()
 export class User {
   @PrimaryColumn()
-  usernameOrPhone: string;
+  chatId: string;
+
+  @Column({ nullable: true })
+  sphere: string;
+
+  @Column({ nullable: true })
+  leads: string;
+
+  @Column({ nullable: true })
+  callDate: string;
+
+  @Column({ nullable: true })
+  optimize: string;
+
+  @Column({ default: "n" })
+  qt: "n" | "s" | "l" | "d" | "a" | "o";
+
+  @OneToMany(() => Thread, (thread) => thread.user)
+  threads: Thread[];
+
+  @ManyToOne(() => Action)
+  @JoinColumn({
+    name: "actionId",
+  })
+  action: Action;
+
+  @Column({
+    nullable: true,
+  })
+  actionId: string;
 
   @Column({
     default: false,
   })
-  sent: boolean;
+  usingImageGeneration: boolean;
 
-  @OneToOne(() => CascadeUser, (cascade) => cascade.user, {
-    cascade: true,
+  @Column({
+    default: "1024x1024",
   })
-  cascade: CascadeUser;
+  imageRes: "1024x1024" | "1024x1792" | "1792x1024";
 
-  @OneToOne(() => SpamUser, (spam) => spam.user, {
-    cascade: true,
+  @Column({
+    default: "gpt-4o-mini",
   })
-  spam: SpamUser;
+  model: OpenAI.ChatModel;
+
+
+
+  @Column({
+    default: 'none'
+  })
+  subscription: 'none' | 'basic' | 'premium' | 'ultra';
+
+  @Column({
+    nullable: true
+  })
+  endDate: Date;
+
+  @Column('float', {
+    default: 0
+  })
+  addBalance: number; // additional balance in Rubles
+
+  @Column('float', {
+    default: 0
+  })
+  leftForToday: number; // subscription Rubles left for today
+
+  @Column('float', {
+    default: 0.6
+  })
+  pricePerMillion: number; 
 }

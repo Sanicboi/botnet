@@ -1,15 +1,10 @@
 import "reflect-metadata";
 import { DataSource } from "typeorm";
 import { User } from "./entity/User";
-import { Bot } from "./entity/Bot";
-import { Message } from "./entity/Message";
-import { Chat } from "./entity/Chat";
-import { Client } from "./entity/Client";
-import { Channel } from "./entity/Channel";
-import { CommentChannel } from "./entity/CommentChannel";
-import { CascadeUser } from "./entity/CascadeUser";
-import { SpamUser } from "./entity/SpamUser";
-import { SmmUser } from "./entity/SmmUser";
+import { Assistant } from "./entity/assistants/Assistant";
+import { Thread } from "./entity/assistants/Thread";
+import { Action } from "./entity/assistants/Action";
+import { SupportRequest } from "./entity/SupportRequest";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -19,19 +14,8 @@ export const AppDataSource = new DataSource({
   password: "test",
   database: "test",
   synchronize: true,
-  logging: false,
-  entities: [
-    User,
-    Bot,
-    Message,
-    Chat,
-    Client,
-    Channel,
-    CommentChannel,
-    CascadeUser,
-    SpamUser,
-    SmmUser,
-  ],
+  logging: true,
+  entities: [User, Assistant, Thread, Action, SupportRequest],
   migrations: [],
   subscribers: [],
 });

@@ -5,7 +5,7 @@ import TelegramBot, {
 import { MessageFormatter } from "../utils/MessageFormatter";
 import pino from "pino";
 import { AppDataSource } from "../data-source";
-import { Client } from "../entity/Client";
+import { User } from "../entity/User";
 
 const logger = pino();
 const bot = new TelegramBot(process.env.SMARTCOMRADE_TOKEN ?? "", {
@@ -21,7 +21,7 @@ bot
       command: "about",
     },
     {
-      description: "Готовые AI решения",
+      description: "Готовые AI системы",
       command: "products",
     },
     {
@@ -49,13 +49,13 @@ bot
 
 bot.onText(/\/start/, async (msg) => {
   if (!msg.from) return;
-  let user = await AppDataSource.getRepository(Client).findOneBy({
+  let user = await AppDataSource.getRepository(User).findOneBy({
     chatId: String(msg.from!.id),
   });
   if (!user) {
-    const user = new Client();
+    const user = new User();
     user.chatId = String(msg.from!.id);
-    await AppDataSource.getRepository(Client).save(user);
+    await AppDataSource.getRepository(User).save(user);
   }
   await bot.sendMessage(
     msg.from.id,
@@ -70,7 +70,12 @@ bot.onText(/\/start/, async (msg) => {
 });
 
 bot.onText(/\/about/, async (msg) => {
-  await MessageFormatter.sendTextFromFileBot(bot, "about.txt", msg.from!.id);
+  await MessageFormatter.sendImageFromFileBot(
+    "logo.jpg",
+    bot,
+    msg.from!.id,
+    MessageFormatter.readTextFromFile("about.txt"),
+  );
 });
 
 bot.onText(/\/products/, async (msg) => {
@@ -148,12 +153,12 @@ bot.on("callback_query", async (q) => {
         q.from.id,
       );
       if (q.data == "question") {
-        const user = await AppDataSource.getRepository(Client).findOneBy({
+        const user = await AppDataSource.getRepository(User).findOneBy({
           chatId: String(q.from.id),
         });
         if (user) {
           user.qt = "a";
-          await AppDataSource.getRepository(Client).save(user);
+          await AppDataSource.getRepository(User).save(user);
         }
       }
       return;
@@ -162,6 +167,7 @@ bot.on("callback_query", async (q) => {
       try {
         const u = await bot.getChatMember(-1002458365675, q.from.id);
         if (!u) throw new Error();
+        await bot.sendMessage(q.from.id, "Спасибо за подписку");
         await MessageFormatter.sendTextFromFileBot(bot, "check.txt", q.from.id);
       } catch (error) {
         await bot.sendMessage(
@@ -243,13 +249,13 @@ bot.onText(/\/partnership/, async (msg) => {
 
 bot.onText(/./, async (msg) => {
   if (!msg.text!.startsWith("/")) {
-    const user = await AppDataSource.getRepository(Client).findOneBy({
+    const user = await AppDataSource.getRepository(User).findOneBy({
       chatId: String(msg.from!.id),
     });
     if (user) {
       const map1 = new Map<
         "s" | "l" | "d" | "a" | "o" | "n",
-        Exclude<keyof Client, "chatId" | "qt">
+        Exclude<keyof User, "chatId" | "qt">
       >();
       const map2 = new Map<"s" | "l" | "d" | "a" | "o" | "n", string>();
       const map3 = new Map<
@@ -283,10 +289,11 @@ bot.onText(/./, async (msg) => {
 
       if (map1.has(user.qt)) {
         const idx = map1.get(user.qt);
+        // @ts-ignore
         user[idx!] = msg.text!;
         await bot.sendMessage(msg.from!.id, map2.get(user.qt)!);
         user.qt = map3.get(user.qt)!;
-        await AppDataSource.getRepository(Client).save(user);
+        await AppDataSource.getRepository(User).save(user);
       }
     }
   }

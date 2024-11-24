@@ -1,11 +1,5 @@
 version: "3.0"
 services:
-  # bots1:
-  #   restart: always
-  #   build: .
-  #   env_file: .env
-  #   ports:
-  #     - "8082:8082"
   db:
     image: "postgres:14.5"
     ports:
@@ -21,8 +15,23 @@ services:
     restart: always
     ports:
       - "6379:6379"
-  voronka:
+  # voronka:
+  #   restart: always
+  #   build: .
+  #   command: npm run voronka
+  #   env_file: .env
+  neuro:
     restart: always
     build: .
-    command: npm run voronka
+    command: npm run neuro
     env_file: .env
+  openai:
+    restart: always
+    build: .
+    command: npm run openai
+    env_file: .env
+  # support:
+  #   restart: always
+  #   build: .
+  #   command: npm run support
+  #   env_file: .env
