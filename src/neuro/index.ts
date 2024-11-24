@@ -38,6 +38,14 @@ const queue = new Queue<IJob>("openai", {
   },
 });
 
+const tryDeletePrevious = async (currentId: number, chatId: number) => {
+  try {
+    await bot.deleteMessage(chatId, currentId - 1);
+  } catch (err) {
+    logger.warn(err, "Error deleting message");
+  }
+}
+
 AppDataSource.initialize();
 
 const manager = AppDataSource.manager;
@@ -64,6 +72,7 @@ bot.setMyCommands([
 ]);
 bot.onText(/\/neuro/, async (msg) => {
   try {
+    await tryDeletePrevious(msg.message_id, msg.from!.id);
     const assistants = await manager.find(Assistant);
     let result: InlineKeyboardButton[][] = [];
     let u = await manager.findOneBy(User, {
@@ -102,6 +111,7 @@ bot.onText(/\/neuro/, async (msg) => {
 
 bot.on("callback_query", async (q) => {
   try {
+    await tryDeletePrevious(q.message!.message_id, q.message!.chat.id);
     if (q.data!.startsWith("a-")) {
       const actions = await manager.find(Action, {
         where: {
@@ -123,6 +133,9 @@ bot.on("callback_query", async (q) => {
         },
       });
     } else if (q.data!.startsWith("ac-")) {
+      if (q.data!.endsWith("-asst_1BdIGF3mp94XvVfgS88fLIor")) {
+
+      }
       const u = await manager.findOne(User, {
         where: {
           chatId: String(q.from.id),
@@ -226,6 +239,7 @@ bot.on("callback_query", async (q) => {
 
 bot.onText(/./, async (msg) => {
   try {
+    await tryDeletePrevious(msg.message_id, msg.from!.id);
     if (!msg.text!.startsWith("/")) {
       const u = await manager.findOne(User, {
         where: {
@@ -269,6 +283,7 @@ bot.onText(/./, async (msg) => {
 });
 
 bot.onText(/\/start/, async (msg) => {
+  await tryDeletePrevious(msg.message_id, msg.from!.id);
   let user = await manager.findOneBy(User, {
     chatId: String(msg.from!.id),
   });
@@ -285,6 +300,7 @@ bot.onText(/\/start/, async (msg) => {
 
 bot.onText(/\/deletecontext/, async (msg) => {
   try {
+    await tryDeletePrevious(msg.message_id, msg.from!.id);
     const u = await manager.findOne(User, {
       where: {
         chatId: String(msg.from!.id),
@@ -314,6 +330,7 @@ bot.onText(/\/deletecontext/, async (msg) => {
 });
 
 bot.onText(/\/balance/, async (msg) => {
+  await tryDeletePrevious(msg.message_id, msg.from!.id);
   await MessageFormatter.sendTextFromFileBot(bot, "balance.txt", msg.from!.id, {
     reply_markup: {
       inline_keyboard: [
@@ -335,6 +352,7 @@ bot.onText(/\/balance/, async (msg) => {
 });
 
 bot.onText(/\/settings/, async (msg) => {
+  await tryDeletePrevious(msg.message_id, msg.from!.id);
   await bot.sendMessage(msg.from!.id, "Настройки ⚙️", {
     reply_markup: {
       inline_keyboard: [
@@ -362,5 +380,6 @@ bot.onText(/\/settings/, async (msg) => {
 });
 
 bot.onText(/\/free/, async (msg) => {
+  await tryDeletePrevious(msg.message_id, msg.from!.id);
   await MessageFormatter.sendTextFromFileBot(bot, "free.txt", msg.from!.id);
 });

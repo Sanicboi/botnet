@@ -82,8 +82,4 @@ export class User {
   })
   leftForToday: number; // subscription Rubles left for today
 
-  @Column('float', {
-    default: 0.6
-  })
-  pricePerMillion: number; 
 }

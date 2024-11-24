@@ -63,7 +63,8 @@ export class Handler {
               chatId: j.userId
             });
             if (!user) throw new Error("User not found");
-
+            logger.info(j.tokenCount, "Token count");
+            logger.info(((j.tokenCount / 1000000) * (user.model === 'gpt-4o-mini' ? 0.6 : user.model === 'gpt-4o' ? 10 : 30) * 100), "Token cost");
             if (user.leftForToday >= 0) {
               user.leftForToday -= (j.tokenCount / 1000000) * (user.model === 'gpt-4o-mini' ? 0.6 : user.model === 'gpt-4o' ? 10 : 30) * 100;
               user.leftForToday = Math.max(0, user.leftForToday);
