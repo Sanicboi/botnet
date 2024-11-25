@@ -490,7 +490,7 @@ bot.onText(/\/balance/, async (msg) => {
   if (!user) return;
   const now = dayjs();
   if (user.endDate && user.endDate <= new Date()) {
-    user.endDate = null;
+    user.endDate = undefined;
     await manager.save(user);
   }
   await bot.sendMessage(msg.from!.id, `Баланс и подписка\n\n🟣 Формат доступа:\n⤷ ${user.subscription === 'exlusive' ? 'Exclusive' : user.subscription === 'premium' ? 'Premium' : user.subscription === 'pro' ? 'PRO+' : user.subscription === 'lite' ? 'Lite' : 'Бесплатный доступ'}
