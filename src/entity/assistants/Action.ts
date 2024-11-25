@@ -36,5 +36,4 @@ export class Action {
 
   @Column({ default: "html-file" })
   format: "text" | "html-file";
-  
 }

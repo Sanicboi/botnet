@@ -55,6 +55,7 @@ bot.onText(/\/start/, async (msg) => {
   if (!user) {
     const user = new User();
     user.chatId = String(msg.from!.id);
+    user.name = msg.from!.first_name;
     await AppDataSource.getRepository(User).save(user);
   }
   await bot.sendMessage(

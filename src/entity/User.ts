@@ -60,26 +60,38 @@ export class User {
   })
   model: OpenAI.ChatModel;
 
-
-
   @Column({
-    default: 'none'
+    default: "none",
   })
-  subscription: 'none' | 'lite' | 'pro' | 'premium' | 'exlusive';
+  subscription: "none" | "lite" | "pro" | "premium" | "exlusive";
 
   @Column({
-    nullable: true
+    nullable: true,
   })
   endDate?: Date;
 
-  @Column('float', {
-    default: 0
+  @Column("float", {
+    default: 0,
   })
   addBalance: number; // additional balance in Rubles
 
-  @Column('float', {
-    default: 0
+  @Column("float", {
+    default: 0,
   })
   leftForToday: number; // subscription Rubles left for today
 
+  @Column({
+    default: "",
+  })
+  name: string;
+
+  @Column({
+    default: false,
+  })
+  countTokens: boolean;
+
+  @Column({
+    default: false,
+  })
+  waitingForName: boolean;
 }

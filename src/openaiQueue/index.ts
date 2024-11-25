@@ -82,11 +82,10 @@ const worker = new Worker(
           for (const m of j.messages) {
             await openai.beta.threads.messages.create(j.threadId, m);
           }
-          const str = openai.beta.threads.runs
-            .stream(j.threadId, {
-              assistant_id: j.actionId,
-              model: j.model
-            });
+          const str = openai.beta.threads.runs.stream(j.threadId, {
+            assistant_id: j.actionId,
+            model: j.model,
+          });
           const msgs = await str.finalMessages();
           const run = await str.finalRun();
           const r = msgs.map((el) =>
@@ -96,7 +95,7 @@ const worker = new Worker(
           await queues.neuro.add("j", {
             ...j,
             messages: r,
-            tokenCount: run.usage?.total_tokens
+            tokenCount: run.usage?.total_tokens,
           });
         } else if (j.task === "image") {
           const result = await openai.images.generate({

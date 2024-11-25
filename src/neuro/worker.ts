@@ -60,10 +60,17 @@ export class Handler {
             await bot.sendMessage(+j.userId, "Контекст удален.");
           } else if (j.task === "run") {
             const user = await manager.findOneBy(User, {
-              chatId: j.userId
+              chatId: j.userId,
             });
             if (!user) throw new Error("User not found");
-            const cost = ((j.tokenCount / 1000000) * (user.model === 'gpt-4o-mini' ? 0.6 : user.model === 'gpt-4o' ? 10 : 30) * 100);
+            const cost =
+              (j.tokenCount / 1000000) *
+              (user.model === "gpt-4o-mini"
+                ? 0.6
+                : user.model === "gpt-4o"
+                  ? 10
+                  : 30) *
+              100;
             if (user.leftForToday > 0) {
               logger.info("Case 1");
               user.leftForToday -= cost;
@@ -93,7 +100,12 @@ export class Handler {
                 );
               }
             }
-            await bot.sendMessage(j.userId, `Отчет о задаче (Для тестов):\n\nКоличество реальных токенов (входные + выходные): ${j.tokenCount}\nЧто будет списано с баланса пользователя (завышено, входные токены считаются по стоимости выходных): ${cost}\nОна же, только в смарттокенах:${cost*10000/34}\nБаланс в рублях после решения задачи:${user.addBalance}\nВ смарттокенах: ${user.addBalance*10000/34}`);
+            if (user.countTokens) {
+              await bot.sendMessage(
+                +user.chatId,
+                `Количество токенов: ${Math.round((cost / 34) * 10000)}`,
+              );
+            }
           } else if (j.task === "image") {
             await bot.sendPhoto(+j.userId, j.imageUrl, {
               caption: "Результат",
@@ -127,7 +139,6 @@ export class Handler {
               },
             });
           }
-          
         } catch (err) {
           logger.fatal(err);
         }
