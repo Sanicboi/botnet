@@ -9,6 +9,7 @@ import { Handler } from "./worker";
 import { MessageFormatter } from "../utils/MessageFormatter";
 import OpenAI from "openai";
 import pino from "pino";
+import dayjs from "dayjs";
 const logger = pino();
 
 export const bot = new TelegramBot(process.env.NEURO_TOKEN ?? "", {
@@ -487,25 +488,41 @@ bot.onText(/\/deletecontext/, async (msg) => {
 });
 
 bot.onText(/\/balance/, async (msg) => {
-  await tryDeletePrevious(msg.message_id, msg.from!.id);
-  await MessageFormatter.sendTextFromFileBot(bot, "balance.txt", msg.from!.id, {
-    reply_markup: {
-      inline_keyboard: [
-        [
-          {
-            text: "Купить подписку",
-            callback_data: "b-sub"
-          }
-        ],
-        [
-          {
-            text: "Купить токены",
-            callback_data: "b-tokens"
-          }
-        ]
-      ]
-    }
+  const user = await manager.findOneBy(User, {
+    chatId: String(msg.from!.id)
   });
+  if (!user) return;
+  const now = dayjs();
+  await bot.sendMessage(msg.from!.id, `Баланс и подписка\n\n🟣 Формат доступа:\n⤷ ${user.subscription === 'exlusive' ? 'Exclusive' : user.subscription === 'premium' ? 'Premium' : user.subscription === 'pro' ? 'PRO+' : user.subscription === 'lite' ? 'Lite' : 'Бесплатный доступ'}
+   ⤷ Сегодня осталось: ${Math.round(user.leftForToday / 34 * 10000)} / ${
+    user.subscription === 'exlusive' ? 135000 :
+    user.subscription === 'premium' ? 45000 :
+    user.subscription === 'pro' ? 30000 :
+    user.subscription === 'lite' ? 5000 : 0
+   } токенов
+   ⤷ Новое пополнение через: ${24 - now.hour()}:${59- now.minute()}
+   ⤷ Следующий платеж: ${user.endDate}
+
+🟣 Ваш комплект токенов:
+   ⤷ ${Math.round(user.addBalance/34*10000)}
+
+📦 Если вам не хватает ежедневных токенов по подписке – вы можете купить комплект токенов. Комплект токенов можно использовать в любое время без лимитов. Полезно, когда вам требуется много токенов за раз.`, {
+  reply_markup: {
+    inline_keyboard: [
+      [
+        {
+          text: "Купить подписку",
+          callback_data: "b-sub"
+        }
+      ],
+      [
+        {
+          text: "Купить токены",
+          callback_data: "b-tokens"
+        }
+      ]
+    ]
+  }});
 });
 
 bot.onText(/\/settings/, async (msg) => {

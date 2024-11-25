@@ -65,7 +65,7 @@ export class User {
   @Column({
     default: 'none'
   })
-  subscription: 'none' | 'basic' | 'premium' | 'ultra';
+  subscription: 'none' | 'lite' | 'pro' | 'premium' | 'exlusive';
 
   @Column({
     nullable: true
