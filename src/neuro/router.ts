@@ -25,9 +25,9 @@ interface IJob {
 }
 
 export class Router {
-  protected static manager = AppDataSource.manager;
-  protected static logger = pino();
-  protected static queue = new Queue<IJob>("openai", {
+  public static manager = AppDataSource.manager;
+  public static logger = pino();
+  public static queue = new Queue<IJob>("openai", {
     connection: {
       host: "redis",
     },

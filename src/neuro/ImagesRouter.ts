@@ -10,7 +10,7 @@ export class ImagesRouter extends Router {
     this.onText = this.onText.bind(this);
   }
 
-  public async onQuery(q: TelegramBot.CallbackQuery) {
+  public async onQuery(q: TelegramBot.CallbackQuery): Promise<boolean> {
     if (q.data === "images") {
       await bot.sendMessage(q.from.id, "Выберите функцию", {
         reply_markup: {
@@ -63,6 +63,7 @@ export class ImagesRouter extends Router {
           ],
         },
       });
+      return true;
     }
 
     if (q.data?.startsWith("res-")) {
@@ -78,6 +79,7 @@ export class ImagesRouter extends Router {
           q.from.id,
           "Пришлите мне промпт, и я сгенерирую изображение",
         );
+        return true;
       }
     }
 
@@ -92,6 +94,8 @@ export class ImagesRouter extends Router {
         await bot.sendMessage(q.from.id, "Генерация завершена.");
       }
     }
+
+    return false;
   }
 
   public async onText(msg: TelegramBot.Message, user: User): Promise<boolean> {

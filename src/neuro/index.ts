@@ -59,9 +59,18 @@ bot.on("callback_query", async (q) => {
       q.message!.message_id + 1,
       q.message!.chat.id,
     );
+    const user = await manager.findOneBy(User, {
+      chatId: String(q.from.id)
+    });
+    if (!user) return;
+    const r = await imagesRouter.onQuery(q);
+    if (!r) {
+      await Router.resetWaiters(user);
+    }
+    await Router.resetSub(user);
     await textRouter.onQuery(q);
     await paymentsRouter.onQuery(q);
-    await imagesRouter.onQuery(q);
+
     await menuRouter.onCallback(q);
     await settingsRouter.onCallback(q);
   } catch (err) {
