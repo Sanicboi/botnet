@@ -47,6 +47,14 @@ const tryDeletePrevious = async (currentId: number, chatId: number) => {
   }
 }
 
+const resetSub = async (user: User) => {
+  if (user.endDate && user.endDate <= new Date()) {
+    user.endDate = undefined;
+    user.subscription = 'none';
+    await manager.save(user);
+  }
+}
+
 AppDataSource.initialize();
 
 const manager = AppDataSource.manager;
@@ -489,10 +497,8 @@ bot.onText(/\/balance/, async (msg) => {
   });
   if (!user) return;
   const now = dayjs();
-  if (user.endDate && user.endDate <= new Date()) {
-    user.endDate = undefined;
-    await manager.save(user);
-  }
+  await resetSub(user);
+  
   await bot.sendMessage(msg.from!.id, `Баланс и подписка\n\n🟣 Формат доступа:\n⤷ ${user.subscription === 'exlusive' ? 'Exclusive' : user.subscription === 'premium' ? 'Premium' : user.subscription === 'pro' ? 'PRO+' : user.subscription === 'lite' ? 'Lite' : 'Бесплатный доступ'}
    ⤷ Сегодня осталось: ${Math.round(user.leftForToday / 34 * 10000)} / ${
     user.subscription === 'exlusive' ? 135000 :
@@ -500,7 +506,7 @@ bot.onText(/\/balance/, async (msg) => {
     user.subscription === 'pro' ? 30000 :
     user.subscription === 'lite' ? 5000 : 0
    } токенов
-   ⤷ Новое пополнение через: ${24 - now.hour()}:${59- now.minute()}
+   ⤷ Новое пополнение через: ${user.subscription === 'none' ? 'Нет' : 24 - now.hour()}:${59- now.minute()}
    ⤷ Следующий платеж: ${user.endDate == null ? 'Нет' : user.endDate.toUTCString()}
 
 🟣 Ваш комплект токенов:
