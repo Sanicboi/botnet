@@ -73,7 +73,6 @@ bot.setMyCommands([
 ]);
 bot.onText(/\/neuro/, async (msg) => {
   try {
-    await tryDeletePrevious(msg.message_id, msg.from!.id);
     const assistants = await manager.find(Assistant);
     let result: InlineKeyboardButton[][] = [];
     let u = await manager.findOneBy(User, {
@@ -390,7 +389,6 @@ bot.on("callback_query", async (q) => {
 
 bot.onText(/./, async (msg) => {
   try {
-    // await tryDeletePrevious(msg.message_id, msg.from!.id);
     if (!msg.text!.startsWith("/")) {
       const u = await manager.findOne(User, {
         where: {
@@ -434,7 +432,6 @@ bot.onText(/./, async (msg) => {
 });
 
 bot.onText(/\/start/, async (msg) => {
-  await tryDeletePrevious(msg.message_id, msg.from!.id);
   let user = await manager.findOneBy(User, {
     chatId: String(msg.from!.id),
   });
@@ -454,7 +451,6 @@ bot.onText(/\/start/, async (msg) => {
 
 bot.onText(/\/deletecontext/, async (msg) => {
   try {
-    await tryDeletePrevious(msg.message_id, msg.from!.id);
     const u = await manager.findOne(User, {
       where: {
         chatId: String(msg.from!.id),
@@ -493,6 +489,10 @@ bot.onText(/\/balance/, async (msg) => {
   });
   if (!user) return;
   const now = dayjs();
+  if (user.endDate && user.endDate <= new Date()) {
+    user.endDate = null;
+    await manager.save(user);
+  }
   await bot.sendMessage(msg.from!.id, `Баланс и подписка\n\n🟣 Формат доступа:\n⤷ ${user.subscription === 'exlusive' ? 'Exclusive' : user.subscription === 'premium' ? 'Premium' : user.subscription === 'pro' ? 'PRO+' : user.subscription === 'lite' ? 'Lite' : 'Бесплатный доступ'}
    ⤷ Сегодня осталось: ${Math.round(user.leftForToday / 34 * 10000)} / ${
     user.subscription === 'exlusive' ? 135000 :
@@ -501,7 +501,7 @@ bot.onText(/\/balance/, async (msg) => {
     user.subscription === 'lite' ? 5000 : 0
    } токенов
    ⤷ Новое пополнение через: ${24 - now.hour()}:${59- now.minute()}
-   ⤷ Следующий платеж: ${user.endDate}
+   ⤷ Следующий платеж: ${user.endDate == null ? 'Нет' : user.endDate.toUTCString()}
 
 🟣 Ваш комплект токенов:
    ⤷ ${Math.round(user.addBalance/34*10000)}
@@ -526,7 +526,6 @@ bot.onText(/\/balance/, async (msg) => {
 });
 
 bot.onText(/\/settings/, async (msg) => {
-  await tryDeletePrevious(msg.message_id, msg.from!.id);
   await bot.sendMessage(msg.from!.id, "Настройки ⚙️", {
     reply_markup: {
       inline_keyboard: [

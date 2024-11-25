@@ -70,7 +70,7 @@ export class User {
   @Column({
     nullable: true
   })
-  endDate: Date;
+  endDate: Date | null;
 
   @Column('float', {
     default: 0
