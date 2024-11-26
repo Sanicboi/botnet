@@ -177,11 +177,11 @@ export class MenuRouter extends Router {
     });
 
     bot.onText(/\/ref/, async (msg) => {
-      
+
     });
 
     bot.onText(/\/about/, async (msg) => {
-      await MessageFormatter.sendTextFromFileBot(bot, 'about.txt', msg.from!.id);
+      await MessageFormatter.sendTextFromFileBot(bot, 'guide.txt', msg.from!.id);
     });
 
     this.onCallback = this.onCallback.bind(this);
