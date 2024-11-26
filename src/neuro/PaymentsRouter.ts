@@ -40,6 +40,7 @@ export class PaymentsRouter extends Router {
             [
               {
                 text: "Назад",
+                callback_data: ''
               },
             ],
           ],
