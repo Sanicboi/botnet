@@ -5,6 +5,7 @@ import { Router } from "./router";
 import { User } from "../entity/User";
 import { Thread } from "../entity/assistants/Thread";
 import dayjs from "dayjs";
+import { MessageFormatter } from "../utils/MessageFormatter";
 
 export class MenuRouter extends Router {
   constructor() {
@@ -173,6 +174,14 @@ export class MenuRouter extends Router {
           ],
         },
       });
+    });
+
+    bot.onText(/\/ref/, async (msg) => {
+      
+    });
+
+    bot.onText(/\/about/, async (msg) => {
+      await MessageFormatter.sendTextFromFileBot(bot, 'about.txt', msg.from!.id);
     });
 
     this.onCallback = this.onCallback.bind(this);
