@@ -45,6 +45,10 @@ bot.setMyCommands([
     command: "settings",
     description: "Настройки",
   },
+  {
+    command: "about",
+    description: "О нас"
+  }
 ]);
 
 const menuRouter = new MenuRouter();
