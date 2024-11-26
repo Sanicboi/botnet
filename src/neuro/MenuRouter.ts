@@ -50,15 +50,26 @@ export class MenuRouter extends Router {
     });
 
     bot.onText(/\/start/, async (msg) => {
-      Router.logger.info(msg);
       let user = await Router.manager.findOneBy(User, {
         chatId: String(msg.from!.id),
       });
 
       if (!user) {
+        const refId = msg.text!.split(' ')[1];
         user = new User();
         user.chatId = String(msg.from!.id);
-        user.addBalance += 1.7;
+        user.addBalance = Math.round(10000*34/10000);
+        if (refId) {
+          const creator = await Router.manager.findOneBy(User, {
+            chatId: refId
+          });
+          if (creator) {
+            creator.addBalance += Math.round(3000*34/10000);
+            await Router.manager.save(creator);
+            user.addBalance += Math.round(5000*34/10000);
+          }
+        }
+
         await Router.manager.save(user);
       } 
       await Router.resetWaiters(user);
@@ -178,7 +189,11 @@ export class MenuRouter extends Router {
     });
 
     bot.onText(/\/ref/, async (msg) => {
-
+      const u = await Router.manager.findOneBy(User, {
+        chatId: String(msg.from!.id)
+      });
+      if (!u) return;
+      await bot.sendMessage(msg.from!.id, `Пригласите друзей и получите 3000 токенов! Ваша реферальная ссылка: https://t.me/NComrades_bot?start=${msg.from!.id}`);
     });
 
     bot.onText(/\/about/, async (msg) => {

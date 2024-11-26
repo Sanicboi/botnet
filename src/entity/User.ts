@@ -94,4 +94,5 @@ export class User {
     default: false,
   })
   waitingForName: boolean;
+
 }
