@@ -50,6 +50,7 @@ export class MenuRouter extends Router {
     });
 
     bot.onText(/\/start/, async (msg) => {
+      Router.logger.info(msg);
       let user = await Router.manager.findOneBy(User, {
         chatId: String(msg.from!.id),
       });
