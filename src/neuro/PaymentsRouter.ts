@@ -22,7 +22,7 @@ export class PaymentsRouter extends Router {
             [
               {
                 text: "PRO+ (790₽)",
-                callback_data: "sub-pro+",
+                callback_data: "sub-pro",
               },
             ],
             [

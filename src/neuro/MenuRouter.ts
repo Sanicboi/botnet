@@ -21,6 +21,7 @@ export class MenuRouter extends Router {
           u.chatId = String(msg.from!.id);
           await Router.manager.save(u);
         }
+        await Router.resetWaiters(u);
         for (const a of assistants) {
           result.push([
             {
@@ -57,10 +58,8 @@ export class MenuRouter extends Router {
         user.chatId = String(msg.from!.id);
         user.addBalance += 1.7;
         await Router.manager.save(user);
-      } else if (user.usingImageGeneration) {
-        user.usingImageGeneration = false;
-        await Router.manager.save(user);
-      }
+      } 
+      await Router.resetWaiters(user);
 
       await bot.sendMessage(
         msg.from!.id,
@@ -80,10 +79,7 @@ export class MenuRouter extends Router {
           },
         });
         if (!u) return;
-        if (u.usingImageGeneration) {
-          u.usingImageGeneration = false;
-          await Router.manager.save(u);
-        }
+        await Router.resetWaiters(u);
 
         const t = u.threads.find((t) => t.actionId === u.actionId);
 
@@ -109,7 +105,7 @@ export class MenuRouter extends Router {
       if (!user) return;
       const now = dayjs();
       await Router.resetSub(user);
-
+      await Router.resetWaiters(user);
       await bot.sendMessage(
         msg.from!.id,
         `Баланс и подписка\n\n🟣 Формат доступа:\n⤷ ${user.subscription === "exlusive" ? "Exclusive" : user.subscription === "premium" ? "Premium" : user.subscription === "pro" ? "PRO+" : user.subscription === "lite" ? "Lite" : "Бесплатный доступ"}
