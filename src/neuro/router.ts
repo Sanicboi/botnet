@@ -1,11 +1,12 @@
 import pino from "pino";
-import { bot } from ".";
+import { bot, openai } from ".";
 import { AppDataSource } from "../data-source";
 import { User } from "../entity/User";
 import { InlineKeyboardButton } from "node-telegram-bot-api";
 import { Assistant } from "../entity/assistants/Assistant";
 import OpenAI from "openai";
 import { Queue } from "bullmq";
+import { FileUpload } from "../entity/assistants/FileUpload";
 
 interface Msg {
   role: "assistant" | "user";
@@ -16,12 +17,13 @@ interface IJob {
   userId: string;
   actionId: string;
   type: "neuro";
-  task: "delete" | "create" | "run" | "image";
+  task: "delete" | "create" | "run" | "image" | "run-file";
   model?: OpenAI.ChatModel;
   messages?: Msg[];
   id?: string;
   threadId?: string;
   prompt?: string;
+  fileId?: string;
 }
 
 export class Router {
@@ -61,6 +63,25 @@ export class Router {
         id: user.action.threads.find((el) => el.userId == user.chatId)!.id,
       });
     }
+    const files = await Router.manager.find(FileUpload, {
+      where: {
+        user: user
+      },
+      relations: {
+        user: true
+      }
+    });
+    for (const file of files) {
+      await openai.files.del(file.id);
+    }
+
+    await this.manager.createQueryBuilder()
+    .delete()
+    .from(FileUpload, 'file')
+    .where('file.id IN :ids', {
+      ids: files.map(el => el.id)
+    })
+    .execute();
   }
 
   constructor() {}

@@ -22,6 +22,10 @@ export const bot = new TelegramBot(process.env.NEURO_TOKEN ?? "", {
   polling: true,
 });
 
+export const openai = new OpenAI({
+  apiKey: process.env.OPENAI_KEY ?? "",
+});
+
 AppDataSource.initialize();
 
 const manager = AppDataSource.manager;
@@ -47,8 +51,8 @@ bot.setMyCommands([
   },
   {
     command: "about",
-    description: "О нас"
-  }
+    description: "О нас",
+  },
 ]);
 
 const menuRouter = new MenuRouter();
@@ -64,7 +68,7 @@ bot.on("callback_query", async (q) => {
       q.message!.chat.id,
     );
     const user = await manager.findOneBy(User, {
-      chatId: String(q.from.id)
+      chatId: String(q.from.id),
     });
     if (!user) return;
     const r = await imagesRouter.onQuery(q);

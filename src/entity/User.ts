@@ -10,6 +10,7 @@ import {
 import { Thread } from "./assistants/Thread";
 import { Action } from "./assistants/Action";
 import OpenAI from "openai";
+import { FileUpload } from "./assistants/FileUpload";
 
 @Entity()
 export class User {
@@ -95,4 +96,6 @@ export class User {
   })
   waitingForName: boolean;
 
+  @OneToMany(() => FileUpload, (f) => f.user)
+  files: FileUpload[];
 }

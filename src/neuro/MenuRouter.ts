@@ -55,23 +55,23 @@ export class MenuRouter extends Router {
       });
 
       if (!user) {
-        const refId = msg.text!.split(' ')[1];
+        const refId = msg.text!.split(" ")[1];
         user = new User();
         user.chatId = String(msg.from!.id);
-        user.addBalance = Math.round(10000*34/10000);
+        user.addBalance = Math.round((10000 * 34) / 10000);
         if (refId) {
           const creator = await Router.manager.findOneBy(User, {
-            chatId: refId
+            chatId: refId,
           });
           if (creator) {
-            creator.addBalance += Math.round(3000*34/10000);
+            creator.addBalance += Math.round((3000 * 34) / 10000);
             await Router.manager.save(creator);
-            user.addBalance += Math.round(5000*34/10000);
+            user.addBalance += Math.round((5000 * 34) / 10000);
           }
         }
 
         await Router.manager.save(user);
-      } 
+      }
       await Router.resetWaiters(user);
 
       await bot.sendMessage(
@@ -190,14 +190,21 @@ export class MenuRouter extends Router {
 
     bot.onText(/\/ref/, async (msg) => {
       const u = await Router.manager.findOneBy(User, {
-        chatId: String(msg.from!.id)
+        chatId: String(msg.from!.id),
       });
       if (!u) return;
-      await bot.sendMessage(msg.from!.id, `Пригласите друзей и получите 3000 токенов! Ваша реферальная ссылка: https://t.me/NComrades_bot?start=${msg.from!.id}`);
+      await bot.sendMessage(
+        msg.from!.id,
+        `Пригласите друзей и получите 3000 токенов! Ваша реферальная ссылка: https://t.me/NComrades_bot?start=${msg.from!.id}`,
+      );
     });
 
     bot.onText(/\/about/, async (msg) => {
-      await MessageFormatter.sendTextFromFileBot(bot, 'guide.txt', msg.from!.id);
+      await MessageFormatter.sendTextFromFileBot(
+        bot,
+        "guide.txt",
+        msg.from!.id,
+      );
     });
 
     this.onCallback = this.onCallback.bind(this);

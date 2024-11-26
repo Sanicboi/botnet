@@ -10,7 +10,7 @@ export const openai = new OpenAI({
 
 interface INeuroJob {
   type: "neuro";
-  task: "delete" | "create" | "run" | "image";
+  task: "delete" | "create" | "run" | "image" | "run-file";
   userId: string;
   actionId: string;
 }
@@ -44,6 +44,14 @@ interface INeuroOutJob extends INeuroJob {
   tokenCount?: number;
 }
 
+interface INeuroFileJob extends INeuroJob {
+  task: "run-file";
+  fileId: string;
+  threadId: string;
+  model: OpenAI.ChatModel;
+}
+
+
 interface Msg {
   role: "user" | "assistant";
   content: string;
@@ -53,7 +61,9 @@ type IJob =
   | INeuroCreateThreadJob
   | INeuroDeleteThreadJob
   | INeuroRunJob
-  | INeuroImageJob;
+  | INeuroImageJob
+  | INeuroFileJob
+  ;
 
 const queues = {
   neuro: new Queue<INeuroOutJob>("neuro", {
@@ -109,6 +119,31 @@ const worker = new Worker(
           await queues.neuro.add("j", {
             ...j,
             imageUrl: result.data[0].url,
+          });
+        } else if (j.task === 'run-file') {
+          await openai.beta.threads.messages.create(j.threadId, {
+            attachments: [
+              {
+                file_id: j.fileId,
+              }
+            ],
+            content: 'Вот входные данные',
+            role: 'user'
+          });
+          const str = openai.beta.threads.runs.stream(j.threadId, {
+            assistant_id: j.actionId,
+            model: j.model,
+          });
+          const msgs = await str.finalMessages();
+          const run = await str.finalRun();
+          const r = msgs.map((el) =>
+            el.content[0].type === "text" ? el.content[0].text.value : "",
+          );
+
+          await queues.neuro.add("j", {
+            ...j,
+            messages: r,
+            tokenCount: run.usage?.total_tokens,
           });
         }
       }

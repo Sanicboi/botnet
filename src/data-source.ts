@@ -5,6 +5,7 @@ import { Assistant } from "./entity/assistants/Assistant";
 import { Thread } from "./entity/assistants/Thread";
 import { Action } from "./entity/assistants/Action";
 import { SupportRequest } from "./entity/SupportRequest";
+import { FileUpload } from "./entity/assistants/FileUpload";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -15,7 +16,7 @@ export const AppDataSource = new DataSource({
   database: "test",
   synchronize: true,
   logging: true,
-  entities: [User, Assistant, Thread, Action, SupportRequest],
+  entities: [User, Assistant, Thread, Action, SupportRequest, FileUpload],
   migrations: [],
   subscribers: [],
 });
