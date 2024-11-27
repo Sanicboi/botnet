@@ -106,6 +106,7 @@ export class ImagesRouter extends Router {
         task: "image",
         userId: user.chatId,
         prompt: msg.text,
+        msgId: String(msg.message_id)
       });
       return true;
     }

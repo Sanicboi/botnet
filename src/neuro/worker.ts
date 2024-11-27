@@ -5,6 +5,7 @@ import { Action } from "../entity/assistants/Action";
 import { AppDataSource } from "../data-source";
 import pino from "pino";
 import { User } from "../entity/User";
+import { Router } from "./router";
 const logger = pino();
 
 interface IJob {
@@ -23,6 +24,7 @@ interface IJobRun extends IJob {
   task: "run";
   messages: string[];
   tokenCount: number;
+  msgId: string;
 }
 
 interface IJobDelete extends IJob {
@@ -32,6 +34,7 @@ interface IJobDelete extends IJob {
 interface IJobImage extends IJob {
   task: "image";
   imageUrl: string;
+  msgId: string;
 }
 
 export class Handler {
@@ -87,11 +90,12 @@ export class Handler {
                 await bot.sendMessage(+j.userId, m, {});
               } else if (act?.format === "html-file") {
                 const b = Buffer.from(m, "utf-8");
+                await Router.tryDeletePrevious(+j.msgId + 2, +j.userId);
                 await bot.sendDocument(
                   +j.userId,
                   b,
                   {
-                    caption: "Данный ассистент возвращает ответ в формате html",
+                    caption: "Ваш ответ готов. Если нужно что-то еще - пишите.",
                   },
                   {
                     contentType: "text/html",
@@ -107,6 +111,7 @@ export class Handler {
               );
             }
           } else if (j.task === "image") {
+            await Router.tryDeletePrevious(+j.msgId + 2, +j.userId);
             await bot.sendPhoto(+j.userId, j.imageUrl, {
               caption: "Результат",
               reply_markup: {

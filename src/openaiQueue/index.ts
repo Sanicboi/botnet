@@ -4,7 +4,7 @@ import pino from "pino";
 
 const logger = pino();
 
-export const openai = new OpenAI({
+const openai = new OpenAI({
   apiKey: process.env.OPENAI_KEY ?? "",
 });
 
@@ -29,12 +29,14 @@ interface INeuroRunJob extends INeuroJob {
   threadId: string;
   messages: Msg[];
   model: OpenAI.ChatModel;
+  msgId: string;
 }
 
 interface INeuroImageJob extends INeuroJob {
   task: "image";
   prompt: string;
   resolution: "1024x1024" | "1024x1792" | "1792x1024";
+  msgId: string;
 }
 
 interface INeuroOutJob extends INeuroJob {
@@ -42,6 +44,7 @@ interface INeuroOutJob extends INeuroJob {
   messages?: string[];
   imageUrl?: string;
   tokenCount?: number;
+  msgId?: string;
 }
 
 interface INeuroFileJob extends INeuroJob {
@@ -49,6 +52,7 @@ interface INeuroFileJob extends INeuroJob {
   fileId: string;
   threadId: string;
   model: OpenAI.ChatModel;
+  msgId: string;
 }
 
 

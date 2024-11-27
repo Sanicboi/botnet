@@ -38,10 +38,6 @@ bot.setMyCommands([
     description: "Выбор профилей",
   },
   {
-    command: "deletecontext",
-    description: "Удалить контекст",
-  },
-  {
     command: "balance",
     description: "Баланс и подписка",
   },
@@ -52,6 +48,10 @@ bot.setMyCommands([
   {
     command: "about",
     description: "О нас",
+  },
+  {
+    command: "deletecontext",
+    description: "Удалить диалог и перезапустить бота",
   },
 ]);
 

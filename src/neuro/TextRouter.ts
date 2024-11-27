@@ -4,7 +4,6 @@ import { bot } from ".";
 import { Action } from "../entity/assistants/Action";
 import { User } from "../entity/User";
 import { openai } from ".";
-import { Stream } from "stream";
 import { FileUpload } from "../entity/assistants/FileUpload";
 
 export class TextRouter extends Router {
@@ -39,6 +38,7 @@ export class TextRouter extends Router {
         await Router.manager.save(f2);
 
         const t = u.threads.find((t) => t.actionId === u.actionId);
+        await bot.sendMessage(msg.from!.id, 'генерирую ответ ✨...');
         await Router.queue.add("j", {
           type: "neuro",
           task: "run-file",
@@ -46,7 +46,9 @@ export class TextRouter extends Router {
           actionId: u.actionId,
           userId: u.chatId,
           threadId: t?.id,
-          fileId: f2.id
+          fileId: f2.id,
+          id: String(msg.message_id),
+          msgId: String(msg.message_id)
         });
       }
     });

@@ -24,6 +24,7 @@ interface IJob {
   threadId?: string;
   prompt?: string;
   fileId?: string;
+  msgId?: string;
 }
 
 export class Router {
