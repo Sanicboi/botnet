@@ -58,7 +58,30 @@ export class Handler {
             thread.userId = j.userId;
             thread.id = j.threadId;
             await manager.save(thread);
-            await bot.sendMessage(+thread.userId, act!.welcomeMessage);
+            await bot.sendMessage(+thread.userId, act!.welcomeMessage + `\n\nЕсли необходимо, измените модель`, {
+              reply_markup: {
+                inline_keyboard: [
+                  [
+                    {
+                      text: "GPT 4 Omni mini",
+                      callback_data: "model-gpt-4o-mini",
+                    },
+                  ],
+                  [
+                    {
+                      text: "GPT 4 Omni",
+                      callback_data: "model-gpt-4o",
+                    },
+                  ],
+                  [
+                    {
+                      text: "GPT 4 Turbo",
+                      callback_data: "model-gpt-4-turbo",
+                    },
+                  ],
+                ]
+              }
+            });
           } else if (j.task === "delete") {
             await bot.sendMessage(+j.userId, "Контекст удален.");
           } else if (j.task === "run") {
