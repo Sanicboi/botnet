@@ -77,7 +77,7 @@ export class ImagesRouter extends Router {
         await Router.manager.save(user);
         await bot.sendMessage(
           q.from.id,
-          "Пришлите мне промпт, и я сгенерирую изображение",
+          "Напишите, что вы хотите увидеть, и я сгенерирую изображение 😉",
         );
         return true;
       }

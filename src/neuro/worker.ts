@@ -58,24 +58,29 @@ export class Handler {
             thread.userId = j.userId;
             thread.id = j.threadId;
             await manager.save(thread);
-            await bot.sendMessage(+thread.userId, act!.welcomeMessage + `\n\nЕсли необходимо, измените модель`, {
+            const u = await manager.findOneBy(User, {
+              chatId: String(j.userId)
+            });
+            if (!u) return;
+            await bot.sendMessage(+thread.userId, act!.welcomeMessage);
+            await bot.sendMessage(+thread.userId, 'Если нужно, смените модель', {
               reply_markup: {
                 inline_keyboard: [
                   [
                     {
-                      text: "GPT 4 Omni mini",
+                      text: `${u.model === 'gpt-4o-mini' ? '✅' : '❌'} GPT 4 Omni mini`,
                       callback_data: "model-gpt-4o-mini",
                     },
                   ],
                   [
                     {
-                      text: "GPT 4 Omni",
+                      text: `${u.model === 'gpt-4o' ? '✅' : '❌'} GPT 4 Omni`,
                       callback_data: "model-gpt-4o",
                     },
                   ],
                   [
                     {
-                      text: "GPT 4 Turbo",
+                      text: `${u.model === 'gpt-4-turbo' ? '✅' : '❌'} GPT 4 Turbo`,
                       callback_data: "model-gpt-4-turbo",
                     },
                   ],

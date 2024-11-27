@@ -50,6 +50,10 @@ bot.setMyCommands([
     description: "О нас",
   },
   {
+    command: 'ref',
+    description: 'Получить бесплатные токены'
+  },
+  {
     command: "deletecontext",
     description: "Удалить диалог и перезапустить бота",
   },
