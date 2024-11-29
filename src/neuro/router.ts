@@ -66,23 +66,24 @@ export class Router {
     }
     const files = await Router.manager.find(FileUpload, {
       where: {
-        user: user
+        user: user,
       },
       relations: {
-        user: true
-      }
+        user: true,
+      },
     });
     for (const file of files) {
       await openai.files.del(file.id);
     }
 
-    await this.manager.createQueryBuilder()
-    .delete()
-    .from(FileUpload, 'file')
-    .where('file.id IN :ids', {
-      ids: files.map(el => el.id)
-    })
-    .execute();
+    await this.manager
+      .createQueryBuilder()
+      .delete()
+      .from(FileUpload, "file")
+      .where("file.id IN :ids", {
+        ids: files.map((el) => el.id),
+      })
+      .execute();
   }
 
   constructor() {}

@@ -98,4 +98,19 @@ export class User {
 
   @OneToMany(() => FileUpload, (f) => f.user)
   files: FileUpload[];
+
+  @Column({
+    default: "",
+  })
+  offerSize: string;
+
+  @Column({
+    default: "",
+  })
+  textStyle: string;
+
+  @Column({
+    default: "",
+  })
+  textTone: string;
 }

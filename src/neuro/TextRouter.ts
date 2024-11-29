@@ -6,6 +6,19 @@ import { User } from "../entity/User";
 import { openai } from ".";
 import { FileUpload } from "../entity/assistants/FileUpload";
 
+const sizeMap = new Map<string, string>();
+sizeMap.set("offer-long", "Оффер большой (70-90 слов)\n");
+sizeMap.set("offer-medium", "Оффер средний (40-70 слов)\n");
+sizeMap.set("offer-short", "Оффер короткий (до 40 слов)\n");
+
+const styleMap = new Map<string, string>();
+styleMap.set("style-official", "стиль - Официальный\n");
+styleMap.set("style-scientific", "стиль - Научный\n");
+styleMap.set("style-public", "стиль - публицистический\n");
+styleMap.set("style-fiction", "стиль - художественный\n");
+styleMap.set("style-informal", "стиль - разговорный\n");
+styleMap.set("style-ad", "стиль - рекламный\n");
+
 export class TextRouter extends Router {
   constructor() {
     super();
@@ -38,7 +51,7 @@ export class TextRouter extends Router {
         await Router.manager.save(f2);
 
         const t = u.threads.find((t) => t.actionId === u.actionId);
-        await bot.sendMessage(msg.from!.id, 'генерирую ответ ✨...');
+        await bot.sendMessage(msg.from!.id, "генерирую ответ ✨...");
         await Router.queue.add("j", {
           type: "neuro",
           task: "run-file",
@@ -48,7 +61,7 @@ export class TextRouter extends Router {
           threadId: t?.id,
           fileId: f2.id,
           id: String(msg.message_id),
-          msgId: String(msg.message_id)
+          msgId: String(msg.message_id),
         });
       }
     });
@@ -58,6 +71,12 @@ export class TextRouter extends Router {
   }
 
   public async onQuery(q: TelegramBot.CallbackQuery) {
+    const u = await Router.manager.findOne(User, {
+      where: {
+        chatId: String(q.from.id),
+      },
+    });
+    if (!u) return;
     if (q.data!.startsWith("a-")) {
       const actions = await Router.manager.find(Action, {
         where: {
@@ -88,13 +107,77 @@ export class TextRouter extends Router {
 
     if (q.data!.startsWith("ac-")) {
       if (q.data!.endsWith("-asst_1BdIGF3mp94XvVfgS88fLIor")) {
+        await bot.sendMessage(q.from!.id, "Выберите стиль текста", {
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: "Официальный",
+                  callback_data: "style-official",
+                },
+              ],
+              [
+                {
+                  text: "Научный",
+                  callback_data: "style-scientific",
+                },
+              ],
+              [
+                {
+                  text: "Публицистический",
+                  callback_data: "style-public",
+                },
+              ],
+              [
+                {
+                  text: "Художественный",
+                  callback_data: "style-fiction",
+                },
+              ],
+              [
+                {
+                  text: "Разговорный",
+                  callback_data: "style-informal",
+                },
+              ],
+              [
+                {
+                  text: "Рекламный",
+                  callback_data: "style-ad",
+                },
+              ],
+            ],
+          },
+        });
       }
-      const u = await Router.manager.findOne(User, {
-        where: {
-          chatId: String(q.from.id),
-        },
-      });
-      if (!u) return;
+      if (q.data!.endsWith("-asst_14B08GDgJphVClkmmtQYo0aq")) {
+        await bot.sendMessage(q.from!.id, "Выберите размер оффера", {
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: "Большой",
+                  callback_data: "offer-long",
+                },
+              ],
+              [
+                {
+                  text: "Средний",
+                  callback_data: "offer-medium",
+                },
+              ],
+              [
+                {
+                  text: "Маленький",
+                  callback_data: "offer-short",
+                },
+              ],
+            ],
+          },
+        });
+        return;
+      }
+
       u.actionId = q.data!.substring(3);
       await Router.manager.save(u);
       await Router.queue.add("j", {
@@ -105,16 +188,39 @@ export class TextRouter extends Router {
         model: u.model,
       });
     }
+
+    if (q.data?.startsWith("offer-")) {
+      u.actionId = "asst_14B08GDgJphVClkmmtQYo0aq";
+      u.offerSize = sizeMap.get(q.data!)!;
+      await Router.manager.save(u);
+      await Router.queue.add("j", {
+        type: "neuro",
+        task: "create",
+        actionId: q.data!.substring(3),
+        userId: u.chatId,
+        model: u.model,
+      });
+    }
+
+    if (q.data?.startsWith("style-")) {
+      u.textStyle = styleMap.get(q.data!)!;
+      await Router.manager.save(u);
+    }
   }
 
   public async onText(msg: TelegramBot.Message, user: User) {
     const t = user.threads.find((t) => t.actionId === user.actionId);
+    const res = msg.text! + user.textStyle + user.textTone + user.offerSize;
+    user.textStyle = "";
+    user.textTone = "";
+    user.offerSize = "";
+    await Router.manager.save(user);
     await Router.queue.add("j", {
       type: "neuro",
       task: "run",
       messages: [
         {
-          content: msg.text!,
+          content: res,
           role: "user",
         },
       ],

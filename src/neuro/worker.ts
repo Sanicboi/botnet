@@ -59,34 +59,38 @@ export class Handler {
             thread.id = j.threadId;
             await manager.save(thread);
             const u = await manager.findOneBy(User, {
-              chatId: String(j.userId)
+              chatId: String(j.userId),
             });
             if (!u) return;
             await bot.sendMessage(+thread.userId, act!.welcomeMessage);
-            await bot.sendMessage(+thread.userId, 'Если нужно, смените модель', {
-              reply_markup: {
-                inline_keyboard: [
-                  [
-                    {
-                      text: `${u.model === 'gpt-4o-mini' ? '✅' : '❌'} GPT 4 Omni mini`,
-                      callback_data: "model-gpt-4o-mini",
-                    },
+            await bot.sendMessage(
+              +thread.userId,
+              "Если нужно, смените модель",
+              {
+                reply_markup: {
+                  inline_keyboard: [
+                    [
+                      {
+                        text: `${u.model === "gpt-4o-mini" ? "✅" : "❌"} GPT 4 Omni mini`,
+                        callback_data: "model-gpt-4o-mini",
+                      },
+                    ],
+                    [
+                      {
+                        text: `${u.model === "gpt-4o" ? "✅" : "❌"} GPT 4 Omni`,
+                        callback_data: "model-gpt-4o",
+                      },
+                    ],
+                    [
+                      {
+                        text: `${u.model === "gpt-4-turbo" ? "✅" : "❌"} GPT 4 Turbo`,
+                        callback_data: "model-gpt-4-turbo",
+                      },
+                    ],
                   ],
-                  [
-                    {
-                      text: `${u.model === 'gpt-4o' ? '✅' : '❌'} GPT 4 Omni`,
-                      callback_data: "model-gpt-4o",
-                    },
-                  ],
-                  [
-                    {
-                      text: `${u.model === 'gpt-4-turbo' ? '✅' : '❌'} GPT 4 Turbo`,
-                      callback_data: "model-gpt-4-turbo",
-                    },
-                  ],
-                ]
-              }
-            });
+                },
+              },
+            );
           } else if (j.task === "delete") {
             await bot.sendMessage(+j.userId, "Контекст удален.");
           } else if (j.task === "run") {

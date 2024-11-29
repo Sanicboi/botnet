@@ -55,7 +55,6 @@ interface INeuroFileJob extends INeuroJob {
   msgId: string;
 }
 
-
 interface Msg {
   role: "user" | "assistant";
   content: string;
@@ -66,8 +65,7 @@ type IJob =
   | INeuroDeleteThreadJob
   | INeuroRunJob
   | INeuroImageJob
-  | INeuroFileJob
-  ;
+  | INeuroFileJob;
 
 const queues = {
   neuro: new Queue<INeuroOutJob>("neuro", {
@@ -124,15 +122,15 @@ const worker = new Worker(
             ...j,
             imageUrl: result.data[0].url,
           });
-        } else if (j.task === 'run-file') {
+        } else if (j.task === "run-file") {
           await openai.beta.threads.messages.create(j.threadId, {
             attachments: [
               {
                 file_id: j.fileId,
-              }
+              },
             ],
-            content: 'Вот входные данные',
-            role: 'user'
+            content: "Вот входные данные",
+            role: "user",
           });
           const str = openai.beta.threads.runs.stream(j.threadId, {
             assistant_id: j.actionId,
