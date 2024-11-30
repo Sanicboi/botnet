@@ -113,4 +113,14 @@ export class User {
 		default: "",
 	})
 	textTone: string;
+
+	@Column({
+		default: "",
+	})
+	docType: string;
+
+	@Column({
+		default: "",
+	})
+	agreementType: string;
 }

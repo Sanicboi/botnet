@@ -29,6 +29,25 @@ toneMap.set("tone-informative", "тон - информативный\n");
 toneMap.set("tone-inspiring", "тон - воодушевляющий\n");
 toneMap.set("tone-bold", "тон - дерзкий\n");
 toneMap.set("tone-calm", "тон - спокойный\n");
+
+const docTypeMap = new Map<string, string>();
+docTypeMap.set("doct-agreement", "Тип документа - договор\n");
+docTypeMap.set("doct-offer", "Тип документа - оферта\n");
+
+const agreementsMap = new Map<string, string>();
+agreementsMap.set(
+	"agreement-legalentity",
+	"Договор о создании юридического лица\n",
+);
+agreementsMap.set(
+	"agreement-cooperation",
+	"Договор о совместной деятельности\n",
+);
+agreementsMap.set("agreement-loan", "Договор займа\n");
+agreementsMap.set("agreement-order", "Договор авторского заказа\n");
+agreementsMap.set("agreement-buysell", "Договор купли продажи\n");
+agreementsMap.set("agreement-service", "Договор оказания услуг\n");
+agreementsMap.set("agreement-employment", "Трудовой договор\n");
 export class TextRouter extends Router {
 	constructor() {
 		super();
@@ -129,6 +148,7 @@ export class TextRouter extends Router {
 						],
 					},
 				});
+				return;
 			}
 			if (q.data!.endsWith("-asst_14B08GDgJphVClkmmtQYo0aq")) {
 				await bot.sendMessage(q.from!.id, "Выберите размер оффера", {
@@ -137,6 +157,17 @@ export class TextRouter extends Router {
 							Btn("Большой", "offer-long"),
 							Btn("Средний", "offer-medium"),
 							Btn("Маленький", "offer-short"),
+						],
+					},
+				});
+				return;
+			}
+			if (q.data!.endsWith("-asst_WHhZd8u8rXpAHADdjIwBM9CJ")) {
+				await bot.sendMessage(q.from!.id, "Выберите тип документа", {
+					reply_markup: {
+						inline_keyboard: [
+							Btn("Договор", "doct-agreement"),
+							Btn("Оферта", "doct-offer"),
 						],
 					},
 				});
@@ -199,14 +230,73 @@ export class TextRouter extends Router {
 				model: u.model,
 			});
 		}
+
+		if (q.data?.startsWith("doct-")) {
+			u.docType = docTypeMap.get(q.data!)!;
+			await Router.manager.save(u);
+			if (q.data === "doct-agreement") {
+				await bot.sendMessage(q.from.id, "Выберите тип договора", {
+					reply_markup: {
+						inline_keyboard: [
+							Btn(
+								"Договор о создании юридического лица",
+								"agreement-legalentity",
+							),
+							Btn(
+								"Договор о совместной деятельности",
+								"agreement-cooperation",
+							),
+							Btn("Договор займа", "agreement-loan"),
+							Btn("Договор авторского заказа", "agreement-order"),
+							Btn("Договор купли продажи", "agreement-buysell"),
+							Btn("Договор оказания услуг", "agreement-service"),
+							Btn("Трудовой договор", "agreement-employment"),
+						],
+					},
+				});
+			} else {
+				u.actionId = "asst_WHhZd8u8rXpAHADdjIwBM9CJ";
+				await Router.manager.save(u);
+				await Router.queue.add("j", {
+					type: "neuro",
+					task: "create",
+					actionId: q.data!.substring(3),
+					userId: u.chatId,
+					model: u.model,
+				});
+				return;
+			}
+			await Router.manager.save(u);
+		}
+
+		if (q.data?.startsWith("agreement-")) {
+			u.agreementType = agreementsMap.get(q.data!)!;
+			await Router.manager.save(u);
+			await Router.queue.add("j", {
+				type: "neuro",
+				task: "create",
+				actionId: q.data!.substring(3),
+				userId: u.chatId,
+				model: u.model,
+			});
+		}
 	}
 
 	public async onText(msg: TelegramBot.Message, user: User) {
 		const t = user.threads.find((t) => t.actionId === user.actionId);
-		const res = msg.text! + user.textStyle + user.textTone + user.offerSize;
+		const res =
+			msg.text! +
+			"\n" +
+			user.textStyle +
+			user.textTone +
+			user.offerSize +
+			user.docType +
+			user.agreementType;
 		user.textStyle = "";
 		user.textTone = "";
 		user.offerSize = "";
+		user.docType = "";
+		user.agreementType = "";
 		await Router.manager.save(user);
 		await Router.queue.add("j", {
 			type: "neuro",

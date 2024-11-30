@@ -65,6 +65,12 @@ export class Router {
 					.id,
 			});
 		}
+		user.docType = "";
+		user.agreementType = "";
+		user.offerSize = "";
+		user.textStyle = "";
+		user.textTone = "";
+		await this.manager.save(user);
 		const files = await Router.manager.find(FileUpload, {
 			where: {
 				user: user,
