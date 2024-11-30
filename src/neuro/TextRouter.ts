@@ -298,6 +298,16 @@ export class TextRouter extends Router {
 		user.docType = "";
 		user.agreementType = "";
 		await Router.manager.save(user);
+		if (user.addBalance === 0 && user.leftForToday === 0) {
+			await bot.sendMessage(msg.from!.id, 'У вас недостатчно токенов', {
+				reply_markup: {
+					inline_keyboard: [
+						Btn('Купить пакет токенов', 'b-token'),
+						Btn('Купить подписку', 'b-sub')
+					]
+				}
+			})
+		}
 		await Router.queue.add("j", {
 			type: "neuro",
 			task: "run",
