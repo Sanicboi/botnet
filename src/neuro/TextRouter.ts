@@ -5,6 +5,7 @@ import { Action } from "../entity/assistants/Action";
 import { User } from "../entity/User";
 import { openai } from ".";
 import { FileUpload } from "../entity/assistants/FileUpload";
+import { Btn } from "./utils";
 
 const sizeMap = new Map<string, string>();
 sizeMap.set("offer-long", "Оффер большой (70-90 слов)\n");
@@ -19,6 +20,15 @@ styleMap.set("style-fiction", "стиль - художественный\n");
 styleMap.set("style-informal", "стиль - разговорный\n");
 styleMap.set("style-ad", "стиль - рекламный\n");
 
+const toneMap = new Map<string, string>();
+toneMap.set('tone-professional', 'тон - Профессиональный\n');
+toneMap.set('tone-friendly', 'тон - Дружелюбный\n');
+toneMap.set('tone-emotional', 'тон - эмоциональный\n');
+toneMap.set('tone-ironic', 'тон - ироничный\n');
+toneMap.set('tone-informative', 'тон - информативный\n');
+toneMap.set('tone-inspiring', 'тон - воодушевляющий\n');
+toneMap.set('tone-bold', 'тон - дерзкий\n');
+toneMap.set('tone-calm', 'тон - спокойный\n');
 export class TextRouter extends Router {
   constructor() {
     super();
@@ -110,42 +120,12 @@ export class TextRouter extends Router {
         await bot.sendMessage(q.from!.id, "Выберите стиль текста", {
           reply_markup: {
             inline_keyboard: [
-              [
-                {
-                  text: "Официальный",
-                  callback_data: "style-official",
-                },
-              ],
-              [
-                {
-                  text: "Научный",
-                  callback_data: "style-scientific",
-                },
-              ],
-              [
-                {
-                  text: "Публицистический",
-                  callback_data: "style-public",
-                },
-              ],
-              [
-                {
-                  text: "Художественный",
-                  callback_data: "style-fiction",
-                },
-              ],
-              [
-                {
-                  text: "Разговорный",
-                  callback_data: "style-informal",
-                },
-              ],
-              [
-                {
-                  text: "Рекламный",
-                  callback_data: "style-ad",
-                },
-              ],
+              Btn('Официальный', 'style-official'),
+              Btn('Научный', 'style-scientific'),
+              Btn('Публицистический','style-public'),
+              Btn('Художественный', 'style-fiction'),
+              Btn('Разговорный', 'style-informal'),
+              Btn('Рекламный', 'style-ad')
             ],
           },
         });
@@ -154,24 +134,9 @@ export class TextRouter extends Router {
         await bot.sendMessage(q.from!.id, "Выберите размер оффера", {
           reply_markup: {
             inline_keyboard: [
-              [
-                {
-                  text: "Большой",
-                  callback_data: "offer-long",
-                },
-              ],
-              [
-                {
-                  text: "Средний",
-                  callback_data: "offer-medium",
-                },
-              ],
-              [
-                {
-                  text: "Маленький",
-                  callback_data: "offer-short",
-                },
-              ],
+              Btn('Большой', 'offer-long'),
+              Btn('Средний', 'offer-medium'),
+              Btn('Маленький', 'offer-short')
             ],
           },
         });
@@ -205,6 +170,34 @@ export class TextRouter extends Router {
     if (q.data?.startsWith("style-")) {
       u.textStyle = styleMap.get(q.data!)!;
       await Router.manager.save(u);
+      await bot.sendMessage(q.from.id, 'Выберите тон текста', {
+        reply_markup: {
+          inline_keyboard: [
+            Btn('Профессиональный', 'tone-professional'),
+            Btn('Дружелюбный', 'tone-friendly'),
+            Btn('Эмоциональный', 'tone-emotional'),
+            Btn('Ироничный', 'tone-ironic'),
+            Btn('Информативный', 'tone-informative'),
+            Btn('Воодушевляющий', 'tone-inspiring'),
+            Btn('Дерзкий', 'tone-bold'),
+            Btn('Спокойный / уравновешенный', 'tone-calm'),
+            Btn('Назад', 'ac-asst_1BdIGF3mp94XvVfgS88fLIor')
+          ]
+        }
+      })
+    }
+
+    if (q.data?.startsWith('tone-')) {
+      u.textTone = toneMap.get(q.data!)!;
+      u.actionId = 'asst_1BdIGF3mp94XvVfgS88fLIor';
+      await Router.manager.save(u);
+      await Router.queue.add("j", {
+        type: "neuro",
+        task: "create",
+        actionId: q.data!.substring(3),
+        userId: u.chatId,
+        model: u.model,
+      });
     }
   }
 
