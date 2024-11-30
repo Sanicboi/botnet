@@ -8,15 +8,15 @@ import { SupportRequest } from "./entity/SupportRequest";
 import { FileUpload } from "./entity/assistants/FileUpload";
 
 export const AppDataSource = new DataSource({
-  type: "postgres",
-  host: "db",
-  port: 5432,
-  username: "test",
-  password: "test",
-  database: "test",
-  synchronize: true,
-  logging: true,
-  entities: [User, Assistant, Thread, Action, SupportRequest, FileUpload],
-  migrations: [],
-  subscribers: [],
+	type: "postgres",
+	host: "db",
+	port: 5432,
+	username: "test",
+	password: "test",
+	database: "test",
+	synchronize: true,
+	logging: true,
+	entities: [User, Assistant, Thread, Action, SupportRequest, FileUpload],
+	migrations: [],
+	subscribers: [],
 });

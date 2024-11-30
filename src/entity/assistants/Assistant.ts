@@ -3,12 +3,12 @@ import { Action } from "./Action";
 
 @Entity()
 export class Assistant {
-  @PrimaryGeneratedColumn()
-  id: string;
+	@PrimaryGeneratedColumn()
+	id: string;
 
-  @OneToMany(() => Action, (action) => action.assistant)
-  actions: Action[];
+	@OneToMany(() => Action, (action) => action.assistant)
+	actions: Action[];
 
-  @Column()
-  name: string;
+	@Column()
+	name: string;
 }

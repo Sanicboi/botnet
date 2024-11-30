@@ -3,9 +3,9 @@ import { User } from "../User";
 
 @Entity()
 export class FileUpload {
-  @PrimaryColumn()
-  id: string;
+	@PrimaryColumn()
+	id: string;
 
-  @ManyToOne(() => User, (user) => user.files)
-  user: User;
+	@ManyToOne(() => User, (user) => user.files)
+	user: User;
 }

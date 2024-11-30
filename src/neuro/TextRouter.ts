@@ -21,206 +21,206 @@ styleMap.set("style-informal", "стиль - разговорный\n");
 styleMap.set("style-ad", "стиль - рекламный\n");
 
 const toneMap = new Map<string, string>();
-toneMap.set('tone-professional', 'тон - Профессиональный\n');
-toneMap.set('tone-friendly', 'тон - Дружелюбный\n');
-toneMap.set('tone-emotional', 'тон - эмоциональный\n');
-toneMap.set('tone-ironic', 'тон - ироничный\n');
-toneMap.set('tone-informative', 'тон - информативный\n');
-toneMap.set('tone-inspiring', 'тон - воодушевляющий\n');
-toneMap.set('tone-bold', 'тон - дерзкий\n');
-toneMap.set('tone-calm', 'тон - спокойный\n');
+toneMap.set("tone-professional", "тон - Профессиональный\n");
+toneMap.set("tone-friendly", "тон - Дружелюбный\n");
+toneMap.set("tone-emotional", "тон - эмоциональный\n");
+toneMap.set("tone-ironic", "тон - ироничный\n");
+toneMap.set("tone-informative", "тон - информативный\n");
+toneMap.set("tone-inspiring", "тон - воодушевляющий\n");
+toneMap.set("tone-bold", "тон - дерзкий\n");
+toneMap.set("tone-calm", "тон - спокойный\n");
 export class TextRouter extends Router {
-  constructor() {
-    super();
+	constructor() {
+		super();
 
-    bot.on("document", async (msg) => {
-      const u = await Router.manager.findOne(User, {
-        where: { chatId: String(msg.chat.id) },
-        relations: {
-          action: true,
-          threads: true,
-        },
-      });
-      if (!u) return;
+		bot.on("document", async (msg) => {
+			const u = await Router.manager.findOne(User, {
+				where: { chatId: String(msg.chat.id) },
+				relations: {
+					action: true,
+					threads: true,
+				},
+			});
+			if (!u) return;
 
-      if (msg.document) {
-        const str = bot.getFileStream(msg.document.file_id);
-        const arr = await str.toArray();
-        const f = new File(arr, msg.document.file_name!, {
-          type: msg.document.mime_type,
-        });
+			if (msg.document) {
+				const str = bot.getFileStream(msg.document.file_id);
+				const arr = await str.toArray();
+				const f = new File(arr, msg.document.file_name!, {
+					type: msg.document.mime_type,
+				});
 
-        const res = await openai.files.create({
-          purpose: "assistants",
-          file: f,
-        });
+				const res = await openai.files.create({
+					purpose: "assistants",
+					file: f,
+				});
 
-        const f2 = new FileUpload();
-        f2.id = res.id;
-        f2.user = u;
-        await Router.manager.save(f2);
+				const f2 = new FileUpload();
+				f2.id = res.id;
+				f2.user = u;
+				await Router.manager.save(f2);
 
-        const t = u.threads.find((t) => t.actionId === u.actionId);
-        await bot.sendMessage(msg.from!.id, "генерирую ответ ✨...");
-        await Router.queue.add("j", {
-          type: "neuro",
-          task: "run-file",
-          model: u.model,
-          actionId: u.actionId,
-          userId: u.chatId,
-          threadId: t?.id,
-          fileId: f2.id,
-          id: String(msg.message_id),
-          msgId: String(msg.message_id),
-        });
-      }
-    });
+				const t = u.threads.find((t) => t.actionId === u.actionId);
+				await bot.sendMessage(msg.from!.id, "генерирую ответ ✨...");
+				await Router.queue.add("j", {
+					type: "neuro",
+					task: "run-file",
+					model: u.model,
+					actionId: u.actionId,
+					userId: u.chatId,
+					threadId: t?.id,
+					fileId: f2.id,
+					id: String(msg.message_id),
+					msgId: String(msg.message_id),
+				});
+			}
+		});
 
-    this.onQuery = this.onQuery.bind(this);
-    this.onText = this.onText.bind(this);
-  }
+		this.onQuery = this.onQuery.bind(this);
+		this.onText = this.onText.bind(this);
+	}
 
-  public async onQuery(q: TelegramBot.CallbackQuery) {
-    const u = await Router.manager.findOne(User, {
-      where: {
-        chatId: String(q.from.id),
-      },
-    });
-    if (!u) return;
-    if (q.data!.startsWith("a-")) {
-      const actions = await Router.manager.find(Action, {
-        where: {
-          assistantId: q.data!.substring(2),
-        },
-      });
-      let result: InlineKeyboardButton[][] = [];
-      for (const action of actions) {
-        result.push([
-          {
-            text: action.name,
-            callback_data: `ac-${action.id}`,
-          },
-        ]);
-      }
-      result.push([
-        {
-          text: "Назад",
-          callback_data: "menu",
-        },
-      ]);
-      await bot.sendMessage(q.from.id, "Выберите функцию", {
-        reply_markup: {
-          inline_keyboard: result,
-        },
-      });
-    }
+	public async onQuery(q: TelegramBot.CallbackQuery) {
+		const u = await Router.manager.findOne(User, {
+			where: {
+				chatId: String(q.from.id),
+			},
+		});
+		if (!u) return;
+		if (q.data!.startsWith("a-")) {
+			const actions = await Router.manager.find(Action, {
+				where: {
+					assistantId: q.data!.substring(2),
+				},
+			});
+			let result: InlineKeyboardButton[][] = [];
+			for (const action of actions) {
+				result.push([
+					{
+						text: action.name,
+						callback_data: `ac-${action.id}`,
+					},
+				]);
+			}
+			result.push([
+				{
+					text: "Назад",
+					callback_data: "menu",
+				},
+			]);
+			await bot.sendMessage(q.from.id, "Выберите функцию", {
+				reply_markup: {
+					inline_keyboard: result,
+				},
+			});
+		}
 
-    if (q.data!.startsWith("ac-")) {
-      if (q.data!.endsWith("-asst_1BdIGF3mp94XvVfgS88fLIor")) {
-        await bot.sendMessage(q.from!.id, "Выберите стиль текста", {
-          reply_markup: {
-            inline_keyboard: [
-              Btn('Официальный', 'style-official'),
-              Btn('Научный', 'style-scientific'),
-              Btn('Публицистический','style-public'),
-              Btn('Художественный', 'style-fiction'),
-              Btn('Разговорный', 'style-informal'),
-              Btn('Рекламный', 'style-ad')
-            ],
-          },
-        });
-      }
-      if (q.data!.endsWith("-asst_14B08GDgJphVClkmmtQYo0aq")) {
-        await bot.sendMessage(q.from!.id, "Выберите размер оффера", {
-          reply_markup: {
-            inline_keyboard: [
-              Btn('Большой', 'offer-long'),
-              Btn('Средний', 'offer-medium'),
-              Btn('Маленький', 'offer-short')
-            ],
-          },
-        });
-        return;
-      }
+		if (q.data!.startsWith("ac-")) {
+			if (q.data!.endsWith("-asst_1BdIGF3mp94XvVfgS88fLIor")) {
+				await bot.sendMessage(q.from!.id, "Выберите стиль текста", {
+					reply_markup: {
+						inline_keyboard: [
+							Btn("Официальный", "style-official"),
+							Btn("Научный", "style-scientific"),
+							Btn("Публицистический", "style-public"),
+							Btn("Художественный", "style-fiction"),
+							Btn("Разговорный", "style-informal"),
+							Btn("Рекламный", "style-ad"),
+						],
+					},
+				});
+			}
+			if (q.data!.endsWith("-asst_14B08GDgJphVClkmmtQYo0aq")) {
+				await bot.sendMessage(q.from!.id, "Выберите размер оффера", {
+					reply_markup: {
+						inline_keyboard: [
+							Btn("Большой", "offer-long"),
+							Btn("Средний", "offer-medium"),
+							Btn("Маленький", "offer-short"),
+						],
+					},
+				});
+				return;
+			}
 
-      u.actionId = q.data!.substring(3);
-      await Router.manager.save(u);
-      await Router.queue.add("j", {
-        type: "neuro",
-        task: "create",
-        actionId: q.data!.substring(3),
-        userId: u.chatId,
-        model: u.model,
-      });
-    }
+			u.actionId = q.data!.substring(3);
+			await Router.manager.save(u);
+			await Router.queue.add("j", {
+				type: "neuro",
+				task: "create",
+				actionId: q.data!.substring(3),
+				userId: u.chatId,
+				model: u.model,
+			});
+		}
 
-    if (q.data?.startsWith("offer-")) {
-      u.actionId = "asst_14B08GDgJphVClkmmtQYo0aq";
-      u.offerSize = sizeMap.get(q.data!)!;
-      await Router.manager.save(u);
-      await Router.queue.add("j", {
-        type: "neuro",
-        task: "create",
-        actionId: q.data!.substring(3),
-        userId: u.chatId,
-        model: u.model,
-      });
-    }
+		if (q.data?.startsWith("offer-")) {
+			u.actionId = "asst_14B08GDgJphVClkmmtQYo0aq";
+			u.offerSize = sizeMap.get(q.data!)!;
+			await Router.manager.save(u);
+			await Router.queue.add("j", {
+				type: "neuro",
+				task: "create",
+				actionId: q.data!.substring(3),
+				userId: u.chatId,
+				model: u.model,
+			});
+		}
 
-    if (q.data?.startsWith("style-")) {
-      u.textStyle = styleMap.get(q.data!)!;
-      await Router.manager.save(u);
-      await bot.sendMessage(q.from.id, 'Выберите тон текста', {
-        reply_markup: {
-          inline_keyboard: [
-            Btn('Профессиональный', 'tone-professional'),
-            Btn('Дружелюбный', 'tone-friendly'),
-            Btn('Эмоциональный', 'tone-emotional'),
-            Btn('Ироничный', 'tone-ironic'),
-            Btn('Информативный', 'tone-informative'),
-            Btn('Воодушевляющий', 'tone-inspiring'),
-            Btn('Дерзкий', 'tone-bold'),
-            Btn('Спокойный / уравновешенный', 'tone-calm'),
-            Btn('Назад', 'ac-asst_1BdIGF3mp94XvVfgS88fLIor')
-          ]
-        }
-      })
-    }
+		if (q.data?.startsWith("style-")) {
+			u.textStyle = styleMap.get(q.data!)!;
+			await Router.manager.save(u);
+			await bot.sendMessage(q.from.id, "Выберите тон текста", {
+				reply_markup: {
+					inline_keyboard: [
+						Btn("Профессиональный", "tone-professional"),
+						Btn("Дружелюбный", "tone-friendly"),
+						Btn("Эмоциональный", "tone-emotional"),
+						Btn("Ироничный", "tone-ironic"),
+						Btn("Информативный", "tone-informative"),
+						Btn("Воодушевляющий", "tone-inspiring"),
+						Btn("Дерзкий", "tone-bold"),
+						Btn("Спокойный / уравновешенный", "tone-calm"),
+						Btn("Назад", "ac-asst_1BdIGF3mp94XvVfgS88fLIor"),
+					],
+				},
+			});
+		}
 
-    if (q.data?.startsWith('tone-')) {
-      u.textTone = toneMap.get(q.data!)!;
-      u.actionId = 'asst_1BdIGF3mp94XvVfgS88fLIor';
-      await Router.manager.save(u);
-      await Router.queue.add("j", {
-        type: "neuro",
-        task: "create",
-        actionId: q.data!.substring(3),
-        userId: u.chatId,
-        model: u.model,
-      });
-    }
-  }
+		if (q.data?.startsWith("tone-")) {
+			u.textTone = toneMap.get(q.data!)!;
+			u.actionId = "asst_1BdIGF3mp94XvVfgS88fLIor";
+			await Router.manager.save(u);
+			await Router.queue.add("j", {
+				type: "neuro",
+				task: "create",
+				actionId: q.data!.substring(3),
+				userId: u.chatId,
+				model: u.model,
+			});
+		}
+	}
 
-  public async onText(msg: TelegramBot.Message, user: User) {
-    const t = user.threads.find((t) => t.actionId === user.actionId);
-    const res = msg.text! + user.textStyle + user.textTone + user.offerSize;
-    user.textStyle = "";
-    user.textTone = "";
-    user.offerSize = "";
-    await Router.manager.save(user);
-    await Router.queue.add("j", {
-      type: "neuro",
-      task: "run",
-      messages: [
-        {
-          content: res,
-          role: "user",
-        },
-      ],
-      model: user.model,
-      actionId: user.actionId,
-      userId: user.chatId,
-      threadId: t?.id,
-    });
-  }
+	public async onText(msg: TelegramBot.Message, user: User) {
+		const t = user.threads.find((t) => t.actionId === user.actionId);
+		const res = msg.text! + user.textStyle + user.textTone + user.offerSize;
+		user.textStyle = "";
+		user.textTone = "";
+		user.offerSize = "";
+		await Router.manager.save(user);
+		await Router.queue.add("j", {
+			type: "neuro",
+			task: "run",
+			messages: [
+				{
+					content: res,
+					role: "user",
+				},
+			],
+			model: user.model,
+			actionId: user.actionId,
+			userId: user.chatId,
+			threadId: t?.id,
+		});
+	}
 }
