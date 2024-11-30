@@ -1,27 +1,37 @@
-version: '3.0'
+version: "3.0"
 services:
-  bots1:
-    restart: always
-    build: .
-    env_file: .env
-
-  # signup:
-  #   restart: always
-  #   build: .
-  #   command: "npm run serve"
-  #   ports:
-  #     - "80:80"
-  db:
-    image: "postgres:14.5"
-    ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_USER: "test"
-      POSTGRES_PASSWORD: "test"
-      POSTGRES_DB: "test"
-    volumes:
-      - "~/db-data:/var/lib/postgresql/data"
-  redis:
-    image: redis
-    restart: always
-
+    db:
+        image: "postgres:14.5"
+        ports:
+            - "5432:5432"
+        environment:
+            POSTGRES_USER: "test"
+            POSTGRES_PASSWORD: "test"
+            POSTGRES_DB: "test"
+        volumes:
+            - "~/db-data:/var/lib/postgresql/data"
+    redis:
+        image: redis
+        restart: always
+        ports:
+            - "6379:6379"
+    # voronka:
+    #   restart: always
+    #   build: .
+    #   command: npm run voronka
+    #   env_file: .env
+    neuro:
+        restart: always
+        build: .
+        command: npm run neuro
+        env_file: .env
+    openai:
+        restart: always
+        build: .
+        command: npm run openai
+        env_file: .env
+    # support:
+    #   restart: always
+    #   build: .
+    #   command: npm run support
+    #   env_file: .env
