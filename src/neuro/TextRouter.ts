@@ -192,7 +192,7 @@ export class TextRouter extends Router {
 			await Router.queue.add("j", {
 				type: "neuro",
 				task: "create",
-				actionId: q.data!.substring(3),
+				actionId: "asst_14B08GDgJphVClkmmtQYo0aq",
 				userId: u.chatId,
 				model: u.model,
 			});
@@ -225,7 +225,7 @@ export class TextRouter extends Router {
 			await Router.queue.add("j", {
 				type: "neuro",
 				task: "create",
-				actionId: q.data!.substring(3),
+				actionId: "asst_1BdIGF3mp94XvVfgS88fLIor",
 				userId: u.chatId,
 				model: u.model,
 			});
@@ -260,7 +260,7 @@ export class TextRouter extends Router {
 				await Router.queue.add("j", {
 					type: "neuro",
 					task: "create",
-					actionId: q.data!.substring(3),
+					actionId: "asst_WHhZd8u8rXpAHADdjIwBM9CJ",
 					userId: u.chatId,
 					model: u.model,
 				});
@@ -271,11 +271,12 @@ export class TextRouter extends Router {
 
 		if (q.data?.startsWith("agreement-")) {
 			u.agreementType = agreementsMap.get(q.data!)!;
+			u.actionId = "asst_WHhZd8u8rXpAHADdjIwBM9CJ";
 			await Router.manager.save(u);
 			await Router.queue.add("j", {
 				type: "neuro",
 				task: "create",
-				actionId: q.data!.substring(3),
+				actionId: "asst_WHhZd8u8rXpAHADdjIwBM9CJ",
 				userId: u.chatId,
 				model: u.model,
 			});
@@ -299,14 +300,14 @@ export class TextRouter extends Router {
 		user.agreementType = "";
 		await Router.manager.save(user);
 		if (user.addBalance === 0 && user.leftForToday === 0) {
-			await bot.sendMessage(msg.from!.id, 'У вас недостатчно токенов', {
+			await bot.sendMessage(msg.from!.id, "У вас недостатчно токенов", {
 				reply_markup: {
 					inline_keyboard: [
-						Btn('Купить пакет токенов', 'b-token'),
-						Btn('Купить подписку', 'b-sub')
-					]
-				}
-			})
+						Btn("Купить пакет токенов", "b-token"),
+						Btn("Купить подписку", "b-sub"),
+					],
+				},
+			});
 		}
 		await Router.queue.add("j", {
 			type: "neuro",

@@ -85,15 +85,14 @@ export class Router {
 		const arr = files.map((el) => el.id);
 		if (arr.length > 0) {
 			await this.manager
-			.createQueryBuilder()
-			.delete()
-			.from(FileUpload, "file")
-			.where("file.id IN :ids", {
-				ids: arr,
-			})
-			.execute();
+				.createQueryBuilder()
+				.delete()
+				.from(FileUpload, "file")
+				.where("file.id IN :ids", {
+					ids: arr,
+				})
+				.execute();
 		}
-
 	}
 
 	constructor() {}
