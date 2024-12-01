@@ -308,6 +308,7 @@ export class TextRouter extends Router {
 					],
 				},
 			});
+			return;
 		}
 		await Router.queue.add("j", {
 			type: "neuro",
