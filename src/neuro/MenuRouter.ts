@@ -62,15 +62,15 @@ export class MenuRouter extends Router {
 				const refId = msg.text!.split(" ")[1];
 				user = new User();
 				user.chatId = String(msg.from!.id);
-				user.addBalance = Math.round((10000 * 34) / 10000);
+				user.addBalance = Math.round((10000 * 3.4) / 10000);
 				if (refId) {
 					const creator = await Router.manager.findOneBy(User, {
 						chatId: refId,
 					});
 					if (creator) {
-						creator.addBalance += Math.round((3000 * 34) / 10000);
+						creator.addBalance += Math.round((3000 * 3.4) / 10000);
 						await Router.manager.save(creator);
-						user.addBalance += Math.round((5000 * 34) / 10000);
+						user.addBalance += Math.round((5000 * 3.4) / 10000);
 					}
 				}
 
@@ -126,7 +126,7 @@ export class MenuRouter extends Router {
 			await bot.sendMessage(
 				msg.from!.id,
 				`Баланс и подписка\n\n🟣 Формат доступа:\n⤷ ${user.subscription === "exlusive" ? "Exclusive" : user.subscription === "premium" ? "Premium" : user.subscription === "pro" ? "PRO+" : user.subscription === "lite" ? "Lite" : "Бесплатный доступ"}
-         ⤷ Сегодня осталось: ${Math.round((user.leftForToday / 34) * 10000)} / ${
+         ⤷ Сегодня осталось: ${Math.round((user.leftForToday / 3.4) * 10000)} / ${
 				user.subscription === "exlusive"
 					? 135000
 					: user.subscription === "premium"
@@ -141,7 +141,7 @@ export class MenuRouter extends Router {
          ⤷ Следующий платеж: ${user.endDate == null ? "Нет" : user.endDate.toUTCString()}
       
       🟣 Ваш комплект токенов:
-         ⤷ ${Math.round((user.addBalance / 34) * 10000)}
+         ⤷ ${Math.round((user.addBalance / 3.4) * 10000)}
       
       📦 Если вам не хватает ежедневных токенов по подписке – вы можете купить комплект токенов. Комплект токенов можно использовать в любое время без лимитов. Полезно, когда вам требуется много токенов за раз.`,
 				{
