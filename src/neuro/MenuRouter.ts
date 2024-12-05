@@ -224,8 +224,8 @@ export class MenuRouter extends Router {
         }
 
         const assistants = await Router.manager.find(Assistant, {
-			take: 8
-		});
+          take: 8,
+        });
         let result: InlineKeyboardButton[][] = [];
         for (const a of assistants) {
           result.push([
@@ -236,8 +236,8 @@ export class MenuRouter extends Router {
           ]);
         }
 
-        result.push(Btn("👨‍🎨Дизайн", 'images'));
-		result.push(Btn('Следующая страница', 'menu-2'));
+        result.push(Btn("👨‍🎨Дизайн", "images"));
+        result.push(Btn("Следующая страница", "menu-2"));
 
         await bot.sendMessage(q.from.id, "Выберите категорию сотрудников", {
           reply_markup: {
@@ -250,45 +250,45 @@ export class MenuRouter extends Router {
         await bot.sendMessage(q.from.id, "Настройки ⚙️", {
           reply_markup: {
             inline_keyboard: [
-				Btn("Изменить модель", 'change-model'),
-				Btn("Изменить имя", 'change-name'),
-				Btn("Подсчет токенов", 'change-count')
+              Btn("Изменить модель", "change-model"),
+              Btn("Изменить имя", "change-name"),
+              Btn("Подсчет токенов", "change-count"),
             ],
           },
         });
       }
 
-	  if (q.data === 'menu-2') {
-		const user = await Router.manager.findOneBy(User, {
-			chatId: String(q.from.id),
-		  });
-		  if (!user) return;
-		  if (user.usingImageGeneration) {
-			user.usingImageGeneration = false;
-			await Router.manager.save(user);
-		  }
-  
-		  const assistants = await Router.manager.find(Assistant, {
-			  skip: 8
-		  });
-		  let result: InlineKeyboardButton[][] = [];
-		  for (const a of assistants) {
-			result.push([
-			  {
-				text: a.name,
-				callback_data: `a-${a.id}`,
-			  },
-			]);
-		  }
-  
-		  result.push(Btn('Предыдущая страница', 'menu-1'));
-  
-		  await bot.sendMessage(q.from.id, "Выберите категорию сотрудников", {
-			reply_markup: {
-			  inline_keyboard: result,
-			},
-		  });
-	  }
+      if (q.data === "menu-2") {
+        const user = await Router.manager.findOneBy(User, {
+          chatId: String(q.from.id),
+        });
+        if (!user) return;
+        if (user.usingImageGeneration) {
+          user.usingImageGeneration = false;
+          await Router.manager.save(user);
+        }
+
+        const assistants = await Router.manager.find(Assistant, {
+          skip: 8,
+        });
+        let result: InlineKeyboardButton[][] = [];
+        for (const a of assistants) {
+          result.push([
+            {
+              text: a.name,
+              callback_data: `a-${a.id}`,
+            },
+          ]);
+        }
+
+        result.push(Btn("Предыдущая страница", "menu-1"));
+
+        await bot.sendMessage(q.from.id, "Выберите категорию сотрудников", {
+          reply_markup: {
+            inline_keyboard: result,
+          },
+        });
+      }
     } catch (err) {
       Router.logger.fatal(err);
     }

@@ -80,34 +80,30 @@ export class Handler {
                 break;
             }
 
-            await bot.sendMessage(
-              +thread.userId,
-              "Модель для генерации:",
-              {
-                reply_markup: {
-                  inline_keyboard: [
-                    [
-                      {
-                        text: `${u.model === "gpt-4o-mini" ? "✅" : "❌"} GPT 4 Omni mini`,
-                        callback_data: "model-gpt-4o-mini",
-                      },
-                    ],
-                    [
-                      {
-                        text: `${u.model === "gpt-4o" ? "✅" : "❌"} GPT 4 Omni`,
-                        callback_data: "model-gpt-4o",
-                      },
-                    ],
-                    [
-                      {
-                        text: `${u.model === "gpt-4-turbo" ? "✅" : "❌"} GPT 4 Turbo`,
-                        callback_data: "model-gpt-4-turbo",
-                      },
-                    ],
+            await bot.sendMessage(+thread.userId, "Модель для генерации:", {
+              reply_markup: {
+                inline_keyboard: [
+                  [
+                    {
+                      text: `${u.model === "gpt-4o-mini" ? "✅" : "❌"} GPT 4 Omni mini`,
+                      callback_data: "model-gpt-4o-mini",
+                    },
                   ],
-                },
+                  [
+                    {
+                      text: `${u.model === "gpt-4o" ? "✅" : "❌"} GPT 4 Omni`,
+                      callback_data: "model-gpt-4o",
+                    },
+                  ],
+                  [
+                    {
+                      text: `${u.model === "gpt-4-turbo" ? "✅" : "❌"} GPT 4 Turbo`,
+                      callback_data: "model-gpt-4-turbo",
+                    },
+                  ],
+                ],
               },
-            );
+            });
           } else if (j.task === "delete") {
             await bot.sendMessage(+j.userId, "Контекст удален.");
           } else if (j.task === "run") {

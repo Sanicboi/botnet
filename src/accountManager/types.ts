@@ -1,20 +1,19 @@
-
 export interface IMsgSend {
-    fromId: string;
-    toId: string;
-    messageText: string;
+  fromId: string;
+  toId: string;
+  messageText: string;
 }
 
 export type ResType = "Ok" | "ClientErr" | "ServerErr";
 
 export interface IMsgSendResult {
-    result: ResType;
+  result: ResType;
 }
 
 export interface IService {
-    sendMessage(input: IMsgSend): IMsgSendResult; 
+  sendMessage(input: IMsgSend): IMsgSendResult;
 }
 
 export interface IPackage {
-    AccountManager: IService;
+  AccountManager: IService;
 }
