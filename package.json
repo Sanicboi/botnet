@@ -37,6 +37,11 @@
     "neuro": "node build/neuro/index.js | pino-pretty",
     "support": "node build/clients/support.js",
     "build": "tsc",
-    "openai": "node build/openaiQueue/index.js | pino-pretty"
+    "openai": "node build/openaiQueue/index.js | pino-pretty",
+    "accounts": "node build/accountManager/index.js",
+    "inQueue": "node build/inQueue/index.js",
+    "mailer": "node build/mailer/index.js",
+    "mailerOut": "node build/mailerOutQueue/index.js",
+    "mailerQueue": "node build/mailerQueue/index.js"
   }
 }

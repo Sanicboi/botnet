@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryColumn } from "typeorm";
+import { Column, Entity, OneToMany, PrimaryColumn } from "typeorm";
+import { Dialog } from "./Dialog";
 
 @Entity()
 export class Bot {
@@ -19,4 +20,7 @@ export class Bot {
     nullable: true,
   })
   lastSentMessage: Date;
+
+  @OneToMany(() => Dialog, (dialog) => dialog.bot)
+  dialogs: Dialog[];
 }

@@ -20,15 +20,40 @@ services:
   #   build: .
   #   command: npm run voronka
   #   env_file: .env
-  neuro:
-    restart: always
-    build: .
-    command: npm run neuro
-    env_file: .env
+  # neuro:
+  #   restart: always
+  #   build: .
+  #   command: npm run neuro
+  #   env_file: .env
   openai:
     restart: always
     build: .
     command: npm run openai
+    env_file: .env
+  mailer:
+    restart: always
+    build: .
+    command: npm run mailer
+    env_file: .env
+  mailer-queue:
+    restart: always
+    build: .
+    command: npm run mailerQueue
+    env_file: .env
+  mailer-out:
+    restart: always
+    build: .
+    command: npm run mailerOut
+    env_file: .env
+  in-queue:
+    restart: always
+    build: .
+    command: npm run inQueue
+    env_file: .env
+  accounts:
+    restart: always
+    build: .
+    command: npm run accounts
     env_file: .env
   # support:
   #   restart: always

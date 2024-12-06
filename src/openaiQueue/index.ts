@@ -1,12 +1,22 @@
 import { Job, Queue, Worker } from "bullmq";
 import OpenAI from "openai";
 import pino from "pino";
+import { AppDataSource } from "../data-source";
+import { Dialog } from "../entity/bots/Dialog";
 
 const logger = pino();
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_KEY ?? "",
 });
+
+interface IMailerJob {
+  type: "mailer";
+  task: "create" | "reply";
+  botId: string;
+  toId: string;
+  msg: string;
+}
 
 interface INeuroJob {
   type: "neuro";
@@ -47,6 +57,12 @@ interface INeuroOutJob extends INeuroJob {
   msgId?: string;
 }
 
+interface IMalerOutJob {
+  botId: string;
+  message: string;
+  sendToId: string;
+}
+
 interface INeuroFileJob extends INeuroJob {
   task: "run-file";
   fileId: string;
@@ -65,7 +81,9 @@ type IJob =
   | INeuroDeleteThreadJob
   | INeuroRunJob
   | INeuroImageJob
-  | INeuroFileJob;
+  | INeuroFileJob 
+  | IMailerJob  
+  ;
 
 const queues = {
   neuro: new Queue<INeuroOutJob>("neuro", {
@@ -73,13 +91,19 @@ const queues = {
       host: "redis",
     },
   }),
+  mailer: new Queue<IMalerOutJob>("mailer-out", {
+    connection: {
+      host: "redis",
+    }
+  })
 };
-
+AppDataSource.initialize();
 const worker = new Worker(
   "openai",
   async (job: Job<IJob>) => {
     try {
       const j = job.data;
+      console.log(j);
       if (j.type === "neuro") {
         if (j.task === "create") {
           const t = await openai.beta.threads.create();
@@ -148,6 +172,48 @@ const worker = new Worker(
             tokenCount: run.usage?.total_tokens,
           });
         }
+      } else if (j.type === 'mailer') {
+        if (j.task === 'create') {
+          const d = new Dialog();
+          d.threadId = (await openai.beta.threads.create()).id;
+          d.botId = j.botId;
+          d.leadId = j.toId;
+          await AppDataSource.manager.save(d);
+
+          // TODO: randomize the message && change the way they are stored
+          const response = "Тестовое сообщение";
+          await openai.beta.threads.messages.create(d.threadId, {
+            content: response,
+            role: 'assistant'
+          });
+          console.log(j);
+          await queues.mailer.add('j', {
+            botId: j.botId,
+            message: response,
+            sendToId: j.toId
+          });
+        } else if (j.task === 'reply') {
+          const d = await AppDataSource.manager.findOneBy(Dialog, {
+            botId: j.botId,
+            leadId: j.toId
+          });
+          if (!d) return
+          await openai.beta.threads.messages.create(d.threadId, {
+            content: j.msg,
+            role: 'user'
+          })
+          const msgs = await openai.beta.threads.runs.stream(d!.threadId, {
+            assistant_id: ''
+          }).finalMessages();
+
+          if (msgs[0].content[0].type != 'text') return;
+
+          await queues.mailer.add('j', {
+            botId: j.botId,
+            message: msgs[0].content[0].text.value,
+            sendToId: j.toId
+          });
+        } 
       }
     } catch (err) {
       logger.fatal(err);

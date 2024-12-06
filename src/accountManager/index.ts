@@ -14,6 +14,8 @@ import { AppDataSource } from "../data-source";
 import { TelegramClient } from "telegram";
 import { Bot } from "../entity/bots/Bot";
 import { StringSession } from "telegram/sessions";
+import { NewMessage, NewMessageEvent } from "telegram/events";
+import { Queue } from "bullmq";
 
 /**
  * This is the main user account manager
@@ -28,7 +30,12 @@ import { StringSession } from "telegram/sessions";
 class GRPCServer {
   private server: Server;
   private manager: EntityManager = AppDataSource.manager;
-  private static bots: Map<string, TelegramClient> = new Map();
+  private bots: Map<string, TelegramClient> = new Map();
+  private queue: Queue = new Queue("in", {
+    connection: {
+      host: 'redis'
+    }
+  });
 
   constructor() {
     const packageDef = loadSync(
@@ -50,9 +57,9 @@ class GRPCServer {
     AppDataSource.initialize().then(async () => {
       this.server = new Server();
       this.server.addService(descriptor.manager.AccountManager.service, {
-        SendMessage: GRPCServer.SendMessage,
+        SendMessage: this.SendMessage.bind(this),
       });
-
+      
       const accounts = await this.manager.find(Bot, {
         where: {
           blocked: false,
@@ -65,36 +72,64 @@ class GRPCServer {
           session,
           +process.env.TG_API_ID!,
           process.env.TG_API_HASH!,
-          {},
+          {
+            useWSS: true
+          },
         );
-        GRPCServer.bots.set(b.token, client);
+        await client.start({
+            onError: async (err) => {
+              console.log(err);
+              return true;
+            },
+            phoneNumber: '+799999999999999',
+            phoneCode: async () => '',
+        });
+        this.bots.set(b.token, client);
+        client.addEventHandler(async (e: NewMessageEvent) => {
+          if (e.isPrivate && e._chat?.className === 'User') {
+            await this.queue.add('j', {
+              from: e.message._chat?.id,
+              to: client.session.save(),
+              text: e.message.text
+            })
+          }
+
+        }, new NewMessage())
       }
 
       this.server.bindAsync(
-        "localhost:8080",
+        "0.0.0.0:50051",
         ServerCredentials.createInsecure(),
         () => {
-          this.server.start();
+          console.log("bound");
         },
       );
     });
-
-    this.server = new Server();
-    this.server.addService(descriptor.manager.AccountManager.service, {
-      SendMessage: GRPCServer.SendMessage.bind(this),
-    });
   }
 
-  public static async SendMessage(
+  public async SendMessage(
     call: ServerUnaryCall<IMsgSend, IMsgSendResult>,
     callback: sendUnaryData<IMsgSendResult>,
   ) {
+    console.log(call.request);
     const data = call.request;
     const client = this.bots.get(data.fromId);
     console.log(client);
-    callback(null, {
-      result: "Ok",
-    });
+    if (!client) return;
+    try {
+      await client.sendMessage(data.toId, {
+        message: data.messageText
+      });
+      callback(null, {
+        result: "Ok",
+      });
+    } catch (err) {
+      console.error(err);
+      callback(null, {
+        result: 'ServerErr'
+      })
+    }
+
   }
 }
 
