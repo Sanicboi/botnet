@@ -162,7 +162,7 @@ const worker = new Worker(
           const msgs = await str.finalMessages();
           const run = await str.finalRun();
           const r = msgs.map((el) =>
-            el.content[0].type === "text" ? el.content[0].text.value.replaceAll(/【.*?†source】/g, '') : "",
+            el.content[0].type === "text" ? el.content[0].text.value.replaceAll(/【.*?†.*】/, '') : "",
           );
 
           await queues.neuro.add("j", {
@@ -193,7 +193,7 @@ const worker = new Worker(
           if (msg.type !== 'text') return;
           await queues.mailer.add("j", {
             botId: j.botId,
-            message: msg.text.value.replaceAll(/【.*?†source】/g, ''),
+            message: msg.text.value.replaceAll(/【.*?†.*】/g, ''),
             sendToId: j.toId,
           });
         } else if (j.task === "reply") {
