@@ -88,6 +88,7 @@ class GRPCServer {
         client.addEventHandler(async (e: NewMessageEvent) => {
           if (e.isPrivate) {
             const entity = e.chat as Api.User;
+            console.log(e);
             await this.queue.add("j", {
               from: entity.username,
               to: client.session.save(),
