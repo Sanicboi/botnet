@@ -216,7 +216,7 @@ const worker = new Worker(
 
           await queues.mailer.add("j", {
             botId: j.botId,
-            message: msgs[0].content[0].text.value.replaceAll(/【.*?†source】/, ''),
+            message: msgs[0].content[0].text.value.replaceAll(/【.*?†source】/g, ''),
             sendToId: j.toId,
           });
         }
