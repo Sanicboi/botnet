@@ -180,7 +180,7 @@ const worker = new Worker(
           await AppDataSource.manager.save(d);
 
           // TODO: randomize the message && change the way they are stored
-          const response = "Тестовое сообщение";
+          const response = "Доброе утро.";
           await openai.beta.threads.messages.create(d.threadId, {
             content: response,
             role: "assistant",
