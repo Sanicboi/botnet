@@ -6,7 +6,12 @@ import dayjs from "dayjs";
 import { wait } from "../utils/wait";
 import { loadSync } from "@grpc/proto-loader";
 import path from "path";
-import { loadPackageDefinition, ServiceDefinition, Client, credentials } from "@grpc/grpc-js";
+import {
+  loadPackageDefinition,
+  ServiceDefinition,
+  Client,
+  credentials,
+} from "@grpc/grpc-js";
 import { ServiceClient } from "../accountManager/types";
 
 /**
@@ -41,7 +46,7 @@ class Queue {
           keepCase: true,
         },
       );
-  
+
       // @ts-ignore
       const descriptor: {
         manager: {
@@ -50,18 +55,22 @@ class Queue {
       } = loadPackageDefinition(packageDef);
 
       //@ts-ignore
-      this.grpc = new descriptor.manager.AccountManager('accounts:50051', credentials.createInsecure());
-      await new Promise((resolve, reject) => this.grpc.waitForReady(3000000, () => resolve));
+      this.grpc = new descriptor.manager.AccountManager(
+        "accounts:50051",
+        credentials.createInsecure(),
+      );
+      await new Promise((resolve, reject) =>
+        this.grpc.waitForReady(3000000, () => resolve),
+      );
       console.log(this.grpc);
     });
-    
+
     this.worker = new Worker("mailer-out", this.handle.bind(this), {
       connection: {
         host: "redis",
       },
       concurrency: 1,
     });
-
   }
 
   private async handle(job: Job<IJob>) {
@@ -83,15 +92,18 @@ class Queue {
     bot.lastSentMessage = new Date();
     this.manager.save(bot);
 
-    this.grpc.sendMessage({
+    this.grpc.sendMessage(
+      {
         fromId: job.data.botId,
         messageText: job.data.message,
-        toId: job.data.sendToId
-    }, (err, result) => {
+        toId: job.data.sendToId,
+      },
+      (err, result) => {
         console.log(err);
         if (err) return;
         console.log(result.result);
-    })
+      },
+    );
   }
 }
 
@@ -100,4 +112,3 @@ try {
 } catch (err) {
   console.log(err);
 }
-

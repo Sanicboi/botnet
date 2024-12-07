@@ -19,7 +19,17 @@ export const AppDataSource = new DataSource({
   database: "test",
   synchronize: true,
   logging: true,
-  entities: [User, Assistant, Thread, Action, SupportRequest, FileUpload, Bot, Lead, Dialog,],
+  entities: [
+    User,
+    Assistant,
+    Thread,
+    Action,
+    SupportRequest,
+    FileUpload,
+    Bot,
+    Lead,
+    Dialog,
+  ],
   migrations: [],
   subscribers: [],
 });

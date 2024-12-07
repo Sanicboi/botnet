@@ -20,11 +20,11 @@ services:
   #   build: .
   #   command: npm run voronka
   #   env_file: .env
-  # neuro:
-  #   restart: always
-  #   build: .
-  #   command: npm run neuro
-  #   env_file: .env
+  neuro:
+    restart: always
+    build: .
+    command: npm run neuro
+    env_file: .env
   openai:
     restart: always
     build: .

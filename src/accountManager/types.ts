@@ -1,4 +1,9 @@
-import { ChannelCredentials, Client, ClientUnaryCall, ServiceError } from "@grpc/grpc-js";
+import {
+  ChannelCredentials,
+  Client,
+  ClientUnaryCall,
+  ServiceError,
+} from "@grpc/grpc-js";
 
 export interface IMsgSend {
   fromId: string;
@@ -13,14 +18,19 @@ export interface IMsgSendResult {
 }
 
 export interface IService {
-  sendMessage(input: IMsgSend, callback: (err: ServiceError | null, response: IMsgSendResult) => void): ClientUnaryCall;
+  sendMessage(
+    input: IMsgSend,
+    callback: (err: ServiceError | null, response: IMsgSendResult) => void,
+  ): ClientUnaryCall;
 }
 
 export interface IPackage {
   AccountManager: IService;
 }
 
-
 export interface ServiceClient extends Client {
-  sendMessage(input: IMsgSend, callback: (err: ServiceError | null, response: IMsgSendResult) => void): ClientUnaryCall;
+  sendMessage(
+    input: IMsgSend,
+    callback: (err: ServiceError | null, response: IMsgSendResult) => void,
+  ): ClientUnaryCall;
 }

@@ -33,8 +33,8 @@ class GRPCServer {
   private bots: Map<string, TelegramClient> = new Map();
   private queue: Queue = new Queue("in", {
     connection: {
-      host: 'redis'
-    }
+      host: "redis",
+    },
   });
 
   constructor() {
@@ -59,7 +59,7 @@ class GRPCServer {
       this.server.addService(descriptor.manager.AccountManager.service, {
         SendMessage: this.SendMessage.bind(this),
       });
-      
+
       const accounts = await this.manager.find(Bot, {
         where: {
           blocked: false,
@@ -73,35 +73,34 @@ class GRPCServer {
           +process.env.TG_API_ID!,
           process.env.TG_API_HASH!,
           {
-            useWSS: true
+            useWSS: true,
           },
         );
         await client.start({
-            onError: async (err) => {
-              console.log(err);
-              return true;
-            },
-            phoneNumber: '+799999999999999',
-            phoneCode: async () => '',
+          onError: async (err) => {
+            console.log(err);
+            return true;
+          },
+          phoneNumber: "+799999999999999",
+          phoneCode: async () => "",
         });
         this.bots.set(b.token, client);
         client.addEventHandler(async (e: NewMessageEvent) => {
-          if (e.isPrivate && e._chat?.className === 'User') {
+          if (e.isPrivate && e._chat?.className === "User") {
             const dialogs = await client.getDialogs();
-            const cl = dialogs.find(el => {
+            const cl = dialogs.find((el) => {
               return (
-                el.entity!.className === 'User' &&
-                el.entity!.username === el.entity!.username                
-              )
+                el.entity!.className === "User" &&
+                el.entity!.username === el.entity!.username
+              );
             })!.entity as Api.User;
-            await this.queue.add('j', {
+            await this.queue.add("j", {
               from: cl.username,
               to: client.session.save(),
-              text: e.message.text
+              text: e.message.text,
             });
           }
-
-        }, new NewMessage())
+        }, new NewMessage());
       }
 
       this.server.bindAsync(
@@ -125,7 +124,7 @@ class GRPCServer {
     if (!client) return;
     try {
       await client.sendMessage(data.toId, {
-        message: data.messageText
+        message: data.messageText,
       });
       callback(null, {
         result: "Ok",
@@ -133,10 +132,9 @@ class GRPCServer {
     } catch (err) {
       console.error(err);
       callback(null, {
-        result: 'ServerErr'
-      })
+        result: "ServerErr",
+      });
     }
-
   }
 }
 

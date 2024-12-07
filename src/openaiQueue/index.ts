@@ -81,9 +81,8 @@ type IJob =
   | INeuroDeleteThreadJob
   | INeuroRunJob
   | INeuroImageJob
-  | INeuroFileJob 
-  | IMailerJob  
-  ;
+  | INeuroFileJob
+  | IMailerJob;
 
 const queues = {
   neuro: new Queue<INeuroOutJob>("neuro", {
@@ -94,8 +93,8 @@ const queues = {
   mailer: new Queue<IMalerOutJob>("mailer-out", {
     connection: {
       host: "redis",
-    }
-  })
+    },
+  }),
 };
 AppDataSource.initialize();
 const worker = new Worker(
@@ -172,8 +171,8 @@ const worker = new Worker(
             tokenCount: run.usage?.total_tokens,
           });
         }
-      } else if (j.type === 'mailer') {
-        if (j.task === 'create') {
+      } else if (j.type === "mailer") {
+        if (j.task === "create") {
           const d = new Dialog();
           d.threadId = (await openai.beta.threads.create()).id;
           d.botId = j.botId;
@@ -184,36 +183,38 @@ const worker = new Worker(
           const response = "Тестовое сообщение";
           await openai.beta.threads.messages.create(d.threadId, {
             content: response,
-            role: 'assistant'
+            role: "assistant",
           });
           console.log(j);
-          await queues.mailer.add('j', {
+          await queues.mailer.add("j", {
             botId: j.botId,
             message: response,
-            sendToId: j.toId
+            sendToId: j.toId,
           });
-        } else if (j.task === 'reply') {
+        } else if (j.task === "reply") {
           const d = await AppDataSource.manager.findOneBy(Dialog, {
             botId: j.botId,
-            leadId: j.toId
+            leadId: j.toId,
           });
-          if (!d) return
+          if (!d) return;
           await openai.beta.threads.messages.create(d.threadId, {
             content: j.msg,
-            role: 'user'
-          })
-          const msgs = await openai.beta.threads.runs.stream(d!.threadId, {
-            assistant_id: 'asst_YXPLxGoGi3m15k3XbAfL5nGg'
-          }).finalMessages();
+            role: "user",
+          });
+          const msgs = await openai.beta.threads.runs
+            .stream(d!.threadId, {
+              assistant_id: "asst_YXPLxGoGi3m15k3XbAfL5nGg",
+            })
+            .finalMessages();
 
-          if (msgs[0].content[0].type != 'text') return;
+          if (msgs[0].content[0].type != "text") return;
 
-          await queues.mailer.add('j', {
+          await queues.mailer.add("j", {
             botId: j.botId,
             message: msgs[0].content[0].text.value,
-            sendToId: j.toId
+            sendToId: j.toId,
           });
-        } 
+        }
       }
     } catch (err) {
       logger.fatal(err);
