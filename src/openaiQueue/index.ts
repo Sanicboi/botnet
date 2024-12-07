@@ -162,7 +162,7 @@ const worker = new Worker(
           const msgs = await str.finalMessages();
           const run = await str.finalRun();
           const r = msgs.map((el) =>
-            el.content[0].type === "text" ? el.content[0].text.value.replaceAll(/【.*?†.*】/, '') : "",
+            el.content[0].type === "text" ? el.content[0].text.value.replaceAll(/【.*?†.*】/g, '') : "",
           );
 
           await queues.neuro.add("j", {
