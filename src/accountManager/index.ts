@@ -87,7 +87,7 @@ class GRPCServer {
         this.bots.set(b.token, client);
         client.addEventHandler(async (e: NewMessageEvent) => {
           if (e.isPrivate) {
-            const entity = e.message.sender as Api.User;
+            const entity = e.chat as Api.User;
             await this.queue.add("j", {
               from: entity.username,
               to: client.session.save(),
