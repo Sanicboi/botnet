@@ -162,7 +162,7 @@ const worker = new Worker(
           const msgs = await str.finalMessages();
           const run = await str.finalRun();
           const r = msgs.map((el) =>
-            el.content[0].type === "text" ? el.content[0].text.value : "",
+            el.content[0].type === "text" ? el.content[0].text.value.replaceAll(/【.*?†source】/, '') : "",
           );
 
           await queues.neuro.add("j", {
@@ -180,15 +180,20 @@ const worker = new Worker(
           await AppDataSource.manager.save(d);
 
           // TODO: randomize the message && change the way they are stored
-          const response = "Доброе утро.";
+
           await openai.beta.threads.messages.create(d.threadId, {
-            content: response,
-            role: "assistant",
+            content: "Начни диалог.",
+            role: "user",
           });
-          console.log(j);
+          const response = await openai.beta.threads.runs.stream(d.threadId, {
+            assistant_id: 'asst_YXPLxGoGi3m15k3XbAfL5nGg',
+          }).finalMessages();
+
+          const msg = response[0].content[0];
+          if (msg.type !== 'text') return;
           await queues.mailer.add("j", {
             botId: j.botId,
-            message: response,
+            message: msg.text.value.replaceAll(/【.*?†source】/, ''),
             sendToId: j.toId,
           });
         } else if (j.task === "reply") {
@@ -211,7 +216,7 @@ const worker = new Worker(
 
           await queues.mailer.add("j", {
             botId: j.botId,
-            message: msgs[0].content[0].text.value,
+            message: msgs[0].content[0].text.value.replaceAll(/【.*?†source】/, ''),
             sendToId: j.toId,
           });
         }
