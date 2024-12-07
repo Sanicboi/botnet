@@ -203,7 +203,7 @@ const worker = new Worker(
             role: 'user'
           })
           const msgs = await openai.beta.threads.runs.stream(d!.threadId, {
-            assistant_id: ''
+            assistant_id: 'asst_YXPLxGoGi3m15k3XbAfL5nGg'
           }).finalMessages();
 
           if (msgs[0].content[0].type != 'text') return;

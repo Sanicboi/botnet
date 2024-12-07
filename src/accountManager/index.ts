@@ -11,7 +11,7 @@ import path from "path";
 import { IMsgSend, IMsgSendResult } from "./types";
 import { EntityManager } from "typeorm";
 import { AppDataSource } from "../data-source";
-import { TelegramClient } from "telegram";
+import { Api, TelegramClient } from "telegram";
 import { Bot } from "../entity/bots/Bot";
 import { StringSession } from "telegram/sessions";
 import { NewMessage, NewMessageEvent } from "telegram/events";
@@ -87,11 +87,18 @@ class GRPCServer {
         this.bots.set(b.token, client);
         client.addEventHandler(async (e: NewMessageEvent) => {
           if (e.isPrivate && e._chat?.className === 'User') {
+            const dialogs = await client.getDialogs();
+            const cl = dialogs.find(el => {
+              return (
+                el.entity!.className === 'User' &&
+                el.entity!.username === el.entity!.username                
+              )
+            })!.entity as Api.User;
             await this.queue.add('j', {
-              from: e.message._chat?.id,
+              from: cl.username,
               to: client.session.save(),
               text: e.message.text
-            })
+            });
           }
 
         }, new NewMessage())

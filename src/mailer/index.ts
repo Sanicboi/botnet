@@ -35,7 +35,7 @@ bot.onText(/\/start/, async msg => {
 
     console.log("mailer");
     await queue.add('j', {
-        to: String(msg.from!.username!),
+        to: msg.text?.split(' ')[1]!,
         type: 'singlemail'
     });
 });
