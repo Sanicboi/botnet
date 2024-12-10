@@ -203,11 +203,18 @@ export class MenuRouter extends Router {
     bot.onText(/\/about/, async (msg) => {
       await MessageFormatter.sendTextFromFileBot(
         bot,
-        "guide.txt",
+        "about-neuro.txt",
         msg.from!.id,
       );
     });
 
+    bot.onText(/\/terms/, async (msg) => {
+      await MessageFormatter.sendTextFromFileBot(
+        bot,
+        "terms.txt",
+        msg.from!.id,
+      );
+    });
     this.onCallback = this.onCallback.bind(this);
   }
 

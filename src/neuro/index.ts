@@ -34,8 +34,12 @@ const handler = new Handler();
 
 bot.setMyCommands([
   {
+    command: "about",
+    description: "О нас (SmartComrade)",
+  },
+  {
     command: "neuro",
-    description: "Выбор профилей",
+    description: "Нейро-сотрудники",
   },
   {
     command: "balance",
@@ -46,10 +50,6 @@ bot.setMyCommands([
     description: "Настройки",
   },
   {
-    command: "about",
-    description: "О нас",
-  },
-  {
     command: "ref",
     description: "Получить бесплатные токены",
   },
@@ -57,6 +57,10 @@ bot.setMyCommands([
     command: "deletecontext",
     description: "Удалить диалог и перезапустить бота",
   },
+  {
+    command: "terms",
+    description: 'Условия пользования & политика'
+  }
 ]);
 
 const menuRouter = new MenuRouter();
@@ -113,6 +117,7 @@ bot.onText(/./, async (msg) => {
     logger.fatal(err);
   }
 });
+
 
 // bot.onText(/\/free/, async (msg) => {
 //   await tryDeletePrevious(msg.message_id, msg.from!.id);
