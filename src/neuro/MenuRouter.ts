@@ -13,7 +13,10 @@ export class MenuRouter extends Router {
     super();
     bot.onText(/\/neuro/, async (msg) => {
       try {
-        const assistants = await Router.manager.find(Assistant);
+        const assistants = await Router.manager.find(Assistant, {
+          take: 7,
+          where: {}
+        });
         let result: InlineKeyboardButton[][] = [];
         let u = await Router.manager.findOneBy(User, {
           chatId: String(msg.from!.id),
@@ -39,6 +42,12 @@ export class MenuRouter extends Router {
             callback_data: "images",
           },
         ]);
+        result.push([
+          {
+            text: 'Следующая страница',
+            callback_data: 'menu-2'
+          }
+        ])
 
         await bot.sendMessage(msg.from!.id, "Выберите категорию сотрудников", {
           reply_markup: {
@@ -231,7 +240,8 @@ export class MenuRouter extends Router {
         }
 
         const assistants = await Router.manager.find(Assistant, {
-          take: 8,
+          take: 7,
+          where: {}
         });
         let result: InlineKeyboardButton[][] = [];
         for (const a of assistants) {
@@ -276,7 +286,8 @@ export class MenuRouter extends Router {
         }
 
         const assistants = await Router.manager.find(Assistant, {
-          skip: 8,
+          skip: 7,
+          where: {}
         });
         let result: InlineKeyboardButton[][] = [];
         for (const a of assistants) {
