@@ -136,7 +136,11 @@ export class TextRouter extends Router {
 
     if (q.data!.startsWith("ac-")) {
       if (q.data!.endsWith("-asst_1BdIGF3mp94XvVfgS88fLIor")) {
-        await bot.sendMessage(q.from!.id, "Выберите стиль текста", {
+        const asst = await Router.manager.findOneBy(Action, {
+          id: q.data!.substring(4)
+        });
+        if (!asst) return;
+        await bot.sendMessage(q.from!.id, asst.welcomeMessage, {
           reply_markup: {
             inline_keyboard: [
               Btn("Официальный", "style-official"),
