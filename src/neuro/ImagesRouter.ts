@@ -24,7 +24,7 @@ export class ImagesRouter extends Router {
             [
               {
                 text: "Назад",
-                callback_data: "menu",
+                callback_data: "menu-1",
               },
             ],
           ],

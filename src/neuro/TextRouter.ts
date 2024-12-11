@@ -124,7 +124,7 @@ export class TextRouter extends Router {
       result.push([
         {
           text: "Назад",
-          callback_data: "menu",
+          callback_data: "menu-1",
         },
       ]);
       await bot.sendMessage(q.from.id, "Выберите функцию", {
