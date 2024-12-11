@@ -217,6 +217,14 @@ export class MenuRouter extends Router {
       );
     });
 
+    bot.onText(/\/help/, async (msg) => {
+      await MessageFormatter.sendTextFromFileBot(
+        bot,
+        "help-neuro.txt",
+        msg.from!.id
+      );
+    });
+
     bot.onText(/\/terms/, async (msg) => {
       await MessageFormatter.sendTextFromFileBot(
         bot,

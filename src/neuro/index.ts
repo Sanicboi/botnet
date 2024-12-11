@@ -35,31 +35,35 @@ const handler = new Handler();
 bot.setMyCommands([
   {
     command: "about",
-    description: "О нас (SmartComrade)",
+    description: "🤝О нас (SmartComrade)",
+  },
+  {
+    command: 'help',
+    description: '🤖О боте (справка)'
   },
   {
     command: "neuro",
-    description: "Нейро-сотрудники",
+    description: "🧠Нейро-сотрудники",
   },
   {
     command: "balance",
-    description: "Баланс и подписка",
-  },
-  {
-    command: "settings",
-    description: "Настройки",
+    description: "💳Баланс & подписка",
   },
   {
     command: "ref",
-    description: "Получить бесплатные токены",
+    description: "🎁Бесплатные токены ",
   },
   {
     command: "deletecontext",
-    description: "Удалить диалог и перезапустить бота",
+    description: "🔁Перезапустить бота ",
+  },
+  {
+    command: "settings",
+    description: "⚙️Настройки ",
   },
   {
     command: "terms",
-    description: 'Условия пользования & политика'
+    description: '📜Условия пользования & политика'
   }
 ]);
 
