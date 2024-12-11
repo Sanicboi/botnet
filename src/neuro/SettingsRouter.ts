@@ -91,16 +91,16 @@ export class SettingsRouter extends Router {
       user.model = model;
       await Router.manager.save(user);
       await bot.sendMessage(q.from.id, "Модель успешно изменена", {
-        reply_markup: {
-          inline_keyboard: [
-            [
-              {
-                text: "Назад",
-                callback_data: "settings",
-              },
-            ],
-          ],
-        },
+        // reply_markup: {
+        //   inline_keyboard: [
+        //     [
+        //       {
+        //         text: "Назад",
+        //         callback_data: "settings",
+        //       },
+        //     ],
+        //   ],
+        // },
       });
     }
 
