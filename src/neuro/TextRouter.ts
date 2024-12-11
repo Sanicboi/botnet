@@ -137,7 +137,7 @@ export class TextRouter extends Router {
     if (q.data!.startsWith("ac-")) {
       if (q.data!.endsWith("-asst_1BdIGF3mp94XvVfgS88fLIor")) {
         const asst = await Router.manager.findOneBy(Action, {
-          id: q.data!.substring(4)
+          id: q.data!.substring(3)
         });
         if (!asst) return;
         await bot.sendMessage(q.from!.id, asst.welcomeMessage, {
