@@ -205,7 +205,7 @@ export class TextRouter extends Router {
     if (q.data?.startsWith("style-")) {
       u.textStyle = styleMap.get(q.data!)!;
       await Router.manager.save(u);
-      await bot.sendMessage(q.from.id, "Выберите тон текста", {
+      await bot.sendMessage(q.from.id, `Стиль: ${u.textStyle}\nВыберите тон текста`, {
         reply_markup: {
           inline_keyboard: [
             Btn("Профессиональный", "tone-professional"),

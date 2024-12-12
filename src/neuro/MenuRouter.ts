@@ -7,6 +7,7 @@ import { Thread } from "../entity/assistants/Thread";
 import dayjs from "dayjs";
 import { MessageFormatter } from "../utils/MessageFormatter";
 import { Btn } from "./utils";
+import OpenAI from "openai";
 
 export class MenuRouter extends Router {
   constructor() {
@@ -15,7 +16,10 @@ export class MenuRouter extends Router {
       try {
         const assistants = await Router.manager.find(Assistant, {
           take: 7,
-          where: {}
+          where: {},
+          order: {
+            id: 'ASC'
+          }
         });
         let result: InlineKeyboardButton[][] = [];
         let u = await Router.manager.findOneBy(User, {
@@ -36,12 +40,7 @@ export class MenuRouter extends Router {
           ]);
         }
 
-        result.push([
-          {
-            text: "Дизайн и генерация картинок",
-            callback_data: "images",
-          },
-        ]);
+        result.push(Btn("👨‍🎨Дизайн", "images"));
         result.push([
           {
             text: 'Следующая страница',
@@ -143,7 +142,7 @@ export class MenuRouter extends Router {
                    ? 5000
                    : 0
          } токенов
-         ⤷ Новое пополнение через: ${user.subscription === "none" ? "Нет" : 24 - now.hour()}:${59 - now.minute()}
+         ⤷ Новое пополнение через: ${user.subscription === "none" ? "Нет" : `${24 - now.hour()}:${59 - now.minute()}`}
          ⤷ Следующий платеж: ${user.endDate == null ? "Нет" : user.endDate.toUTCString()}
       
       🟣 Ваш комплект токенов:
@@ -249,7 +248,10 @@ export class MenuRouter extends Router {
 
         const assistants = await Router.manager.find(Assistant, {
           take: 7,
-          where: {}
+          where: {},
+          order: {
+            id: 'ASC'
+          }
         });
         let result: InlineKeyboardButton[][] = [];
         for (const a of assistants) {
@@ -295,7 +297,10 @@ export class MenuRouter extends Router {
 
         const assistants = await Router.manager.find(Assistant, {
           skip: 7,
-          where: {}
+          where: {},
+          order: {
+            id: 'ASC'
+          }
         });
         let result: InlineKeyboardButton[][] = [];
         for (const a of assistants) {
@@ -312,6 +317,42 @@ export class MenuRouter extends Router {
         await bot.sendMessage(q.from.id, "Выберите категорию сотрудников", {
           reply_markup: {
             inline_keyboard: result,
+          },
+        });
+      }
+
+      if (q.data?.startsWith('aimodel-')) {
+        // @ts-ignore
+        const m: OpenAI.ChatModel = q.data!.substring(7);
+        const user = await Router.manager.findOneBy(User, {
+          chatId: String(q.from.id),
+        });
+        if (!user) return;
+        user.model = m;
+        await Router.manager.save(user);
+
+        await bot.sendMessage(q.from.id, "Модель для генерации:", {
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: `${m === "gpt-4o-mini" ? "✅" : ""} GPT 4 Omni mini`,
+                  callback_data: "aimodel-gpt-4o-mini",
+                },
+              ],
+              [
+                {
+                  text: `${m === "gpt-4o" ? "✅" : ""} GPT 4 Omni`,
+                  callback_data: "aimodel-gpt-4o",
+                },
+              ],
+              [
+                {
+                  text: `${m === "gpt-4-turbo" ? "✅" : ""} GPT 4 Turbo`,
+                  callback_data: "aimodel-gpt-4-turbo",
+                },
+              ],
+            ],
           },
         });
       }

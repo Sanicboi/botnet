@@ -72,7 +72,7 @@ export class Handler {
               case "asst_1BdIGF3mp94XvVfgS88fLIor":
                 await bot.sendMessage(
                   +thread.userId,
-                  "Отлично, со стилем и тоном определились! 😉\nТеперь напиши тему, по которой необходимо создать текст.",
+                  `Стиль:${u.textStyle}\nТон:${u.textTone}\nОтлично, со стилем и тоном определились! 😉\nТеперь напиши тему, по которой необходимо создать текст.`,
                 );
                 break;
               default:
@@ -85,27 +85,27 @@ export class Handler {
                 inline_keyboard: [
                   [
                     {
-                      text: `${u.model === "gpt-4o-mini" ? "✅" : "❌"} GPT 4 Omni mini`,
-                      callback_data: "model-gpt-4o-mini",
+                      text: `${u.model === "gpt-4o-mini" ? "✅" : ""} GPT 4 Omni mini`,
+                      callback_data: "aimodel-gpt-4o-mini",
                     },
                   ],
                   [
                     {
-                      text: `${u.model === "gpt-4o" ? "✅" : "❌"} GPT 4 Omni`,
-                      callback_data: "model-gpt-4o",
+                      text: `${u.model === "gpt-4o" ? "✅" : ""} GPT 4 Omni`,
+                      callback_data: "aimodel-gpt-4o",
                     },
                   ],
                   [
                     {
-                      text: `${u.model === "gpt-4-turbo" ? "✅" : "❌"} GPT 4 Turbo`,
-                      callback_data: "model-gpt-4-turbo",
+                      text: `${u.model === "gpt-4-turbo" ? "✅" : ""} GPT 4 Turbo`,
+                      callback_data: "aimodel-gpt-4-turbo",
                     },
                   ],
                 ],
               },
             });
           } else if (j.task === "delete") {
-            await bot.sendMessage(+j.userId, "Контекст удален.");
+            await bot.sendMessage(+j.userId, "Контекст успешно удален! Начните новый диалог");
           } else if (j.task === "run") {
             const user = await manager.findOneBy(User, {
               chatId: j.userId,
