@@ -16,7 +16,6 @@ export class NeuroHandler {
         await FileHandler.deleteFiles(j.userId);
       } else if (j.task === "run") {
         const docs = await FileHandler.uploadDocuments(j);
-        const images = await FileHandler.uploadImages(j);
 
         const attachments: {
           file_id: string;
@@ -27,20 +26,24 @@ export class NeuroHandler {
             file_id: el,
           }),
         );
-
+        let content: MessageContentPartParam[] = [];
+        content.push({
+          text: j.message.content,
+          type: 'text'
+        });
+        if (j.message.images) {
+          for (const i of j.message.images) {
+            content.push({
+              image_url: {
+                url: i,
+                detail: 'high'
+              },
+              type: 'image_url'
+            })
+          }
+        }
         await openai.beta.threads.messages.create(j.threadId, {
-          content: [
-            {
-              text: j.message.content,
-              type: 'text'
-            },
-            ...(attachments.map<MessageContentPartParam>(el => {
-              return {
-                type: 'image_file',
-                image_file: el 
-              }
-            }))
-          ],
+          content,
           role: j.message.role,
           attachments: attachments,
         });

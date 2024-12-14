@@ -34,16 +34,6 @@ export class FileHandler {
     return upload.id;
   }
 
-  public static async uploadImages(j: INeuroRunJob): Promise<string[]> {
-    let files: string[] = [];
-    if (j.message.images) {
-      for (const f of j.message.images) {
-        const r = await this.fetchAndUploadFile(f, "assistants", j.userId);
-        files.push(r);
-      }
-    }
-    return files;
-  }
 
   public static async uploadDocuments(j: INeuroRunJob): Promise<string[]> {
     let files: string[] = [];
