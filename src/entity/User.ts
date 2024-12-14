@@ -39,7 +39,7 @@ export class User {
   @JoinColumn({
     name: "actionId",
   })
-  action: Action;
+  action: Action | null;
 
   @Column({
     nullable: true,

@@ -60,22 +60,33 @@ export class Router {
     if (user.action) {
       console.log(user.action);
       const t = (user.action.threads.find((el) => el.userId == user.chatId))!
-      await Router.manager.delete(Thread, t);
+      user.docType = "";
+      user.agreementType = "";
+      user.offerSize = "";
+      user.textStyle = "";
+      user.textTone = "";
+      user.actionId = null;
+      const act = user.action;
+      user.action = null;
+      await this.manager.save(user);
       await Router.queue.add("j", {
-        actionId: user.action.id,
+        actionId: act.id,
         task: "delete",
         type: "neuro",
         userId: user.chatId,
         id: t.id,
       });
+    } else {
+      user.docType = "";
+      user.agreementType = "";
+      user.offerSize = "";
+      user.textStyle = "";
+      user.textTone = "";
+      user.actionId = null;
+      user.action = null;
+      await this.manager.save(user);
     }
-    user.docType = "";
-    user.agreementType = "";
-    user.offerSize = "";
-    user.textStyle = "";
-    user.textTone = "";
-    user.actionId = null;
-    await this.manager.save(user);
+
   }
 
   constructor() {}
