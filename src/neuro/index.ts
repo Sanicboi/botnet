@@ -79,8 +79,14 @@ bot.on("callback_query", async (q) => {
       q.message!.message_id + 1,
       q.message!.chat.id,
     );
-    const user = await manager.findOneBy(User, {
-      chatId: String(q.from.id),
+    const user = await manager.findOne(User, {
+      where: {
+        chatId: String(q.from.id),
+      },
+      relations: {
+        threads: true
+      }
+      
     });
     if (!user) return;
     const r = await imagesRouter.onQuery(q);
