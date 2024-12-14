@@ -355,6 +355,7 @@ export class TextRouter extends Router {
       return;
     }
     const url = await bot.getFileLink(photo.file_id);
+    console.log(url);
     await Router.queue.add("j", {
       type: "neuro",
       task: "run",
