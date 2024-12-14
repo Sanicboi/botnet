@@ -100,6 +100,7 @@ export class MenuRouter extends Router {
             threads: true,
           },
         });
+        console.log(u);
         if (!u) return;
         await Router.resetWaiters(u);
 
