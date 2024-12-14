@@ -105,7 +105,10 @@ export class Handler {
               },
             });
           } else if (j.task === "delete") {
-            await bot.sendMessage(+j.userId, "Контекст успешно удален! Начните новый диалог");
+            await bot.sendMessage(
+              +j.userId,
+              "Контекст успешно удален! Начните новый диалог",
+            );
           } else if (j.task === "run") {
             const user = await manager.findOneBy(User, {
               chatId: j.userId,

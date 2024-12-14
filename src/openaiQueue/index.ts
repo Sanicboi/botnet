@@ -2,11 +2,12 @@ import { Job, Queue, Worker } from "bullmq";
 import OpenAI from "openai";
 import pino from "pino";
 import { AppDataSource } from "../data-source";
-import { Dialog } from "../entity/bots/Dialog";
+import { NeuroHandler } from "./NeuroHandler";
+import { MailerHandler } from "./MailerHandler";
 
 const logger = pino();
 
-const openai = new OpenAI({
+export const openai = new OpenAI({
   apiKey: process.env.OPENAI_KEY ?? "",
 });
 
@@ -20,7 +21,7 @@ interface IMailerJob {
 
 interface INeuroJob {
   type: "neuro";
-  task: "delete" | "create" | "run" | "image" | "run-file";
+  task: "delete" | "create" | "run" | "image";
   userId: string;
   actionId: string;
 }
@@ -34,10 +35,10 @@ interface INeuroDeleteThreadJob extends INeuroJob {
   id: string;
 }
 
-interface INeuroRunJob extends INeuroJob {
+export interface INeuroRunJob extends INeuroJob {
   task: "run";
   threadId: string;
-  messages: Msg[];
+  message: Msg;
   model: OpenAI.ChatModel;
   msgId: string;
 }
@@ -63,28 +64,21 @@ interface IMalerOutJob {
   sendToId: string;
 }
 
-interface INeuroFileJob extends INeuroJob {
-  task: "run-file";
-  fileId: string;
-  threadId: string;
-  model: OpenAI.ChatModel;
-  msgId: string;
-}
-
 interface Msg {
   role: "user" | "assistant";
   content: string;
+  images?: string[];
+  files?: string[];
 }
 
-type IJob =
+export type IJob =
   | INeuroCreateThreadJob
   | INeuroDeleteThreadJob
   | INeuroRunJob
   | INeuroImageJob
-  | INeuroFileJob
   | IMailerJob;
 
-const queues = {
+export const queues = {
   neuro: new Queue<INeuroOutJob>("neuro", {
     connection: {
       host: "redis",
@@ -102,125 +96,9 @@ const worker = new Worker(
   async (job: Job<IJob>) => {
     try {
       const j = job.data;
-      console.log(j);
-      if (j.type === "neuro") {
-        if (j.task === "create") {
-          const t = await openai.beta.threads.create();
-          await queues.neuro.add("j", {
-            ...j,
-            threadId: t.id,
-          });
-        } else if (j.task === "delete") {
-          await openai.beta.threads.del(j.id);
-          await queues.neuro.add("j", j);
-        } else if (j.task === "run") {
-          for (const m of j.messages) {
-            await openai.beta.threads.messages.create(j.threadId, m);
-          }
-          const str = openai.beta.threads.runs.stream(j.threadId, {
-            assistant_id: j.actionId,
-            model: j.model,
-          });
-          const msgs = await str.finalMessages();
-          const run = await str.finalRun();
-          const r = msgs.map((el) =>
-            el.content[0].type === "text" ? el.content[0].text.value : "",
-          );
 
-          await queues.neuro.add("j", {
-            ...j,
-            messages: r,
-            tokenCount: run.usage?.total_tokens,
-          });
-        } else if (j.task === "image") {
-          const result = await openai.images.generate({
-            prompt: j.prompt,
-            model: "dall-e-3",
-            n: 1,
-            quality: "standard",
-            response_format: "url",
-            size: j.resolution,
-          });
-          await queues.neuro.add("j", {
-            ...j,
-            imageUrl: result.data[0].url,
-          });
-        } else if (j.task === "run-file") {
-          await openai.beta.threads.messages.create(j.threadId, {
-            attachments: [
-              {
-                file_id: j.fileId,
-              },
-            ],
-            content: "Вот входные данные",
-            role: "user",
-          });
-          const str = openai.beta.threads.runs.stream(j.threadId, {
-            assistant_id: j.actionId,
-            model: j.model,
-          });
-          const msgs = await str.finalMessages();
-          const run = await str.finalRun();
-          const r = msgs.map((el) =>
-            el.content[0].type === "text" ? el.content[0].text.value.replaceAll(/【.*?†.*】/g, '') : "",
-          );
-
-          await queues.neuro.add("j", {
-            ...j,
-            messages: r,
-            tokenCount: run.usage?.total_tokens,
-          });
-        }
-      } else if (j.type === "mailer") {
-        if (j.task === "create") {
-          const d = new Dialog();
-          d.threadId = (await openai.beta.threads.create()).id;
-          d.botId = j.botId;
-          d.leadId = j.toId;
-          await AppDataSource.manager.save(d);
-
-          // TODO: randomize the message && change the way they are stored
-
-          await openai.beta.threads.messages.create(d.threadId, {
-            content: "Начни диалог.",
-            role: "user",
-          });
-          const response = await openai.beta.threads.runs.stream(d.threadId, {
-            assistant_id: 'asst_YXPLxGoGi3m15k3XbAfL5nGg',
-          }).finalMessages();
-
-          const msg = response[0].content[0];
-          if (msg.type !== 'text') return;
-          await queues.mailer.add("j", {
-            botId: j.botId,
-            message: msg.text.value.replaceAll(/【.*?†.*】/g, ''),
-            sendToId: j.toId,
-          });
-        } else if (j.task === "reply") {
-          const d = await AppDataSource.manager.findOneBy(Dialog, {
-            botId: j.botId,
-            leadId: j.toId,
-          });
-          if (!d) return;
-          await openai.beta.threads.messages.create(d.threadId, {
-            content: j.msg,
-            role: "user",
-          });
-          const msgs = await openai.beta.threads.runs
-            .stream(d!.threadId, {
-              assistant_id: "asst_YXPLxGoGi3m15k3XbAfL5nGg",
-            })
-            .finalMessages();
-
-          if (msgs[0].content[0].type != "text") return;
-
-          await queues.mailer.add("j", {
-            botId: j.botId,
-            message: msgs[0].content[0].text.value.replaceAll(/【.*?†source】/g, ''),
-            sendToId: j.toId,
-          });
-        }
-      }
+      await NeuroHandler.handle(j);
+      await MailerHandler.handle(j);
     } catch (err) {
       logger.fatal(err);
     }

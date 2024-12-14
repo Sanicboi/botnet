@@ -18,8 +18,8 @@ export class MenuRouter extends Router {
           take: 7,
           where: {},
           order: {
-            id: 'ASC'
-          }
+            id: "ASC",
+          },
         });
         let result: InlineKeyboardButton[][] = [];
         let u = await Router.manager.findOneBy(User, {
@@ -43,10 +43,10 @@ export class MenuRouter extends Router {
         result.push(Btn("👨‍🎨Дизайн", "images"));
         result.push([
           {
-            text: 'Следующая страница',
-            callback_data: 'menu-2'
-          }
-        ])
+            text: "Следующая страница",
+            callback_data: "menu-2",
+          },
+        ]);
 
         await bot.sendMessage(msg.from!.id, "Выберите категорию сотрудников", {
           reply_markup: {
@@ -220,7 +220,7 @@ export class MenuRouter extends Router {
       await MessageFormatter.sendTextFromFileBot(
         bot,
         "help-neuro.txt",
-        msg.from!.id
+        msg.from!.id,
       );
     });
 
@@ -250,8 +250,8 @@ export class MenuRouter extends Router {
           take: 7,
           where: {},
           order: {
-            id: 'ASC'
-          }
+            id: "ASC",
+          },
         });
         let result: InlineKeyboardButton[][] = [];
         for (const a of assistants) {
@@ -299,8 +299,8 @@ export class MenuRouter extends Router {
           skip: 7,
           where: {},
           order: {
-            id: 'ASC'
-          }
+            id: "ASC",
+          },
         });
         let result: InlineKeyboardButton[][] = [];
         for (const a of assistants) {
@@ -321,7 +321,7 @@ export class MenuRouter extends Router {
         });
       }
 
-      if (q.data?.startsWith('aimodel-')) {
+      if (q.data?.startsWith("aimodel-")) {
         // @ts-ignore
         const m: OpenAI.ChatModel = q.data!.substring(7);
         const user = await Router.manager.findOneBy(User, {

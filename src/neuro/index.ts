@@ -38,8 +38,8 @@ bot.setMyCommands([
     description: "🤝О нас (SmartComrade)",
   },
   {
-    command: 'help',
-    description: '🤖О боте (справка)'
+    command: "help",
+    description: "🤖О боте (справка)",
   },
   {
     command: "neuro",
@@ -63,8 +63,8 @@ bot.setMyCommands([
   },
   {
     command: "terms",
-    description: '📜Условия пользования & политика'
-  }
+    description: "📜Условия пользования & политика",
+  },
 ]);
 
 const menuRouter = new MenuRouter();
@@ -121,7 +121,6 @@ bot.onText(/./, async (msg) => {
     logger.fatal(err);
   }
 });
-
 
 // bot.onText(/\/free/, async (msg) => {
 //   await tryDeletePrevious(msg.message_id, msg.from!.id);

@@ -11,19 +11,20 @@ import { FileUpload } from "../entity/assistants/FileUpload";
 interface Msg {
   role: "assistant" | "user";
   content: string;
+  images?: string[];
+  files?: string[];
 }
 
 interface IJob {
   userId: string;
   actionId: string;
   type: "neuro";
-  task: "delete" | "create" | "run" | "image" | "run-file";
+  task: "delete" | "create" | "run" | "image";
   model?: OpenAI.ChatModel;
-  messages?: Msg[];
+  message?: Msg;
   id?: string;
   threadId?: string;
   prompt?: string;
-  fileId?: string;
   msgId?: string;
 }
 
@@ -70,28 +71,6 @@ export class Router {
     user.textStyle = "";
     user.textTone = "";
     await this.manager.save(user);
-    const files = await Router.manager.find(FileUpload, {
-      where: {
-        user: user,
-      },
-      relations: {
-        user: true,
-      },
-    });
-    for (const file of files) {
-      await openai.files.del(file.id);
-    }
-    const arr = files.map((el) => el.id);
-    if (arr.length > 0) {
-      await this.manager
-        .createQueryBuilder()
-        .delete()
-        .from(FileUpload, "file")
-        .where("file.id IN :ids", {
-          ids: arr,
-        })
-        .execute();
-    }
   }
 
   constructor() {}

@@ -1,10 +1,11 @@
-import TelegramBot, { InlineKeyboardButton } from "node-telegram-bot-api";
+import TelegramBot, {
+  InlineKeyboardButton,
+  Message,
+} from "node-telegram-bot-api";
 import { Router } from "./router";
 import { bot } from ".";
 import { Action } from "../entity/assistants/Action";
 import { User } from "../entity/User";
-import { openai } from ".";
-import { FileUpload } from "../entity/assistants/FileUpload";
 import { Btn } from "./utils";
 
 const sizeMap = new Map<string, string>();
@@ -63,33 +64,22 @@ export class TextRouter extends Router {
       if (!u) return;
 
       if (msg.document) {
-        const str = bot.getFileStream(msg.document.file_id);
-        const arr = await str.toArray();
-        const f = new File(arr, msg.document.file_name!, {
-          type: msg.document.mime_type,
-        });
+        const url = await bot.getFileLink(msg.document.file_id);
+        const t = u.threads.find((el) => el.actionId === u.actionId);
 
-        const res = await openai.files.create({
-          purpose: "assistants",
-          file: f,
-        });
-
-        const f2 = new FileUpload();
-        f2.id = res.id;
-        f2.user = u;
-        await Router.manager.save(f2);
-
-        const t = u.threads.find((t) => t.actionId === u.actionId);
         await bot.sendMessage(msg.from!.id, "генерирую ответ ✨...");
         await Router.queue.add("j", {
           type: "neuro",
-          task: "run-file",
+          task: "run",
           model: u.model,
           actionId: u.actionId,
           userId: u.chatId,
           threadId: t?.id,
-          fileId: f2.id,
-          id: String(msg.message_id),
+          message: {
+            content: msg.text ?? "входные данные",
+            role: "user",
+            files: [url],
+          },
           msgId: String(msg.message_id),
         });
       }
@@ -137,7 +127,7 @@ export class TextRouter extends Router {
     if (q.data!.startsWith("ac-")) {
       if (q.data!.endsWith("-asst_1BdIGF3mp94XvVfgS88fLIor")) {
         const asst = await Router.manager.findOneBy(Action, {
-          id: q.data!.substring(3)
+          id: q.data!.substring(3),
         });
         if (!asst) return;
         await bot.sendMessage(q.from!.id, asst.welcomeMessage, {
@@ -205,21 +195,25 @@ export class TextRouter extends Router {
     if (q.data?.startsWith("style-")) {
       u.textStyle = styleMap.get(q.data!)!;
       await Router.manager.save(u);
-      await bot.sendMessage(q.from.id, `Стиль: ${u.textStyle}\nВыберите тон текста`, {
-        reply_markup: {
-          inline_keyboard: [
-            Btn("Профессиональный", "tone-professional"),
-            Btn("Дружелюбный", "tone-friendly"),
-            Btn("Эмоциональный", "tone-emotional"),
-            Btn("Ироничный", "tone-ironic"),
-            Btn("Информативный", "tone-informative"),
-            Btn("Воодушевляющий", "tone-inspiring"),
-            Btn("Дерзкий", "tone-bold"),
-            Btn("Спокойный / уравновешенный", "tone-calm"),
-            Btn("Назад", "ac-asst_1BdIGF3mp94XvVfgS88fLIor"),
-          ],
+      await bot.sendMessage(
+        q.from.id,
+        `Стиль: ${u.textStyle}\nВыберите тон текста`,
+        {
+          reply_markup: {
+            inline_keyboard: [
+              Btn("Профессиональный", "tone-professional"),
+              Btn("Дружелюбный", "tone-friendly"),
+              Btn("Эмоциональный", "tone-emotional"),
+              Btn("Ироничный", "tone-ironic"),
+              Btn("Информативный", "tone-informative"),
+              Btn("Воодушевляющий", "tone-inspiring"),
+              Btn("Дерзкий", "tone-bold"),
+              Btn("Спокойный / уравновешенный", "tone-calm"),
+              Btn("Назад", "ac-asst_1BdIGF3mp94XvVfgS88fLIor"),
+            ],
+          },
         },
-      });
+      );
     }
 
     if (q.data?.startsWith("tone-")) {
@@ -314,12 +308,54 @@ export class TextRouter extends Router {
     await Router.queue.add("j", {
       type: "neuro",
       task: "run",
-      messages: [
-        {
-          content: res,
-          role: "user",
+      message: { content: res, role: "user" },
+      model: user.model,
+      actionId: user.actionId,
+      userId: user.chatId,
+      threadId: t?.id,
+    });
+  }
+
+  public async onPhoto(msg: Message) {
+    const photo = msg.photo!.sort((a, b) => a.file_size! - b.file_size!)[0];
+    const user = await Router.manager.findOne(User, {
+      where: {
+        chatId: String(msg.chat.id),
+      },
+    });
+    if (!user) return;
+
+    const t = user.threads.find((t) => t.actionId === user.actionId);
+    const res =
+      msg.text! +
+      "\n" +
+      user.textStyle +
+      user.textTone +
+      user.offerSize +
+      user.docType +
+      user.agreementType;
+    user.textStyle = "";
+    user.textTone = "";
+    user.offerSize = "";
+    user.docType = "";
+    user.agreementType = "";
+    await Router.manager.save(user);
+    if (user.addBalance === 0 && user.leftForToday === 0) {
+      await bot.sendMessage(msg.from!.id, "У вас недостатчно токенов", {
+        reply_markup: {
+          inline_keyboard: [
+            Btn("Купить пакет токенов", "b-tokens"),
+            Btn("Купить подписку", "b-sub"),
+          ],
         },
-      ],
+      });
+      return;
+    }
+    const url = await bot.getFileLink(photo.file_id);
+    await Router.queue.add("j", {
+      type: "neuro",
+      task: "run",
+      message: { content: res, role: "user", images: [url] },
       model: user.model,
       actionId: user.actionId,
       userId: user.chatId,

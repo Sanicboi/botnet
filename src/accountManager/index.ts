@@ -88,12 +88,12 @@ class GRPCServer {
         client.addEventHandler(async (e: NewMessageEvent) => {
           if (e.isPrivate) {
             const dialogs = await client.getDialogs();
-            const dialog = dialogs.find(el => {
+            const dialog = dialogs.find((el) => {
               return (
-                el.entity?.className === 'User' &&
+                el.entity?.className === "User" &&
                 String(el.entity?.id) === e.message.senderId!.toJSON()
-              )
-            })
+              );
+            });
             const u = dialog?.entity as Api.User;
 
             await this.queue.add("j", {
