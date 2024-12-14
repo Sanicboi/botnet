@@ -112,19 +112,6 @@ export class MenuRouter extends Router {
         });
         if (!u) return;
         await Router.resetWaiters(u);
-
-        const t = u.threads.find((t) => t.actionId === u.actionId);
-
-        await Router.manager.delete(Thread, {
-          id: t?.id,
-        });
-        await Router.queue.add("j", {
-          actionId: u.actionId,
-          userId: u.chatId,
-          task: "delete",
-          type: "neuro",
-          id: t?.id,
-        });
       } catch (err) {
         Router.logger.fatal(err);
       }
