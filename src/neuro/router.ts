@@ -57,12 +57,13 @@ export class Router {
     if (user.waitingForName) user.waitingForName = false;
     if (user.usingImageGeneration) user.usingImageGeneration = false;
     if (user.action) {
+      console.log(user.action.threads);
       await Router.queue.add("j", {
         actionId: user.action.id,
         task: "delete",
         type: "neuro",
         userId: user.chatId,
-        id: user.action.threads.find((el) => el.userId == user.chatId)!.id,
+        id: (user.action.threads.find((el) => el.userId == user.chatId))!.id,
       });
     }
     user.docType = "";
