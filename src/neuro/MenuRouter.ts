@@ -121,8 +121,13 @@ export class MenuRouter extends Router {
     });
 
     bot.onText(/\/balance/, async (msg) => {
-      const user = await Router.manager.findOneBy(User, {
-        chatId: String(msg.from!.id),
+      const user = await Router.manager.findOne(User, {
+        where: {
+          chatId: String(msg.from!.id),
+        },
+        relations: {
+          threads: true
+        }
       });
       if (!user) return;
       const now = dayjs();
