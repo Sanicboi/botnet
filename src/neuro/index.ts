@@ -84,7 +84,10 @@ bot.on("callback_query", async (q) => {
         chatId: String(q.from.id),
       },
       relations: {
-        threads: true
+        threads: {
+          action: true
+        },
+        action: true
       }
       
     });

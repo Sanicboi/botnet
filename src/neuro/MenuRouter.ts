@@ -22,8 +22,15 @@ export class MenuRouter extends Router {
           },
         });
         let result: InlineKeyboardButton[][] = [];
-        let u = await Router.manager.findOneBy(User, {
-          chatId: String(msg.from!.id),
+        let u = await Router.manager.findOne(User, {
+          where: {
+            chatId: String(msg.from!.id),
+          },
+          relations: {
+            threads: true,
+            action: true
+          }
+
         });
         if (!u) {
           u = new User();
