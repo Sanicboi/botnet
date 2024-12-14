@@ -104,8 +104,9 @@ export class MenuRouter extends Router {
             chatId: String(msg.from!.id),
           },
           relations: {
-            action: true,
-            threads: true,
+            action: {
+              threads: true
+            },
           },
         });
         if (!u) return;
