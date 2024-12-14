@@ -130,6 +130,10 @@ bot.onText(/./, async (msg) => {
   }
 });
 
+bot.on('photo', async msg => {
+  await textRouter.onPhoto(msg);
+})
+
 // bot.onText(/\/free/, async (msg) => {
 //   await tryDeletePrevious(msg.message_id, msg.from!.id);
 //   await MessageFormatter.sendTextFromFileBot(bot, "free.txt", msg.from!.id);

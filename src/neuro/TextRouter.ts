@@ -279,10 +279,6 @@ export class TextRouter extends Router {
   }
 
   public async onText(msg: TelegramBot.Message, user: User) {
-    if (msg.photo) {
-      await this.onPhoto(msg);
-      return;
-    }
     const t = user.threads.find((t) => t.actionId === user.actionId);
     const res =
       msg.text! +
