@@ -27,10 +27,9 @@ export class MenuRouter extends Router {
             chatId: String(msg.from!.id),
           },
           relations: {
-            threads: {
-              action: true
-            },
-            action: true
+            action: {
+              threads: true
+            }
           }
 
         });
