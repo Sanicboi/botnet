@@ -74,6 +74,7 @@ export class Router {
     user.offerSize = "";
     user.textStyle = "";
     user.textTone = "";
+    user.actionId = null;
     await this.manager.save(user);
   }
 

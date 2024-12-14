@@ -44,7 +44,7 @@ export class User {
   @Column({
     nullable: true,
   })
-  actionId: string;
+  actionId: string | null;
 
   @Column({
     default: false,

@@ -14,6 +14,9 @@ export class NeuroHandler {
       } else if (j.task === "delete") {
         await openai.beta.threads.del(j.id);
         await FileHandler.deleteFiles(j.userId);
+        await queues.neuro.add('j', {
+          ...j
+        });
       } else if (j.task === "run") {
         const docs = await FileHandler.uploadDocuments(j);
 

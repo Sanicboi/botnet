@@ -72,7 +72,7 @@ export class TextRouter extends Router {
           type: "neuro",
           task: "run",
           model: u.model,
-          actionId: u.actionId,
+          actionId: u.actionId!,
           userId: u.chatId,
           threadId: t?.id,
           message: {
@@ -310,7 +310,7 @@ export class TextRouter extends Router {
       task: "run",
       message: { content: res, role: "user" },
       model: user.model,
-      actionId: user.actionId,
+      actionId: user.actionId!,
       userId: user.chatId,
       threadId: t?.id,
     });
@@ -361,7 +361,7 @@ export class TextRouter extends Router {
       task: "run",
       message: { content: res, role: "user", images: [url] },
       model: user.model,
-      actionId: user.actionId,
+      actionId: user.actionId!,
       userId: user.chatId,
       threadId: t?.id,
     });
