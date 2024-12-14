@@ -107,6 +107,7 @@ export class MenuRouter extends Router {
             action: {
               threads: true
             },
+            threads: true
           },
         });
         if (!u) return;
