@@ -1,3 +1,4 @@
+import { MessageContentPartParam } from "openai/resources/beta/threads/messages";
 import { IJob, openai, queues } from ".";
 import { FileHandler } from "./FileHandler";
 
@@ -26,14 +27,20 @@ export class NeuroHandler {
             file_id: el,
           }),
         );
-        images.forEach((el) =>
-          attachments.push({
-            file_id: el,
-          }),
-        );
 
         await openai.beta.threads.messages.create(j.threadId, {
-          content: j.message.content,
+          content: [
+            {
+              text: j.message.content,
+              type: 'text'
+            },
+            ...(attachments.map<MessageContentPartParam>(el => {
+              return {
+                type: 'image_file',
+                image_file: el 
+              }
+            }))
+          ],
           role: j.message.role,
           attachments: attachments,
         });
