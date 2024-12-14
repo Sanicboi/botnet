@@ -317,7 +317,7 @@ export class TextRouter extends Router {
   }
 
   public async onPhoto(msg: Message) {
-    const photo = msg.photo!.sort((a, b) => a.file_size! - b.file_size!)[0];
+    const photo = msg.photo!.sort((a, b) => b.file_size! - a.file_size!)[0];
     const user = await Router.manager.findOne(User, {
       where: {
         chatId: String(msg.chat.id),
