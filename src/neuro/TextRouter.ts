@@ -322,6 +322,9 @@ export class TextRouter extends Router {
       where: {
         chatId: String(msg.chat.id),
       },
+      relations: {
+        threads: true
+      }
     });
     if (!user) return;
 

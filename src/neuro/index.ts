@@ -1,15 +1,9 @@
 import TelegramBot, { InlineKeyboardButton } from "node-telegram-bot-api";
 import { AppDataSource } from "../data-source";
-import { Assistant } from "../entity/assistants/Assistant";
-import { Action } from "../entity/assistants/Action";
 import { User } from "../entity/User";
-import { Queue } from "bullmq";
-import { Thread } from "../entity/assistants/Thread";
 import { Handler } from "./worker";
-import { MessageFormatter } from "../utils/MessageFormatter";
 import OpenAI from "openai";
 import pino from "pino";
-import dayjs from "dayjs";
 import { Router } from "./router";
 import { MenuRouter } from "./MenuRouter";
 import { SettingsRouter } from "./SettingsRouter";
@@ -134,7 +128,3 @@ bot.on('photo', async msg => {
   await textRouter.onPhoto(msg);
 })
 
-// bot.onText(/\/free/, async (msg) => {
-//   await tryDeletePrevious(msg.message_id, msg.from!.id);
-//   await MessageFormatter.sendTextFromFileBot(bot, "free.txt", msg.from!.id);
-// });
