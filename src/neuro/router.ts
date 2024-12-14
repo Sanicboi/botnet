@@ -7,6 +7,7 @@ import { Assistant } from "../entity/assistants/Assistant";
 import OpenAI from "openai";
 import { Queue } from "bullmq";
 import { FileUpload } from "../entity/assistants/FileUpload";
+import { Thread } from "../entity/assistants/Thread";
 
 interface Msg {
   role: "assistant" | "user";
@@ -58,12 +59,14 @@ export class Router {
     if (user.usingImageGeneration) user.usingImageGeneration = false;
     if (user.action) {
       console.log(user.action);
+      const t = (user.action.threads.find((el) => el.userId == user.chatId))!
+      await Router.manager.delete(Thread, t);
       await Router.queue.add("j", {
         actionId: user.action.id,
         task: "delete",
         type: "neuro",
         userId: user.chatId,
-        id: (user.action.threads.find((el) => el.userId == user.chatId))!.id,
+        id: t.id,
       });
     }
     user.docType = "";
