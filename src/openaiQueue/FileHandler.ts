@@ -2,7 +2,7 @@ import axios from "axios";
 import { INeuroRunJob, openai } from ".";
 import path from "path";
 import { v4 } from "uuid";
-import mime from "mime";
+import mime from "mime-types";
 import { FileUpload } from "../entity/assistants/FileUpload";
 import { AppDataSource } from "../data-source";
 
@@ -18,7 +18,7 @@ export class FileHandler {
     const extension = path.extname(url);
 
     const asFile = new File(data.data, v4() + extension, {
-      type: mime.getType(extension)!,
+      type: mime.lookup(extension) || 'text/plain',
     });
 
     const r = await openai.files.create({
