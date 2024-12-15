@@ -81,7 +81,7 @@ export class NeuroHandler {
         });
       } else if (j.task === "voice") {
         const file = await FileHandler.getFileContent(j.voiceUrl);
-        console.log(j.voiceUrl, file.type);
+        console.log(j.voiceUrl);
         const transcription = await openai.audio.transcriptions.create({
           file: file,
           model: "whisper-1",

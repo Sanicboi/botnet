@@ -113,7 +113,7 @@ export class OpenAI {
     if (!msg.voice) return;
 
     const url = await bot.getFileLink(msg.voice.file_id);
-
+    console.log(url);
     await Router.queue.add("j", {
       type: "neuro",
       task: "voice",
