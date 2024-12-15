@@ -66,6 +66,9 @@ export class TextRouter extends Router {
       if (!user) return;
       await OpenAI.runDocument(msg, user);
     });
+    bot.on('voice', async (msg) => {
+      await this.onVoice(msg);
+    })
 
     this.onQuery = this.onQuery.bind(this);
     this.onText = this.onText.bind(this);
