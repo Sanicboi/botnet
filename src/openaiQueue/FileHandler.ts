@@ -57,7 +57,7 @@ export class FileHandler {
     });
 
     let extension = path.extname(url);
-    console.log(mime.lookup(extension));
+    console.log(r.data);
     return new File(r.data, v4() + extension, {
       type: mime.lookup(extension) || "text/plain",
     });
