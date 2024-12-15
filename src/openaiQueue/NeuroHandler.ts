@@ -85,6 +85,7 @@ export class NeuroHandler {
           file: file,
           model: "whisper-1",
         });
+        console.log(transcription.text);
         await this.handle({
           task: "run",
           type: "neuro",
