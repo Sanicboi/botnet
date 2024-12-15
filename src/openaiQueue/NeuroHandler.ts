@@ -95,6 +95,7 @@ export class NeuroHandler {
           model: "whisper-1",
         });
         
+        fs.rmSync(path.join(process.cwd(), 'voice', name));
         await this.handle({
           task: "run",
           type: "neuro",
