@@ -12,14 +12,7 @@ export class FileHandler {
     purpose: "vision" | "assistants",
     userId: string,
   ): Promise<string> {
-    const data = await axios.get(url, {
-      responseType: "arraybuffer",
-    });
-    const extension = path.extname(url);
-
-    const asFile = new File(data.data, v4() + extension, {
-      type: mime.lookup(extension) || 'text/plain',
-    });
+    const asFile = await this.getFileContent(url);
 
     const r = await openai.files.create({
       file: asFile,
@@ -33,7 +26,6 @@ export class FileHandler {
 
     return upload.id;
   }
-
 
   public static async uploadDocuments(j: INeuroRunJob): Promise<string[]> {
     let files: string[] = [];
@@ -57,5 +49,15 @@ export class FileHandler {
       await openai.files.del(f.id);
       await AppDataSource.manager.delete(FileUpload, f);
     }
+  }
+
+  public static async getFileContent(url: string): Promise<File> {
+    const r = await axios.get(url, {
+      responseType: "arraybuffer",
+    });
+
+    return new File(r.data, v4() + path.extname(url), {
+      type: mime.lookup(url) || "text/plain",
+    });
   }
 }

@@ -3,11 +3,10 @@ import { bot } from ".";
 import { Assistant } from "../entity/assistants/Assistant";
 import { Router } from "./router";
 import { User } from "../entity/User";
-import { Thread } from "../entity/assistants/Thread";
 import dayjs from "dayjs";
 import { MessageFormatter } from "../utils/MessageFormatter";
 import { Btn } from "./utils";
-import OpenAI from "openai";
+import { OpenAI } from "./OpenAI";
 
 export class MenuRouter extends Router {
   constructor() {
@@ -28,10 +27,9 @@ export class MenuRouter extends Router {
           },
           relations: {
             action: {
-              threads: true
-            }
-          }
-
+              threads: true,
+            },
+          },
         });
         if (!u) {
           u = new User();
@@ -99,19 +97,7 @@ export class MenuRouter extends Router {
 
     bot.onText(/\/deletecontext/, async (msg) => {
       try {
-        const u = await Router.manager.findOne(User, {
-          where: {
-            chatId: String(msg.from!.id),
-          },
-          relations: {
-            action: {
-              threads: true
-            },
-            threads: true
-          },
-        });
-        if (!u) return;
-        await Router.resetWaiters(u);
+        await OpenAI.deleteThread(msg);
       } catch (err) {
         Router.logger.fatal(err);
       }
@@ -123,8 +109,8 @@ export class MenuRouter extends Router {
           chatId: String(msg.from!.id),
         },
         relations: {
-          threads: true
-        }
+          threads: true,
+        },
       });
       if (!user) return;
       const now = dayjs();

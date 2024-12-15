@@ -20,13 +20,14 @@ interface IJob {
   userId: string;
   actionId: string;
   type: "neuro";
-  task: "delete" | "create" | "run" | "image";
+  task: "delete" | "create" | "run" | "image" | "voice";
   model?: OpenAI.ChatModel;
   message?: Msg;
   id?: string;
   threadId?: string;
   prompt?: string;
   msgId?: string;
+  voiceUrl?: string;
 }
 
 export class Router {
@@ -58,8 +59,7 @@ export class Router {
     if (user.waitingForName) user.waitingForName = false;
     if (user.usingImageGeneration) user.usingImageGeneration = false;
     if (user.action) {
-      console.log(user.action);
-      const t = (user.action.threads.find((el) => el.userId == user.chatId))!
+      const t = user.action.threads.find((el) => el.userId == user.chatId)!;
       user.docType = "";
       user.agreementType = "";
       user.offerSize = "";
@@ -86,7 +86,6 @@ export class Router {
       user.action = null;
       await this.manager.save(user);
     }
-
   }
 
   constructor() {}

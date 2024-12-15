@@ -14,8 +14,8 @@ export class NeuroHandler {
       } else if (j.task === "delete") {
         await openai.beta.threads.del(j.id);
         await FileHandler.deleteFiles(j.userId);
-        await queues.neuro.add('j', {
-          ...j
+        await queues.neuro.add("j", {
+          ...j,
         });
       } else if (j.task === "run") {
         const docs = await FileHandler.uploadDocuments(j);
@@ -32,17 +32,17 @@ export class NeuroHandler {
         let content: MessageContentPartParam[] = [];
         content.push({
           text: j.message.content,
-          type: 'text'
+          type: "text",
         });
         if (j.message.images) {
           for (const i of j.message.images) {
             content.push({
               image_url: {
                 url: i,
-                detail: 'high'
+                detail: "high",
               },
-              type: 'image_url'
-            })
+              type: "image_url",
+            });
           }
         }
         await openai.beta.threads.messages.create(j.threadId, {
@@ -78,6 +78,25 @@ export class NeuroHandler {
         await queues.neuro.add("j", {
           ...j,
           imageUrl: result.data[0].url,
+        });
+      } else if (j.task === "voice") {
+        const file = await FileHandler.getFileContent(j.voiceUrl);
+        const transcription = await openai.audio.transcriptions.create({
+          file: file,
+          model: "whisper-1",
+        });
+        await this.handle({
+          task: "run",
+          type: "neuro",
+          actionId: j.actionId,
+          message: {
+            content: transcription.text,
+            role: "user",
+          },
+          model: j.model,
+          msgId: j.msgId,
+          threadId: j.threadId,
+          userId: j.userId,
         });
       }
     }

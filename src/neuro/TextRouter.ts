@@ -7,6 +7,7 @@ import { bot } from ".";
 import { Action } from "../entity/assistants/Action";
 import { User } from "../entity/User";
 import { Btn } from "./utils";
+import { OpenAI } from "./OpenAI";
 
 const sizeMap = new Map<string, string>();
 sizeMap.set("offer-long", "Оффер большой (70-90 слов)\n");
@@ -54,39 +55,22 @@ export class TextRouter extends Router {
     super();
 
     bot.on("document", async (msg) => {
-      const u = await Router.manager.findOne(User, {
-        where: { chatId: String(msg.chat.id) },
+      const user = await Router.manager.findOne(User, {
+        where: {
+          chatId: String(msg.chat.id),
+        },
         relations: {
-          action: true,
           threads: true,
         },
       });
-      if (!u) return;
-
-      if (msg.document) {
-        const url = await bot.getFileLink(msg.document.file_id);
-        const t = u.threads.find((el) => el.actionId === u.actionId);
-
-        await bot.sendMessage(msg.from!.id, "генерирую ответ ✨...");
-        await Router.queue.add("j", {
-          type: "neuro",
-          task: "run",
-          model: u.model,
-          actionId: u.actionId!,
-          userId: u.chatId,
-          threadId: t?.id,
-          message: {
-            content: msg.text ?? "входные данные",
-            role: "user",
-            files: [url],
-          },
-          msgId: String(msg.message_id),
-        });
-      }
+      if (!user) return;
+      await OpenAI.runDocument(msg, user);
     });
 
     this.onQuery = this.onQuery.bind(this);
     this.onText = this.onText.bind(this);
+    this.onPhoto = this.onPhoto.bind(this);
+    this.onVoice = this.onVoice.bind(this);
   }
 
   public async onQuery(q: TelegramBot.CallbackQuery) {
@@ -168,28 +152,12 @@ export class TextRouter extends Router {
         return;
       }
 
-      u.actionId = q.data!.substring(3);
-      await Router.manager.save(u);
-      await Router.queue.add("j", {
-        type: "neuro",
-        task: "create",
-        actionId: q.data!.substring(3),
-        userId: u.chatId,
-        model: u.model,
-      });
+      await OpenAI.createThread(q, u, q.data!.substring(3));
     }
 
     if (q.data?.startsWith("offer-")) {
-      u.actionId = "asst_14B08GDgJphVClkmmtQYo0aq";
       u.offerSize = sizeMap.get(q.data!)!;
-      await Router.manager.save(u);
-      await Router.queue.add("j", {
-        type: "neuro",
-        task: "create",
-        actionId: "asst_14B08GDgJphVClkmmtQYo0aq",
-        userId: u.chatId,
-        model: u.model,
-      });
+      await OpenAI.createThread(q, u, "asst_14B08GDgJphVClkmmtQYo0aq");
     }
 
     if (q.data?.startsWith("style-")) {
@@ -218,15 +186,7 @@ export class TextRouter extends Router {
 
     if (q.data?.startsWith("tone-")) {
       u.textTone = toneMap.get(q.data!)!;
-      u.actionId = "asst_1BdIGF3mp94XvVfgS88fLIor";
-      await Router.manager.save(u);
-      await Router.queue.add("j", {
-        type: "neuro",
-        task: "create",
-        actionId: "asst_1BdIGF3mp94XvVfgS88fLIor",
-        userId: u.chatId,
-        model: u.model,
-      });
+      await OpenAI.createThread(q, u, "asst_1BdIGF3mp94XvVfgS88fLIor");
     }
 
     if (q.data?.startsWith("doct-")) {
@@ -250,15 +210,7 @@ export class TextRouter extends Router {
           },
         });
       } else {
-        u.actionId = "asst_WHhZd8u8rXpAHADdjIwBM9CJ";
-        await Router.manager.save(u);
-        await Router.queue.add("j", {
-          type: "neuro",
-          task: "create",
-          actionId: "asst_WHhZd8u8rXpAHADdjIwBM9CJ",
-          userId: u.chatId,
-          model: u.model,
-        });
+        await OpenAI.createThread(q, u, "asst_WHhZd8u8rXpAHADdjIwBM9CJ");
         return;
       }
       await Router.manager.save(u);
@@ -266,104 +218,46 @@ export class TextRouter extends Router {
 
     if (q.data?.startsWith("agreement-")) {
       u.agreementType = agreementsMap.get(q.data!)!;
-      u.actionId = "asst_WHhZd8u8rXpAHADdjIwBM9CJ";
-      await Router.manager.save(u);
-      await Router.queue.add("j", {
-        type: "neuro",
-        task: "create",
-        actionId: "asst_WHhZd8u8rXpAHADdjIwBM9CJ",
-        userId: u.chatId,
-        model: u.model,
-      });
+      await OpenAI.createThread(q, u, "asst_WHhZd8u8rXpAHADdjIwBM9CJ");
     }
   }
 
-  public async onText(msg: TelegramBot.Message, user: User) {
-    const t = user.threads.find((t) => t.actionId === user.actionId);
-    const res =
-      msg.text! +
-      "\n" +
-      user.textStyle +
-      user.textTone +
-      user.offerSize +
-      user.docType +
-      user.agreementType;
-    user.textStyle = "";
-    user.textTone = "";
-    user.offerSize = "";
-    user.docType = "";
-    user.agreementType = "";
-    await Router.manager.save(user);
-    if (user.addBalance === 0 && user.leftForToday === 0) {
-      await bot.sendMessage(msg.from!.id, "У вас недостатчно токенов", {
-        reply_markup: {
-          inline_keyboard: [
-            Btn("Купить пакет токенов", "b-tokens"),
-            Btn("Купить подписку", "b-sub"),
-          ],
-        },
-      });
-      return;
-    }
-    await Router.queue.add("j", {
-      type: "neuro",
-      task: "run",
-      message: { content: res, role: "user" },
-      model: user.model,
-      actionId: user.actionId!,
-      userId: user.chatId,
-      threadId: t?.id,
-    });
-  }
-
-  public async onPhoto(msg: Message) {
-    const photo = msg.photo!.sort((a, b) => b.file_size! - a.file_size!)[0];
+  public async onText(msg: TelegramBot.Message) {
     const user = await Router.manager.findOne(User, {
       where: {
         chatId: String(msg.chat.id),
       },
       relations: {
-        threads: true
-      }
+        threads: true,
+      },
     });
     if (!user) return;
+    await OpenAI.runText(msg, user);
+  }
 
-    const t = user.threads.find((t) => t.actionId === user.actionId);
-    const res =
-      msg.text! +
-      "\n" +
-      user.textStyle +
-      user.textTone +
-      user.offerSize +
-      user.docType +
-      user.agreementType;
-    user.textStyle = "";
-    user.textTone = "";
-    user.offerSize = "";
-    user.docType = "";
-    user.agreementType = "";
-    await Router.manager.save(user);
-    if (user.addBalance === 0 && user.leftForToday === 0) {
-      await bot.sendMessage(msg.from!.id, "У вас недостатчно токенов", {
-        reply_markup: {
-          inline_keyboard: [
-            Btn("Купить пакет токенов", "b-tokens"),
-            Btn("Купить подписку", "b-sub"),
-          ],
-        },
-      });
-      return;
-    }
-    const url = await bot.getFileLink(photo.file_id);
-    console.log(url);
-    await Router.queue.add("j", {
-      type: "neuro",
-      task: "run",
-      message: { content: res, role: "user", images: [url] },
-      model: user.model,
-      actionId: user.actionId!,
-      userId: user.chatId,
-      threadId: t?.id,
+  public async onPhoto(msg: Message) {
+    const user = await Router.manager.findOne(User, {
+      where: {
+        chatId: String(msg.chat.id),
+      },
+      relations: {
+        threads: true,
+      },
     });
+    if (!user) return;
+    await OpenAI.runPhoto(msg, user);
+  }
+
+  public async onVoice(msg: Message) {
+    const user = await Router.manager.findOne(User, {
+      where: {
+        chatId: String(msg.chat.id),
+      },
+      relations: {
+        threads: true,
+      },
+    });
+    if (!user) return;
+    await OpenAI.runVoice(msg, user);
   }
 }

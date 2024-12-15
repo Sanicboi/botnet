@@ -79,14 +79,13 @@ bot.on("callback_query", async (q) => {
       },
       relations: {
         action: {
-          threads: true
-        }
-      }
-      
+          threads: true,
+        },
+      },
     });
     if (!user) return;
     const r = await imagesRouter.onQuery(q);
-    if (!r && !(q.data?.startsWith('aimodel-'))) {
+    if (!r && !q.data?.startsWith("aimodel-")) {
       await Router.resetWaiters(user);
     }
     await Router.resetSub(user);
@@ -124,7 +123,6 @@ bot.onText(/./, async (msg) => {
   }
 });
 
-bot.on('photo', async msg => {
+bot.on("photo", async (msg) => {
   await textRouter.onPhoto(msg);
-})
-
+});

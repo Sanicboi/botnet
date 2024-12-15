@@ -21,7 +21,7 @@ interface IMailerJob {
 
 interface INeuroJob {
   type: "neuro";
-  task: "delete" | "create" | "run" | "image";
+  task: "delete" | "create" | "run" | "image" | "voice";
   userId: string;
   actionId: string;
 }
@@ -58,6 +58,14 @@ interface INeuroOutJob extends INeuroJob {
   msgId?: string;
 }
 
+interface INeuroVoiceJob extends INeuroJob {
+  task: "voice";
+  threadId: string;
+  model: OpenAI.ChatModel;
+  msgId: string;
+  voiceUrl: string;
+}
+
 interface IMalerOutJob {
   botId: string;
   message: string;
@@ -76,7 +84,8 @@ export type IJob =
   | INeuroDeleteThreadJob
   | INeuroRunJob
   | INeuroImageJob
-  | IMailerJob;
+  | IMailerJob
+  | INeuroVoiceJob;
 
 export const queues = {
   neuro: new Queue<INeuroOutJob>("neuro", {
