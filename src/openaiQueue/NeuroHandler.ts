@@ -1,6 +1,10 @@
 import { MessageContentPartParam } from "openai/resources/beta/threads/messages";
 import { IJob, openai, queues } from ".";
 import { FileHandler } from "./FileHandler";
+import axios from "axios";
+import path from "path";
+import { v4 } from "uuid";
+import fs from 'fs';
 
 export class NeuroHandler {
   public static async handle(j: IJob) {
@@ -80,13 +84,17 @@ export class NeuroHandler {
           imageUrl: result.data[0].url,
         });
       } else if (j.task === "voice") {
-        const file = await FileHandler.getFileContent(j.voiceUrl);
-        console.log(j.voiceUrl);
+        const res = await axios.get(j.voiceUrl, {
+          responseType: 'arraybuffer',
+        });
+        const name = v4() + path.extname(j.voiceUrl);
+        fs.writeFileSync(path.join(process.cwd(), 'voice', name), res.data);
+
         const transcription = await openai.audio.transcriptions.create({
-          file: file,
+          file: fs.createReadStream(path.join(process.cwd(), 'voice', name)),
           model: "whisper-1",
         });
-        console.log(transcription.text);
+        
         await this.handle({
           task: "run",
           type: "neuro",
