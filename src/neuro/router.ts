@@ -60,6 +60,12 @@ export class Router {
     if (user.waitingForName) user.waitingForName = false;
     if (user.usingImageGeneration) user.usingImageGeneration = false;
     if (user.action) {
+      if (user.action.id === 'voice') {
+        user.actionId = null;
+        user.action = null;
+        await Router.manager.save(user);
+        return;
+      }
       const t = user.action.threads.find((el) => el.userId == user.chatId)!;
       user.docType = "";
       user.agreementType = "";
