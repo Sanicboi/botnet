@@ -56,8 +56,10 @@ export class FileHandler {
       responseType: "arraybuffer",
     });
 
-    return new File(r.data, v4() + path.extname(url), {
-      type: mime.lookup(url) || "text/plain",
+    let extension = path.extname(url);
+    if (extension === '.oga') extension = '.ogg';
+    return new File(r.data, v4() + extension, {
+      type: mime.lookup(extension) || "text/plain",
     });
   }
 }
