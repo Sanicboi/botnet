@@ -96,19 +96,30 @@ export class NeuroHandler {
         });
         
         fs.rmSync(path.join(process.cwd(), 'voice', name));
-        await this.handle({
-          task: "run",
-          type: "neuro",
-          actionId: j.actionId,
-          message: {
-            content: transcription.text,
-            role: "user",
-          },
-          model: j.model,
-          msgId: j.msgId,
-          threadId: j.threadId,
-          userId: j.userId,
-        });
+
+        if (j.generate) {
+          await this.handle({
+            task: "run",
+            type: "neuro",
+            actionId: j.actionId,
+            message: {
+              content: transcription.text,
+              role: "user",
+            },
+            model: j.model,
+            msgId: j.msgId,
+            threadId: j.threadId,
+            userId: j.userId,
+          });
+        } else {
+          await queues.neuro.add('j', {
+            task: 'voice',
+            result: transcription.text,
+            actionId: 'voice',
+            type: 'neuro',
+            userId: j.userId,
+          })
+        }
       }
     }
   }

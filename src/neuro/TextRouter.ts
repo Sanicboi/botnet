@@ -155,6 +155,13 @@ export class TextRouter extends Router {
         return;
       }
 
+      if (q.data!.endsWith('-voice')) {
+        await bot.sendMessage(q.from!.id, "Пришлите мне голосовое сообщение, и я переведу его в текст");
+        u.actionId = 'voice';
+        await Router.manager.save(u);
+        return;
+      }
+
       await OpenAI.createThread(q, u, q.data!.substring(3));
     }
 
@@ -261,6 +268,10 @@ export class TextRouter extends Router {
       },
     });
     if (!user) return;
+    if (user.actionId === 'voice') {
+      await OpenAI.runJustVoice(msg);
+      return;
+    }
     await OpenAI.runVoice(msg, user);
   }
 }

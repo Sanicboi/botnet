@@ -28,6 +28,7 @@ interface IJob {
   prompt?: string;
   msgId?: string;
   voiceUrl?: string;
+  generate?: boolean;
 }
 
 export class Router {

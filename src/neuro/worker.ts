@@ -37,13 +37,20 @@ interface IJobImage extends IJob {
   msgId: string;
 }
 
+interface IJobVoice extends IJob {
+  task: "voice";
+  text: string;
+  msgId: string;
+  result: string;
+}
+
 export class Handler {
   worker: Worker;
 
   constructor() {
     this.worker = new Worker(
       "neuro",
-      async (job: Job<IJobCreate | IJobRun | IJobDelete | IJobImage>) => {
+      async (job: Job<IJobCreate | IJobRun | IJobDelete | IJobImage | IJobVoice>) => {
         try {
           const manager = AppDataSource.manager;
           const j = job.data;
@@ -191,6 +198,8 @@ export class Handler {
                 ],
               },
             });
+          } else if (j.task === 'voice') {
+            await bot.sendMessage(+j.userId, j.result);
           }
         } catch (err) {
           logger.fatal(err);

@@ -56,10 +56,12 @@ interface INeuroOutJob extends INeuroJob {
   imageUrl?: string;
   tokenCount?: number;
   msgId?: string;
+  result?: string;
 }
 
 interface INeuroVoiceJob extends INeuroJob {
   task: "voice";
+  generate: boolean;
   threadId: string;
   model: OpenAI.ChatModel;
   msgId: string;
