@@ -57,7 +57,7 @@ export class FileHandler {
     });
 
     let extension = path.extname(url);
-    if (extension === '.oga') extension = '.ogg';
+    console.log(mime.lookup(extension));
     return new File(r.data, v4() + extension, {
       type: mime.lookup(extension) || "text/plain",
     });
