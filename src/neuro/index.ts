@@ -116,7 +116,7 @@ bot.onText(/./, async (msg) => {
       if (imRes) return;
       const nameRes = await settingsRouter.onText(msg, u);
       if (nameRes) return;
-      await textRouter.onText(msg, u);
+      await textRouter.onText(msg);
     }
   } catch (err) {
     logger.fatal(err);
