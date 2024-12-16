@@ -32,15 +32,33 @@ interface IJob {
   sendResetMessage?: boolean;
 }
 
+/**
+ * Helper class to create routers
+ */
 export class Router {
+  /**
+   * Database Entity Manager
+   */
   public static manager = AppDataSource.manager;
+
+  /**
+   * Pino logger
+   */
   public static logger = pino();
+
+  /**
+   * OpenAI Queue
+   */
   public static queue = new Queue<IJob>("openai", {
     connection: {
       host: "redis",
     },
   });
 
+  /**
+   * Reset of subscription
+   * @param user User object
+   */
   public static async resetSub(user: User) {
     if (user.endDate && user.endDate <= new Date()) {
       user.endDate = undefined;
@@ -49,6 +67,11 @@ export class Router {
     }
   }
 
+  /**
+   * Try and delete previous message
+   * @param currentId ID of message received right now (The message selected for deletion is this - 1)
+   * @param chatId ID of chat
+   */
   public static async tryDeletePrevious(currentId: number, chatId: number) {
     try {
       await bot.deleteMessage(chatId, currentId - 1);
@@ -57,11 +80,20 @@ export class Router {
     }
   }
 
-  public static async resetWaiters(user: User, sendResetMessage: boolean = false) {
+  /**
+   * Resets all the waiters and the current
+   * @param user User object (Action and Action.threads are required)
+   * @param sendResetMessage Whether to send the Context deleted message to the user after its deletion
+   * @returns Nothing
+   */
+  public static async resetWaiters(
+    user: User,
+    sendResetMessage: boolean = false,
+  ) {
     if (user.waitingForName) user.waitingForName = false;
     if (user.usingImageGeneration) user.usingImageGeneration = false;
     if (user.action) {
-      if (user.action.id === 'voice') {
+      if (user.action.id === "voice") {
         user.actionId = null;
         user.action = null;
         await Router.manager.save(user);
@@ -97,5 +129,8 @@ export class Router {
     }
   }
 
+  /**
+   * Empty constructor for child classes
+   */
   constructor() {}
 }

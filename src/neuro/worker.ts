@@ -45,13 +45,21 @@ interface IJobVoice extends IJob {
   result: string;
 }
 
+/**
+ * This class is a single worker that processes back openai requests
+ */
 export class Handler {
   worker: Worker;
 
+  /**
+   * This creates a new Worker on the neuro back queue that processes incoming OpenAI queue requests
+   */
   constructor() {
     this.worker = new Worker(
       "neuro",
-      async (job: Job<IJobCreate | IJobRun | IJobDelete | IJobImage | IJobVoice>) => {
+      async (
+        job: Job<IJobCreate | IJobRun | IJobDelete | IJobImage | IJobVoice>,
+      ) => {
         try {
           const manager = AppDataSource.manager;
           const j = job.data;
@@ -201,7 +209,7 @@ export class Handler {
                 ],
               },
             });
-          } else if (j.task === 'voice') {
+          } else if (j.task === "voice") {
             await bot.sendMessage(+j.userId, j.result);
           }
         } catch (err) {

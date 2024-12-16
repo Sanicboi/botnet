@@ -2,68 +2,50 @@ import TelegramBot from "node-telegram-bot-api";
 import { Router } from "./router";
 import { User } from "../entity/User";
 import { bot } from ".";
+import { Btn } from "./utils";
 
+/**
+ * This router handles image generation
+ */
 export class ImagesRouter extends Router {
+  /**
+   * Creates a new instance of the router
+   */
   constructor() {
     super();
     this.onQuery = this.onQuery.bind(this);
     this.onText = this.onText.bind(this);
   }
 
+  /**
+   * Handle callback query
+   * @param q Callback query object
+   * @returns If waiters should be kept
+   */
   public async onQuery(q: TelegramBot.CallbackQuery): Promise<boolean> {
     if (q.data === "images") {
       await bot.sendMessage(q.from.id, "Выберите функцию", {
         reply_markup: {
           inline_keyboard: [
-            [
-              {
-                text: "🖼️ Генерация картинок",
-                callback_data: "gen",
-              },
-            ],
-            [
-              {
-                text: "Назад",
-                callback_data: "menu-1",
-              },
-            ],
+            Btn("🖼️ Генерация картинок", "gen"),
+            Btn("Назад", "menu-1"),
           ],
         },
       });
+      return true;
     }
 
     if (q.data === "gen") {
       await bot.sendMessage(q.from.id, "Выберите разрешение", {
         reply_markup: {
           inline_keyboard: [
-            [
-              {
-                text: "1024x1024",
-                callback_data: "res-1024x1024",
-              },
-            ],
-            [
-              {
-                text: "1024x1792",
-                callback_data: "res-1024x1792",
-              },
-            ],
-            [
-              {
-                text: "1792x1024",
-                callback_data: "res-1792x1024",
-              },
-            ],
-            [
-              {
-                text: "Назад",
-                callback_data: "images",
-              },
-            ],
+            Btn("1024x1024", "res-1024x1024"),
+            Btn("1024x1792", "res-1024x1792"),
+            Btn("1792x1024", "res-1792x1024"),
+            Btn("Назад", "images"),
           ],
         },
       });
-      return true;
     }
 
     if (q.data?.startsWith("res-")) {
@@ -98,6 +80,12 @@ export class ImagesRouter extends Router {
     return false;
   }
 
+  /**
+   * Handles text input
+   * @param msg Message Object
+   * @param user User Object
+   * @returns If the message has been handled
+   */
   public async onText(msg: TelegramBot.Message, user: User): Promise<boolean> {
     if (user.usingImageGeneration) {
       await Router.queue.add("j", {

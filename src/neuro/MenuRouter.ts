@@ -47,7 +47,7 @@ export class MenuRouter extends Router {
         }
 
         result.push(Btn("👨‍🎨Дизайн", "images"));
-        result.push(Btn("Следующая страница","menu-2"));
+        result.push(Btn("Следующая страница", "menu-2"));
 
         await bot.sendMessage(msg.from!.id, "Выберите категорию сотрудников", {
           reply_markup: {
@@ -295,7 +295,7 @@ export class MenuRouter extends Router {
           ]);
         }
 
-        result.push(Btn("Свободный режим", "ac-asst_5oeIoYRLcSgupyUaPQF8Rp2N"))
+        result.push(Btn("Свободный режим", "ac-asst_5oeIoYRLcSgupyUaPQF8Rp2N"));
         result.push(Btn("Предыдущая страница", "menu-1"));
 
         await bot.sendMessage(q.from.id, "Выберите категорию сотрудников", {

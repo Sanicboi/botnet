@@ -122,7 +122,7 @@ export class OpenAI {
       model: u.model,
       voiceUrl: url,
       threadId: data.thread.id,
-      generate: true
+      generate: true,
     });
   }
 
@@ -202,29 +202,37 @@ export class OpenAI {
       },
     });
     if (!u) return;
-    if (u.actionId === 'voice') {
+    if (u.actionId === "voice") {
       u.actionId = null;
       u.action = null;
       await Router.manager.save(u);
-      await bot.sendMessage(msg.from!.id, 'Транскрибация закончена. Выберите другую функцию');
+      await bot.sendMessage(
+        msg.from!.id,
+        "Транскрибация закончена. Выберите другую функцию",
+      );
       return;
     }
     await Router.resetWaiters(u, true);
   }
 
+  /**
+   * This method only transcribes the voice, without actually using any assistant
+   * @param msg Message object
+   * @returns Nothing
+   */
   public static async runJustVoice(msg: Message) {
     if (!msg.voice) return;
 
     const url = await bot.getFileLink(msg.voice.file_id);
 
-    await Router.queue.add('j', {
-      actionId: 'voice',
+    await Router.queue.add("j", {
+      actionId: "voice",
       generate: false,
-      task: 'voice',
-      type: 'neuro',
+      task: "voice",
+      type: "neuro",
       userId: String(msg.from!.id),
       voiceUrl: url,
       msgId: String(msg.message_id),
-    })
+    });
   }
 }

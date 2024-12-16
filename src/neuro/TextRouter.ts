@@ -50,7 +50,15 @@ agreementsMap.set("agreement-order", "Договор авторского зак
 agreementsMap.set("agreement-buysell", "Договор купли продажи\n");
 agreementsMap.set("agreement-service", "Договор оказания услуг\n");
 agreementsMap.set("agreement-employment", "Трудовой договор\n");
+
+/**
+ * This class is used to route all the text model requests
+ * @todo make all the binding code to the events the same
+ */
 export class TextRouter extends Router {
+  /**
+   * Creates a new router
+   */
   constructor() {
     super();
 
@@ -66,9 +74,9 @@ export class TextRouter extends Router {
       if (!user) return;
       await OpenAI.runDocument(msg, user);
     });
-    bot.on('voice', async (msg) => {
+    bot.on("voice", async (msg) => {
       await this.onVoice(msg);
-    })
+    });
 
     this.onQuery = this.onQuery.bind(this);
     this.onText = this.onText.bind(this);
@@ -76,6 +84,11 @@ export class TextRouter extends Router {
     this.onVoice = this.onVoice.bind(this);
   }
 
+  /**
+   * Callback on Callback Query
+   * @param q Callback Query object
+   * @returns Nothing
+   */
   public async onQuery(q: TelegramBot.CallbackQuery) {
     const u = await Router.manager.findOne(User, {
       where: {
@@ -91,7 +104,7 @@ export class TextRouter extends Router {
       });
       let result: InlineKeyboardButton[][] = [];
       for (const action of actions) {
-        if (action.id !== 'asst_5oeIoYRLcSgupyUaPQF8Rp2N') {
+        if (action.id !== "asst_5oeIoYRLcSgupyUaPQF8Rp2N") {
           result.push([
             {
               text: action.name,
@@ -157,9 +170,12 @@ export class TextRouter extends Router {
         return;
       }
 
-      if (q.data!.endsWith('-voice')) {
-        await bot.sendMessage(q.from!.id, "Пришлите мне голосовое сообщение, и я переведу его в текст");
-        u.actionId = 'voice';
+      if (q.data!.endsWith("-voice")) {
+        await bot.sendMessage(
+          q.from!.id,
+          "Пришлите мне голосовое сообщение, и я переведу его в текст",
+        );
+        u.actionId = "voice";
         await Router.manager.save(u);
         return;
       }
@@ -234,6 +250,11 @@ export class TextRouter extends Router {
     }
   }
 
+  /**
+   * Callback to process text messages
+   * @param msg Message object
+   * @returns Nothing
+   */
   public async onText(msg: TelegramBot.Message) {
     const user = await Router.manager.findOne(User, {
       where: {
@@ -247,6 +268,11 @@ export class TextRouter extends Router {
     await OpenAI.runText(msg, user);
   }
 
+  /**
+   * Callback to process photos
+   * @param msg Message Object
+   * @returns Nothing
+   */
   public async onPhoto(msg: Message) {
     const user = await Router.manager.findOne(User, {
       where: {
@@ -260,6 +286,11 @@ export class TextRouter extends Router {
     await OpenAI.runPhoto(msg, user);
   }
 
+  /**
+   * Callback to process Voice Messages
+   * @param msg Message Object
+   * @returns Nothing
+   */
   public async onVoice(msg: Message) {
     const user = await Router.manager.findOne(User, {
       where: {
@@ -270,7 +301,7 @@ export class TextRouter extends Router {
       },
     });
     if (!user) return;
-    if (user.actionId === 'voice') {
+    if (user.actionId === "voice") {
       await OpenAI.runJustVoice(msg);
       return;
     }

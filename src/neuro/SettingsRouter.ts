@@ -2,8 +2,15 @@ import TelegramBot from "node-telegram-bot-api";
 import { Router } from "./router";
 import { User } from "../entity/User";
 import { bot } from ".";
+import { Btn } from "./utils";
 
+/**
+ * This class is a router that processes everything in settings
+ */
 export class SettingsRouter extends Router {
+  /**
+   * Creates a new router
+   */
   constructor() {
     super();
 
@@ -11,6 +18,12 @@ export class SettingsRouter extends Router {
     this.onText = this.onText.bind(this);
   }
 
+  /**
+   * Callback on Callback Query
+   * @todo rename
+   * @param q Callback Query
+   * @returns Nothing
+   */
   public async onCallback(q: TelegramBot.CallbackQuery) {
     if (q.data === "change-name") {
       const user = await Router.manager.findOneBy(User, {
@@ -44,18 +57,11 @@ export class SettingsRouter extends Router {
         {
           reply_markup: {
             inline_keyboard: [
-              [
-                {
-                  text: user.countTokens ? "✖️ Отключить" : "✅ Включить",
-                  callback_data: "toggle-count",
-                },
-              ],
-              [
-                {
-                  text: "Назад",
-                  callback_data: "settings",
-                },
-              ],
+              Btn(
+                user.countTokens ? "✖️ Отключить" : "✅ Включить",
+                "toggle-count",
+              ),
+              Btn("Назад", "settings"),
             ],
           },
         },
@@ -80,18 +86,11 @@ export class SettingsRouter extends Router {
         {
           reply_markup: {
             inline_keyboard: [
-              [
-                {
-                  text: user.countTokens ? "✖️ Отключить" : "✅ Включить",
-                  callback_data: "toggle-count",
-                },
-              ],
-              [
-                {
-                  text: "Назад",
-                  callback_data: "settings",
-                },
-              ],
+              Btn(
+                user.countTokens ? "✖️ Отключить" : "✅ Включить",
+                "toggle-count",
+              ),
+              Btn("Назад", "settings"),
             ],
           },
         },
@@ -107,54 +106,30 @@ export class SettingsRouter extends Router {
       //@ts-ignore
       user.model = model;
       await Router.manager.save(user);
-      await bot.sendMessage(q.from.id, "Модель успешно изменена", {
-        // reply_markup: {
-        //   inline_keyboard: [
-        //     [
-        //       {
-        //         text: "Назад",
-        //         callback_data: "settings",
-        //       },
-        //     ],
-        //   ],
-        // },
-      });
+      await bot.sendMessage(q.from.id, "Модель успешно изменена");
     }
 
     if (q.data === "change-model") {
       await bot.sendMessage(q.from.id, "Выберите модель", {
         reply_markup: {
           inline_keyboard: [
-            [
-              {
-                text: "GPT 4 Omni mini",
-                callback_data: "model-gpt-4o-mini",
-              },
-            ],
-            [
-              {
-                text: "GPT 4 Omni",
-                callback_data: "model-gpt-4o",
-              },
-            ],
-            [
-              {
-                text: "GPT 4 Turbo",
-                callback_data: "model-gpt-4-turbo",
-              },
-            ],
-            [
-              {
-                text: "Назад",
-                callback_data: "settings",
-              },
-            ],
+            Btn("GPT 4 Omni mini", "model-gpt-4o-mini"),
+            Btn("GPT 4 Omni", "model-gpt-4o"),
+            Btn("GPT 4 Turbo", "model-gpt-4-turbo"),
+            Btn("Назад", "settings"),
           ],
         },
       });
     }
   }
 
+  /**
+   * Callback on text messages
+   * @param msg Message Object
+   * @param u User object
+   * @returns Whether the user was waiting for name or not
+   * @todo Refactor the usage of User objects
+   */
   public async onText(msg: TelegramBot.Message, u: User): Promise<boolean> {
     if (u.waitingForName) {
       u.name = msg.text!;

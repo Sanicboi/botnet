@@ -4,7 +4,7 @@ import { FileHandler } from "./FileHandler";
 import axios from "axios";
 import path from "path";
 import { v4 } from "uuid";
-import fs from 'fs';
+import fs from "fs";
 
 export class NeuroHandler {
   public static async handle(j: IJob) {
@@ -85,17 +85,17 @@ export class NeuroHandler {
         });
       } else if (j.task === "voice") {
         const res = await axios.get(j.voiceUrl, {
-          responseType: 'arraybuffer',
+          responseType: "arraybuffer",
         });
         const name = v4() + path.extname(j.voiceUrl);
-        fs.writeFileSync(path.join(process.cwd(), 'voice', name), res.data);
+        fs.writeFileSync(path.join(process.cwd(), "voice", name), res.data);
 
         const transcription = await openai.audio.transcriptions.create({
-          file: fs.createReadStream(path.join(process.cwd(), 'voice', name)),
+          file: fs.createReadStream(path.join(process.cwd(), "voice", name)),
           model: "whisper-1",
         });
-        
-        fs.rmSync(path.join(process.cwd(), 'voice', name));
+
+        fs.rmSync(path.join(process.cwd(), "voice", name));
 
         if (j.generate) {
           await this.handle({
@@ -112,13 +112,13 @@ export class NeuroHandler {
             userId: j.userId,
           });
         } else {
-          await queues.neuro.add('j', {
-            task: 'voice',
+          await queues.neuro.add("j", {
+            task: "voice",
             result: transcription.text,
-            actionId: 'voice',
-            type: 'neuro',
+            actionId: "voice",
+            type: "neuro",
             userId: j.userId,
-          })
+          });
         }
       }
     }
