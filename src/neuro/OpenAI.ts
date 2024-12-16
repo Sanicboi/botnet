@@ -209,7 +209,7 @@ export class OpenAI {
       await bot.sendMessage(msg.from!.id, 'Транскрибация закончена. Выберите другую функцию');
       return;
     }
-    await Router.resetWaiters(u);
+    await Router.resetWaiters(u, true);
   }
 
   public static async runJustVoice(msg: Message) {

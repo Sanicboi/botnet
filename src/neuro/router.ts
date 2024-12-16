@@ -29,6 +29,7 @@ interface IJob {
   msgId?: string;
   voiceUrl?: string;
   generate?: boolean;
+  sendResetMessage?: boolean;
 }
 
 export class Router {
@@ -56,7 +57,7 @@ export class Router {
     }
   }
 
-  public static async resetWaiters(user: User) {
+  public static async resetWaiters(user: User, sendResetMessage: boolean = false) {
     if (user.waitingForName) user.waitingForName = false;
     if (user.usingImageGeneration) user.usingImageGeneration = false;
     if (user.action) {
@@ -82,6 +83,7 @@ export class Router {
         type: "neuro",
         userId: user.chatId,
         id: t.id,
+        sendResetMessage,
       });
     } else {
       user.docType = "";

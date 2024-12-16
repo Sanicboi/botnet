@@ -33,6 +33,7 @@ interface INeuroCreateThreadJob extends INeuroJob {
 interface INeuroDeleteThreadJob extends INeuroJob {
   task: "delete";
   id: string;
+  sendResetMessage: boolean;
 }
 
 export interface INeuroRunJob extends INeuroJob {
@@ -57,6 +58,7 @@ interface INeuroOutJob extends INeuroJob {
   tokenCount?: number;
   msgId?: string;
   result?: string;
+  sendResetMessage?: boolean;
 }
 
 interface INeuroVoiceJob extends INeuroJob {
