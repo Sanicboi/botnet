@@ -91,12 +91,14 @@ export class TextRouter extends Router {
       });
       let result: InlineKeyboardButton[][] = [];
       for (const action of actions) {
-        result.push([
-          {
-            text: action.name,
-            callback_data: `ac-${action.id}`,
-          },
-        ]);
+        if (action.id !== 'asst_5oeIoYRLcSgupyUaPQF8Rp2N') {
+          result.push([
+            {
+              text: action.name,
+              callback_data: `ac-${action.id}`,
+            },
+          ]);
+        }
       }
       result.push([
         {
