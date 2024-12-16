@@ -38,12 +38,7 @@ export class MenuRouter extends Router {
         }
         await Router.resetWaiters(u);
         for (const a of assistants) {
-          result.push([
-            {
-              text: a.name,
-              callback_data: `a-${a.id}`,
-            },
-          ]);
+          result.push(Btn(a.name, `a-${a.id}`));
         }
 
         result.push(Btn("👨‍🎨Дизайн", "images"));
