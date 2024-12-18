@@ -1,7 +1,1 @@
-
-
-
-
-export class TGStat {
-    
-}
+export class TGStat {}

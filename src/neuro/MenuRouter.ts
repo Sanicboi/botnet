@@ -232,6 +232,7 @@ export class MenuRouter extends Router {
           },
         });
         let result: InlineKeyboardButton[][] = [];
+        result.push(Btn("Свободный режим", "ac-asst_5oeIoYRLcSgupyUaPQF8Rp2N"));
         for (const a of assistants) {
           result.push([
             {
@@ -290,7 +291,6 @@ export class MenuRouter extends Router {
           ]);
         }
 
-        result.push(Btn("Свободный режим", "ac-asst_5oeIoYRLcSgupyUaPQF8Rp2N"));
         result.push(Btn("Предыдущая страница", "menu-1"));
 
         await bot.sendMessage(q.from.id, "Выберите категорию сотрудников", {

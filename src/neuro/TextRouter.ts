@@ -15,22 +15,22 @@ sizeMap.set("offer-medium", "Оффер средний (40-70 слов)\n");
 sizeMap.set("offer-short", "Оффер короткий (до 40 слов)\n");
 
 const styleMap = new Map<string, string>();
-styleMap.set("style-official", "стиль - Официальный\n");
-styleMap.set("style-scientific", "стиль - Научный\n");
-styleMap.set("style-public", "стиль - публицистический\n");
-styleMap.set("style-fiction", "стиль - художественный\n");
-styleMap.set("style-informal", "стиль - разговорный\n");
-styleMap.set("style-ad", "стиль - рекламный\n");
+styleMap.set("style-official", "Стиль - Официальный\n");
+styleMap.set("style-scientific", "Стиль - Научный\n");
+styleMap.set("style-public", "Стиль - публицистический\n");
+styleMap.set("style-fiction", "Стиль - художественный\n");
+styleMap.set("style-informal", "Стиль - разговорный\n");
+styleMap.set("style-ad", "Стиль - рекламный\n");
 
 const toneMap = new Map<string, string>();
-toneMap.set("tone-professional", "тон - Профессиональный\n");
-toneMap.set("tone-friendly", "тон - Дружелюбный\n");
-toneMap.set("tone-emotional", "тон - эмоциональный\n");
-toneMap.set("tone-ironic", "тон - ироничный\n");
-toneMap.set("tone-informative", "тон - информативный\n");
-toneMap.set("tone-inspiring", "тон - воодушевляющий\n");
-toneMap.set("tone-bold", "тон - дерзкий\n");
-toneMap.set("tone-calm", "тон - спокойный\n");
+toneMap.set("tone-professional", "Тон - Профессиональный\n");
+toneMap.set("tone-friendly", "Тон - Дружелюбный\n");
+toneMap.set("tone-emotional", "Тон - эмоциональный\n");
+toneMap.set("tone-ironic", "Тон - ироничный\n");
+toneMap.set("tone-informative", "Тон - информативный\n");
+toneMap.set("tone-inspiring", "Тон - воодушевляющий\n");
+toneMap.set("tone-bold", "Тон - дерзкий\n");
+toneMap.set("tone-calm", "Тон - спокойный\n");
 
 const docTypeMap = new Map<string, string>();
 docTypeMap.set("doct-agreement", "Тип документа - договор\n");
@@ -191,25 +191,21 @@ export class TextRouter extends Router {
     if (q.data?.startsWith("style-")) {
       u.textStyle = styleMap.get(q.data!)!;
       await Router.manager.save(u);
-      await bot.sendMessage(
-        q.from.id,
-        `Стиль: ${u.textStyle}\nВыберите тон текста`,
-        {
-          reply_markup: {
-            inline_keyboard: [
-              Btn("Профессиональный", "tone-professional"),
-              Btn("Дружелюбный", "tone-friendly"),
-              Btn("Эмоциональный", "tone-emotional"),
-              Btn("Ироничный", "tone-ironic"),
-              Btn("Информативный", "tone-informative"),
-              Btn("Воодушевляющий", "tone-inspiring"),
-              Btn("Дерзкий", "tone-bold"),
-              Btn("Спокойный / уравновешенный", "tone-calm"),
-              Btn("Назад", "ac-asst_1BdIGF3mp94XvVfgS88fLIor"),
-            ],
-          },
+      await bot.sendMessage(q.from.id, `${u.textStyle}\nВыберите тон текста`, {
+        reply_markup: {
+          inline_keyboard: [
+            Btn("Профессиональный", "tone-professional"),
+            Btn("Дружелюбный", "tone-friendly"),
+            Btn("Эмоциональный", "tone-emotional"),
+            Btn("Ироничный", "tone-ironic"),
+            Btn("Информативный", "tone-informative"),
+            Btn("Воодушевляющий", "tone-inspiring"),
+            Btn("Дерзкий", "tone-bold"),
+            Btn("Спокойный / уравновешенный", "tone-calm"),
+            Btn("Назад", "ac-asst_1BdIGF3mp94XvVfgS88fLIor"),
+          ],
         },
-      );
+      });
     }
 
     if (q.data?.startsWith("tone-")) {
