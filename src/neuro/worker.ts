@@ -106,8 +106,12 @@ export class Handler {
                 );
                 break;
               case "asst_WHhZd8u8rXpAHADdjIwBM9CJ":
-                await bot.sendMessage(+j.userId, "Для составления документа мне нужна информация:")
-                await MessageFormatter.sendTextFromFileBot(bot, agreementsMap.get(u.agreementType)! + ".txt", +u.chatId);
+                await bot.sendMessage(+u.chatId, `Приветствую!👋 Я AI составитель договоров. Я помогу тебе составить ${u.agreementType} 🔶Для того, чтобы составить договор, мне необходима вводная информация для составления
+
+Пришли мне вводную информацию ответным сообщением или файлом (word)
+
+Ожидаю информацию)😉`);
+                await bot.sendMessage(+u.chatId, `Вводная информация:\n${MessageFormatter.readTextFromFile(agreementsMap.get(u.agreementType)! + ".txt")}`);
                 break;
               case "asst_1BdIGF3mp94XvVfgS88fLIor":
                 await bot.sendMessage(
