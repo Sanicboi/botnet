@@ -234,6 +234,8 @@ export class TextRouter extends Router {
           },
         });
       } else {
+        u.agreementType = "Договор оферты\n";
+        await Router.manager.save(u);
         await OpenAI.createThread(q, u, "asst_WHhZd8u8rXpAHADdjIwBM9CJ");
         return;
       }

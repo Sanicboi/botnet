@@ -6,6 +6,7 @@ import { AppDataSource } from "../data-source";
 import pino from "pino";
 import { User } from "../entity/User";
 import { Router } from "./router";
+import { MessageFormatter } from "../utils/MessageFormatter";
 const logger = pino();
 
 interface IJob {
@@ -44,6 +45,25 @@ interface IJobVoice extends IJob {
   msgId: string;
   result: string;
 }
+
+
+let agreementsMap = new Map<string, string>();
+agreementsMap.set(
+  "Договор о создании юридического лица\n",
+  "offers-1",
+);
+agreementsMap.set(
+  "Договор о совместной деятельности\n",
+  "offers-2",
+);
+agreementsMap.set( "Договор займа\n","offers-3",);
+agreementsMap.set( "Договор авторского заказа\n", "offers-4",);
+agreementsMap.set( "Договор купли продажи\n", "offers-5",);
+agreementsMap.set( "Договор оказания услуг\n", "offers-7",);
+agreementsMap.set( "Трудовой договор\n", "offers-6",);
+agreementsMap.set("Договор оферты\n", "offers-8");
+
+
 
 /**
  * This class is a single worker that processes back openai requests
@@ -84,6 +104,10 @@ export class Handler {
                   +thread.userId,
                   "Отлично, с размером определились. Теперь пришлите мне данные о компании.",
                 );
+                break;
+              case "asst_WHhZd8u8rXpAHADdjIwBM9CJ":
+                await bot.sendMessage(+j.userId, "Для составления документа мне нужна информация:")
+                await MessageFormatter.sendTextFromFileBot(bot, agreementsMap.get(u.agreementType)! + ".txt", +u.chatId);
                 break;
               case "asst_1BdIGF3mp94XvVfgS88fLIor":
                 await bot.sendMessage(
