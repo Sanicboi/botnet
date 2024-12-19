@@ -37,6 +37,7 @@ export class MenuRouter extends Router {
           await Router.manager.save(u);
         }
         await Router.resetWaiters(u);
+        result.push(Btn("🆓Свободный режим", "ac-asst_5oeIoYRLcSgupyUaPQF8Rp2N"));
         for (const a of assistants) {
           result.push(Btn(a.name, `a-${a.id}`));
         }
@@ -232,7 +233,7 @@ export class MenuRouter extends Router {
           },
         });
         let result: InlineKeyboardButton[][] = [];
-        result.push(Btn("Свободный режим", "ac-asst_5oeIoYRLcSgupyUaPQF8Rp2N"));
+        result.push(Btn("🆓Свободный режим", "ac-asst_5oeIoYRLcSgupyUaPQF8Rp2N"));
         for (const a of assistants) {
           result.push([
             {
