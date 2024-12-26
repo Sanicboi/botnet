@@ -24,8 +24,9 @@ export class NeuroHandler {
           ...j,
         });
       } else if (j.task === "run") {
+        console.log("run job")
         const docs = await FileHandler.uploadDocuments(j);
-
+        console.log("docs", docs);
         const attachments: {
           file_id: string;
         }[] = [];

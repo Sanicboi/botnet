@@ -89,7 +89,7 @@ bot.on("callback_query", async (q) => {
     });
     if (!user) return;
     const r = await imagesRouter.onQuery(q);
-    if (!r && !q.data?.startsWith("aimodel-")) {
+    if (!r && !q.data?.startsWith("aimodel-") && !q.data?.startsWith("ac-")) {
       await Router.resetWaiters(user);
     }
     await Router.resetSub(user);

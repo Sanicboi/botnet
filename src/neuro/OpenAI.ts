@@ -87,6 +87,7 @@ export class OpenAI {
    */
   public static async runText(msg: Message, u: User) {
     const data = await this.setupRun(msg, u);
+    console.log(data);
     if (!data) return;
 
     await Router.queue.add("j", {
