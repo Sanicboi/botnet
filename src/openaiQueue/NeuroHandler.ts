@@ -10,7 +10,7 @@ export class NeuroHandler {
   public static async handle(j: IJob) {
     if (j.type === "neuro") {
       if (j.task === "create") {
-        console.log("create thread");
+        console.log("create thread neuro");
         const t = await openai.beta.threads.create();
         await queues.neuro.add("j", {
           ...j,
