@@ -37,11 +37,13 @@ export class NeuroHandler {
             file_id: el,
           }),
         );
+        console.log("attachments", attachments)
         let content: MessageContentPartParam[] = [];
         content.push({
           text: j.message.content,
           type: "text",
         });
+        console.log("content", content);
         if (j.message.images) {
           for (const i of j.message.images) {
             content.push({
@@ -53,6 +55,8 @@ export class NeuroHandler {
             });
           }
         }
+        console.log("content", content);
+        console.log("creating");
         await openai.beta.threads.messages.create(j.threadId, {
           content,
           role: j.message.role,
