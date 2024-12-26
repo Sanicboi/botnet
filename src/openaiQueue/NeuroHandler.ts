@@ -56,17 +56,21 @@ export class NeuroHandler {
           content,
           role: j.message.role,
           attachments: attachments,
-        });
+        }).catch(err => console.log(err));
+        console.log("message created");
 
         const str = openai.beta.threads.runs.stream(j.threadId, {
           assistant_id: j.actionId,
           model: j.model,
         });
+        console.log("stream created");
         const msgs = await str.finalMessages();
         const run = await str.finalRun();
+        console.log("messages", msgs);
         const r = msgs.map((el) =>
           el.content[0].type === "text" ? el.content[0].text.value : "",
         );
+        console.log("result",r);
         console.log("Pushing back");
         await queues.neuro.add("j", {
           ...j,
