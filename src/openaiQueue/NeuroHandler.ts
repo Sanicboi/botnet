@@ -67,7 +67,7 @@ export class NeuroHandler {
         const r = msgs.map((el) =>
           el.content[0].type === "text" ? el.content[0].text.value : "",
         );
-
+        console.log("Pushing back");
         await queues.neuro.add("j", {
           ...j,
           messages: r,
