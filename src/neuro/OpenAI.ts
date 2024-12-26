@@ -89,7 +89,7 @@ export class OpenAI {
     const data = await this.setupRun(msg, u);
     console.log(data);
     if (!data) return;
-
+    console.log("adding");
     await Router.queue.add("j", {
       type: "neuro",
       task: "run",
