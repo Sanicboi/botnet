@@ -164,6 +164,7 @@ export class Handler {
               );
             }
           } else if (j.task === "run") {
+            console.log("Run");
             const user = await manager.findOneBy(User, {
               chatId: j.userId,
             });
@@ -186,11 +187,13 @@ export class Handler {
               user.addBalance = Math.max(0, user.addBalance);
             }
             await manager.save(user);
+            console.log("Run 2");
 
             for (const m of j.messages) {
               if (act?.format === "text") {
                 await bot.sendMessage(+j.userId, m, {});
               } else if (act?.format === "html-file") {
+                console.log("Run file");
                 const b = Buffer.from(m, "utf-8");
                 await Router.tryDeletePrevious(+j.msgId + 2, +j.userId);
                 await bot.sendDocument(
@@ -204,6 +207,7 @@ export class Handler {
                     filename: "report.html",
                   },
                 );
+                console.log("Run file end");
               }
             }
             if (user.countTokens) {
