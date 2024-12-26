@@ -10,12 +10,14 @@ export class NeuroHandler {
   public static async handle(j: IJob) {
     if (j.type === "neuro") {
       if (j.task === "create") {
+        console.log("create thread");
         const t = await openai.beta.threads.create();
         await queues.neuro.add("j", {
           ...j,
           threadId: t.id,
         });
       } else if (j.task === "delete") {
+        console.log("deletion");
         await openai.beta.threads.del(j.id);
         await FileHandler.deleteFiles(j.userId);
         await queues.neuro.add("j", {

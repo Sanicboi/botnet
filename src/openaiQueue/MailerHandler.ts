@@ -6,6 +6,7 @@ export class MailerHandler {
   public static async handle(j: IJob) {
     if (j.type === "mailer") {
       if (j.task === "create") {
+        console.log("create thread");
         const d = new Dialog();
         d.threadId = (await openai.beta.threads.create()).id;
         d.botId = j.botId;
