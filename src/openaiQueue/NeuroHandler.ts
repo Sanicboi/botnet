@@ -8,6 +8,7 @@ import fs from "fs";
 
 export class NeuroHandler {
   public static async handle(j: IJob) {
+    console.log(j);
     if (j.type === "neuro") {
       if (j.task === "create") {
         console.log("create thread neuro");
