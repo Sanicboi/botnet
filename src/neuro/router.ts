@@ -47,15 +47,6 @@ export class Router {
   public static logger = pino();
 
   /**
-   * OpenAI Queue
-   */
-  public static queue = new Queue<IJob>("openai", {
-    connection: {
-      host: "redis",
-    },
-  });
-
-  /**
    * Reset of subscription
    * @param user User object
    */
@@ -82,7 +73,7 @@ export class Router {
 
   /**
    * Resets all the waiters and the current
-   * @param user User object (Action and Action.threads are required)
+   * @param user User object (Action, Action.threads and Files are required)
    * @param sendResetMessage Whether to send the Context deleted message to the user after its deletion
    * @returns Nothing
    */
@@ -109,14 +100,7 @@ export class Router {
       const act = user.action;
       user.action = null;
       await this.manager.save(user);
-      await Router.queue.add("j", {
-        actionId: act.id,
-        task: "delete",
-        type: "neuro",
-        userId: user.chatId,
-        id: t.id,
-        sendResetMessage,
-      });
+      await openai.beta.threads.del(t.id);
     } else {
       user.docType = "";
       user.agreementType = "";
@@ -126,6 +110,13 @@ export class Router {
       user.actionId = null;
       user.action = null;
       await this.manager.save(user);
+    }
+    if (user.files) {
+      for (const file of user.files) {
+        await openai.files.del(file.id);
+        await Router.manager.delete(FileUpload, file.id);
+      }
+      user.files = [];
     }
   }
 

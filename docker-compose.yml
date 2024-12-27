@@ -10,11 +10,11 @@ services:
       POSTGRES_DB: "test"
     volumes:
       - "~/db-data:/var/lib/postgresql/data"
-  redis:
-    image: redis
-    restart: always
-    ports:
-      - "6379:6379"
+  # redis:
+  #   image: redis
+  #   restart: always
+  #   ports:
+  #     - "6379:6379"
   # voronka:
   #   restart: always
   #   build: .
@@ -24,36 +24,6 @@ services:
     restart: always
     build: .
     command: npm run neuro
-    env_file: .env
-  openai:
-    restart: always
-    build: .
-    command: npm run openai
-    env_file: .env
-  mailer:
-    restart: always
-    build: .
-    command: npm run mailer
-    env_file: .env
-  mailer-queue:
-    restart: always
-    build: .
-    command: npm run mailerQueue
-    env_file: .env
-  mailer-out:
-    restart: always
-    build: .
-    command: npm run mailerOut
-    env_file: .env
-  in-queue:
-    restart: always
-    build: .
-    command: npm run inQueue
-    env_file: .env
-  accounts:
-    restart: always
-    build: .
-    command: npm run accounts
     env_file: .env
   # support:
   #   restart: always

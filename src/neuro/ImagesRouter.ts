@@ -20,9 +20,12 @@ export class ImagesRouter extends Router {
   /**
    * Handle callback query
    * @param q Callback query object
-   * @returns If waiters should be kept
+   * @returns If waiters should be reset
    */
-  public async onQuery(q: TelegramBot.CallbackQuery): Promise<boolean> {
+  public async onQuery(
+    q: TelegramBot.CallbackQuery,
+    user: User,
+  ): Promise<boolean> {
     if (q.data === "images") {
       await bot.sendMessage(q.from.id, "Выберите функцию", {
         reply_markup: {
@@ -46,35 +49,27 @@ export class ImagesRouter extends Router {
           ],
         },
       });
+      return false;
     }
 
     if (q.data?.startsWith("res-")) {
-      const user = await Router.manager.findOneBy(User, {
-        chatId: String(q.from.id),
-      });
-      if (user) {
-        user.usingImageGeneration = true;
-        //@ts-ignore
-        user.imageRes = q.data.substring(4);
-        await Router.manager.save(user);
-        await bot.sendMessage(
-          q.from.id,
-          "Напишите, что вы хотите увидеть, и я сгенерирую изображение 😉",
-        );
-        return true;
-      }
+      user.usingImageGeneration = true;
+      //@ts-ignore
+      user.imageRes = q.data.substring(4);
+      await Router.manager.save(user);
+      await bot.sendMessage(
+        q.from.id,
+        "Напишите, что вы хотите увидеть, и я сгенерирую изображение 😉",
+      );
+      return false;
     }
 
     if (q.data === "stop-image") {
-      const user = await Router.manager.findOneBy(User, {
-        chatId: String(q.from.id),
-      });
-      if (user) {
-        user.usingImageGeneration = false;
-        user.imageRes = "1024x1024";
-        await Router.manager.save(user);
-        await bot.sendMessage(q.from.id, "Генерация завершена.");
-      }
+      user.usingImageGeneration = false;
+      user.imageRes = "1024x1024";
+      await Router.manager.save(user);
+      await bot.sendMessage(q.from.id, "Генерация завершена.");
+      return true;
     }
 
     return false;
@@ -88,14 +83,6 @@ export class ImagesRouter extends Router {
    */
   public async onText(msg: TelegramBot.Message, user: User): Promise<boolean> {
     if (user.usingImageGeneration) {
-      await Router.queue.add("j", {
-        type: "neuro",
-        actionId: "image",
-        task: "image",
-        userId: user.chatId,
-        prompt: msg.text,
-        msgId: String(msg.message_id),
-      });
       return true;
     }
     return false;

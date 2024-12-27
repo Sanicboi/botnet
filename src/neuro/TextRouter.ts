@@ -127,7 +127,7 @@ export class TextRouter extends Router {
     }
 
     if (q.data!.startsWith("ac-")) {
-      console.log("Action")
+      console.log("Action");
       if (q.data!.endsWith("-asst_1BdIGF3mp94XvVfgS88fLIor")) {
         const asst = await Router.manager.findOneBy(Action, {
           id: q.data!.substring(3),
@@ -301,9 +301,9 @@ export class TextRouter extends Router {
     });
     if (!user) return;
     if (user.actionId === "voice") {
-      await OpenAI.runJustVoice(msg);
+      await OpenAI.runVoice(msg, user, false);
       return;
     }
-    await OpenAI.runVoice(msg, user);
+    await OpenAI.runVoice(msg, user, true);
   }
 }

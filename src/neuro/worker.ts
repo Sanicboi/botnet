@@ -46,25 +46,6 @@ interface IJobVoice extends IJob {
   result: string;
 }
 
-
-let agreementsMap = new Map<string, string>();
-agreementsMap.set(
-  "Договор о создании юридического лица\n",
-  "offers-1",
-);
-agreementsMap.set(
-  "Договор о совместной деятельности\n",
-  "offers-2",
-);
-agreementsMap.set( "Договор займа\n","offers-3",);
-agreementsMap.set( "Договор авторского заказа\n", "offers-4",);
-agreementsMap.set( "Договор купли продажи\n", "offers-5",);
-agreementsMap.set( "Договор оказания услуг\n", "offers-7",);
-agreementsMap.set( "Трудовой договор\n", "offers-6",);
-agreementsMap.set("Договор оферты\n", "offers-8");
-
-
-
 /**
  * This class is a single worker that processes back openai requests
  */
@@ -98,64 +79,6 @@ export class Handler {
               chatId: String(j.userId),
             });
             if (!u) return;
-            switch (u.actionId) {
-              case "asst_14B08GDgJphVClkmmtQYo0aq":
-                await bot.sendMessage(
-                  +thread.userId,
-                  "Отлично, с размером определились. Теперь пришлите мне данные о компании.",
-                );
-                break;
-              case "asst_WHhZd8u8rXpAHADdjIwBM9CJ":
-                await bot.sendMessage(+u.chatId, `Приветствую!👋 Я AI составитель договоров. Я помогу тебе составить ${u.agreementType} 🔶Для того, чтобы составить договор, мне необходима вводная информация для составления
-
-Пришли мне вводную информацию ответным сообщением или файлом (word)
-
-Ожидаю информацию)😉`);
-                await bot.sendMessage(+u.chatId, `Вводная информация:\n${MessageFormatter.readTextFromFile(agreementsMap.get(u.agreementType)! + ".txt")}`);
-                break;
-              case "asst_1BdIGF3mp94XvVfgS88fLIor":
-                await bot.sendMessage(
-                  +thread.userId,
-                  `${u.textStyle ?? "Стиль не выбран"}\n${u.textTone ?? "Тон не выбран"}\nОтлично, со стилем и тоном определились! 😉
-Теперь для создание доклада мне необходимо получить от тебя вводную информацию:
-1)Тема 
-2)Для кого создается текст  (студенты, инвесторы…)
-3)Размер текста по времени (5 мин; 10 мин; 30 мин)
-
-Ответ пришли мне в ответном сообщении!
-
-Ожидаю информацию)😉`,
-                );
-                break;
-              default:
-                await bot.sendMessage(+thread.userId, act!.welcomeMessage);
-                break;
-            }
-
-            await bot.sendMessage(+thread.userId, "Модель для генерации:", {
-              reply_markup: {
-                inline_keyboard: [
-                  [
-                    {
-                      text: `${u.model === "gpt-4o-mini" ? "✅" : ""} GPT 4 Omni mini`,
-                      callback_data: "aimodel-gpt-4o-mini",
-                    },
-                  ],
-                  [
-                    {
-                      text: `${u.model === "gpt-4o" ? "✅" : ""} GPT 4 Omni`,
-                      callback_data: "aimodel-gpt-4o",
-                    },
-                  ],
-                  [
-                    {
-                      text: `${u.model === "gpt-4-turbo" ? "✅" : ""} GPT 4 Turbo`,
-                      callback_data: "aimodel-gpt-4-turbo",
-                    },
-                  ],
-                ],
-              },
-            });
           } else if (j.task === "delete") {
             if (j.sendResetMessage) {
               await bot.sendMessage(
