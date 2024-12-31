@@ -39,6 +39,7 @@ export class Action {
 
   @Column({
     nullable: true,
+    default: ''
   })
   exampleFile: string | null;
 }
