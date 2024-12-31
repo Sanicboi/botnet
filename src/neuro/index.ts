@@ -24,7 +24,6 @@ AppDataSource.initialize();
 
 const manager = AppDataSource.manager;
 
-const handler = new Handler();
 
 bot.setMyCommands([
   {
