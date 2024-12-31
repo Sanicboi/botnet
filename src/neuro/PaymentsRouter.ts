@@ -11,6 +11,12 @@ const checkout = new YooCheckout({
 });
 
 
+const subMap = new Map<string, number>();
+subMap.set('lite', 490);
+subMap.set('pro', 790);
+subMap.set('premium', 1490);
+subMap.set('exclusive', 3490);
+
 const tokenPacksMap = new Map<string, number>();
 tokenPacksMap.set('1', 99);
 tokenPacksMap.set('2', 255);
@@ -72,6 +78,13 @@ export class PaymentsRouter extends Router {
         },
       });
     }
+
+
+    if (q.data?.startsWith("sub-")) {
+      const t = q.data.substring(4);
+      const n = subMap.get(t);
+    }
+
 
     if (q.data?.startsWith("tokens-")) {
       const t = q.data.substring(7);

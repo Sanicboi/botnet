@@ -201,7 +201,6 @@ export class MenuRouter extends Router {
         "about-neuro.txt",
         msg.from!.id,
         {
-          parse_mode: 'Markdown',
           reply_markup: {
             inline_keyboard: [
               [
