@@ -199,7 +199,23 @@ export class MenuRouter extends Router {
         "about-neuro.txt",
         msg.from!.id,
         {
-          parse_mode: 'Markdown'
+          parse_mode: 'Markdown',
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: 'Подробнее о компании',
+                  url: 'https://drive.google.com/file/d/1oJcInZJShwd-LI4EYlAIBBgRWpEfMHlv/view?usp=drivesdk'
+                }
+              ],
+              [
+                {
+                  text: 'Наш канал',
+                  url: 'https://t.me/SmartComrade1'
+                }
+              ]
+            ]
+          }
         }
       );
     });
