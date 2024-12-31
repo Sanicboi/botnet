@@ -91,6 +91,13 @@ export class OpenAI {
         break;
     }
 
+    if (act?.exampleFile) {
+      const rs = fs.createReadStream(path.join(process.cwd(), "assets", act.exampleFile))
+      await bot.sendDocument(+thread.userId, rs, {
+        caption: "Пример промпта",
+      });
+    }
+
     await bot.sendMessage(+thread.userId, "Модель для генерации:", {
       reply_markup: {
         inline_keyboard: [
