@@ -37,9 +37,8 @@ export class Action {
   @Column({ default: "html-file" })
   format: "text" | "html-file";
 
-  @Column({
+  @Column('string',{
     nullable: true,
-    default: ''
   })
   exampleFile: string | null;
 }
