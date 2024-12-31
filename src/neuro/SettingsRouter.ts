@@ -110,7 +110,7 @@ export class SettingsRouter extends Router {
     }
 
     if (q.data === "change-model") {
-      await bot.sendMessage(q.from.id, "Выберите модель", {
+      await bot.sendMessage(q.from.id, "[Подробнее о моделях](https://docs.google.com/document/d/1VkachN7pXjuVQ5ybHeZLoNLZ2hcXLAALbwIsDmXjtoc/edit)", {
         reply_markup: {
           inline_keyboard: [
             Btn("GPT 4 Omni mini", "model-gpt-4o-mini"),
@@ -119,6 +119,7 @@ export class SettingsRouter extends Router {
             Btn("Назад", "settings"),
           ],
         },
+        parse_mode: 'Markdown'
       });
     }
   }

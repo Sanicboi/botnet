@@ -21,7 +21,7 @@ export class PaymentsRouter extends Router {
    */
   public async onQuery(q: TelegramBot.CallbackQuery) {
     if (q.data === "b-sub") {
-      await bot.sendMessage(q.from.id, "Выберите тариф подписки", {
+      await bot.sendMessage(q.from.id, "👇Выберите условия подписки:", {
         reply_markup: {
           inline_keyboard: [
             Btn("Lite (490₽)", "sub-lite"),
@@ -35,7 +35,7 @@ export class PaymentsRouter extends Router {
     }
 
     if (q.data === "b-tokens") {
-      await bot.sendMessage(q.from.id, "Выберите пакет токенов", {
+      await bot.sendMessage(q.from.id, "👇Выберите комплект токенов:", {
         reply_markup: {
           inline_keyboard: [
             Btn("10к токенов - 99₽", "tokens-1"),

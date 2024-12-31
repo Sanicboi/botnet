@@ -123,4 +123,9 @@ export class User {
     default: "",
   })
   agreementType: string;
+
+  @Column({
+    default: 0
+  })
+  inviteCount: number;
 }

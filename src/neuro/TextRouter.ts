@@ -231,6 +231,7 @@ export class TextRouter extends Router {
               Btn("Договор купли продажи", "agreement-buysell"),
               Btn("Договор оказания услуг", "agreement-service"),
               Btn("Трудовой договор", "agreement-employment"),
+              Btn("Назад", "menu-1")
             ],
           },
         });
