@@ -17,6 +17,7 @@
     "typescript": "^5.6.3"
   },
   "dependencies": {
+    "@a2seven/yoo-checkout": "^1.1.4",
     "@grpc/grpc-js": "^1.12.4",
     "@grpc/proto-loader": "^0.7.13",
     "axios": "^1.7.9",
