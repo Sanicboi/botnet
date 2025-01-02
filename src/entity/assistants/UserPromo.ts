@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { User } from "../User";
 import { PromoCode } from "./Promo";
 
@@ -6,6 +6,8 @@ import { PromoCode } from "./Promo";
 @Entity()
 export class UserPromo {
 
+    @PrimaryGeneratedColumn()
+    id: number;
 
     @ManyToOne(() => User, (user) => user.promos)
     @JoinColumn({
