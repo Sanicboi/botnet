@@ -144,7 +144,7 @@ bot.onText(/./, async (msg) => {
             uPromo.user = u;
             await manager.save(uPromo);
             u.addBalance += promo.amount;
-            
+            await bot.sendMessage(msg.from!.id, "Промокод успешно активирован!");
           }
         }
 
