@@ -35,7 +35,7 @@ export class Action {
   welcomeMessage: string;
 
   @Column({ default: "html-file" })
-  format: "text" | "html-file";
+  format: "text" | "html-file" | "word-file";
 
   @Column({
     nullable: true,

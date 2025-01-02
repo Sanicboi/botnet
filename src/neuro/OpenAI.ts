@@ -14,6 +14,8 @@ import mime from "mime-types";
 import { MessageCreateParams } from "openai/resources/beta/threads/messages";
 import { FileUpload } from "../entity/assistants/FileUpload";
 import { wait } from "../utils/wait";
+//@ts-ignore
+import docx from 'html-to-docx';
 
 interface IRunData {
   prompt: string;
@@ -412,7 +414,22 @@ export class OpenAI {
         );
       } else if (action?.format === "text") {
         await bot.sendMessage(msg.from!.id, m);
-      }
+      } else if (action?.format === "word-file") {
+        await Router.tryDeletePrevious(msg.message_id + 2, msg.from!.id);
+        const doc: Buffer = await docx(m, null, {
+          table: {
+            row: {
+              cantSplit: true
+            }
+          }
+        });
+        await bot.sendDocument(msg.from!.id, doc, {
+          caption: "Ваш ответ готов. Если нужно что-то еще - пишите."
+        }, {
+          contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          filename: 'report.docx'
+        });
+      } 
     }
 
     if (u.countTokens) {

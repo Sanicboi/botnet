@@ -23,6 +23,7 @@
     "axios": "^1.7.9",
     "bullmq": "^5.7.15",
     "dayjs": "^1.11.13",
+    "html-to-docx": "^1.8.0",
     "mime-types": "^2.1.35",
     "node-telegram-bot-api": "^0.63.0",
     "openai": "^4.53.0",
