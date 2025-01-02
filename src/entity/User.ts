@@ -11,6 +11,7 @@ import { Thread } from "./assistants/Thread";
 import { Action } from "./assistants/Action";
 import OpenAI from "openai";
 import { FileUpload } from "./assistants/FileUpload";
+import { UserPromo } from "./assistants/UserPromo";
 
 @Entity()
 export class User {
@@ -128,4 +129,12 @@ export class User {
     default: 0
   })
   inviteCount: number;
+
+  @OneToMany(() => UserPromo, (promo) => promo.user)
+  promos: UserPromo[];
+
+  @Column({
+    default: false
+  })
+  waitingForPromo: boolean;
 }

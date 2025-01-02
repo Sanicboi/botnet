@@ -1,7 +1,6 @@
 import TelegramBot, { InlineKeyboardButton } from "node-telegram-bot-api";
 import { AppDataSource } from "../data-source";
 import { User } from "../entity/User";
-import { Handler } from "./worker";
 import OpenAI from "openai";
 import pino from "pino";
 import { Router } from "./router";
@@ -10,6 +9,8 @@ import { SettingsRouter } from "./SettingsRouter";
 import { TextRouter } from "./TextRouter";
 import { ImagesRouter } from "./ImagesRouter";
 import { PaymentsRouter } from "./PaymentsRouter";
+import { PromoCode } from "../entity/assistants/Promo";
+import { UserPromo } from "../entity/assistants/UserPromo";
 const logger = pino();
 
 export const bot = new TelegramBot(process.env.NEURO_TOKEN ?? "", {
@@ -115,6 +116,42 @@ bot.onText(/./, async (msg) => {
         },
       });
       if (!u) return;
+      if (u.waitingForPromo) {
+        u.waitingForPromo = false;
+        const promo = await manager.findOne(PromoCode, {
+          where: {
+            name: u.name
+          },
+          relations: {
+            userPromos: true
+          }
+        });
+        
+        if (!promo) {
+          await bot.sendMessage(msg.from!.id, "Упс, промокод не найден(")
+        } else {
+          if (promo.expiresAt < new Date()) {
+            await bot.sendMessage(msg.from!.id, "Кажется, вы не успели(. Данный промокод уже истек.");
+          } else if (promo.limit <= promo.userPromos.length) {
+            await bot.sendMessage(msg.from!.id, "Кажется, вы не успели(. Количество пользователей, активировавших этот промокод, превысило лимит.");
+          } else if (promo.userPromos.findIndex(el => el.userId === String(msg.from!.id))) {
+            await bot.sendMessage(msg.from!.id, "Кажется, вы уже ввели этот промокод.")
+          } else {
+            const uPromo = new UserPromo()
+            uPromo.promoId = promo.name;
+            uPromo.promo = promo;
+            uPromo.userId = u.chatId;
+            uPromo.user = u;
+            await manager.save(uPromo);
+            u.addBalance += promo.amount;
+            
+          }
+        }
+
+        await manager.save(u);
+        return;
+      }
+
       const imRes = await imagesRouter.onText(msg, u);
       if (imRes) return;
       const nameRes = await settingsRouter.onText(msg, u);

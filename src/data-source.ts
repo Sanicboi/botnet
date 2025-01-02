@@ -6,6 +6,8 @@ import { Thread } from "./entity/assistants/Thread";
 import { Action } from "./entity/assistants/Action";
 import { SupportRequest } from "./entity/SupportRequest";
 import { FileUpload } from "./entity/assistants/FileUpload";
+import { PromoCode } from "./entity/assistants/Promo";
+import { UserPromo } from "./entity/assistants/UserPromo";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -23,6 +25,8 @@ export const AppDataSource = new DataSource({
     Action,
     SupportRequest,
     FileUpload,
+    PromoCode,
+    UserPromo
   ],
   migrations: [],
   subscribers: [],
