@@ -29,7 +29,7 @@ client.start({
         id: username
     }));
     const firstMessageAsst = 'asst_pcWdHxrp1xlaqkBStSCCpnHy';
-    const dialogAsst = '';
+    const dialogAsst = 'asst_I66lzkKeACqLSCn0Vt5w1ges';
 
     const firstMsgThread = await openai.beta.threads.create();
     await openai.beta.threads.messages.create(firstMsgThread.id, {
