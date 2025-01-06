@@ -334,7 +334,7 @@ export class MenuRouter extends Router {
 
       if (q.data?.startsWith("aimodel-")) {
         // @ts-ignore
-        const m: OpenAI.ChatModel = q.data!.substring(7);
+        const m: OpenAI.ChatModel = q.data!.substring(8);
         const user = await Router.manager.findOneBy(User, {
           chatId: String(q.from.id),
         });
