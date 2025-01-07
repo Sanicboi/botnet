@@ -22,7 +22,7 @@ let currentPost: Post | null = null;
 let currentPostText: string = "";
 AppDataSource.initialize().then(async () => {
     const manager = AppDataSource.manager;
-    const session = new StringSession(process.env.PERSONAL_SMM_CLIENt_TOKEN);
+    const session = new StringSession(process.env.PERSONAL_SMM_CLIENT_TOKEN);
     const client = new TelegramClient(session, Number(process.env.TG_API_ID!), process.env.TG_API_HASH!, {
         useWSS: true
     });
