@@ -46,6 +46,6 @@
     "neuro": "node build/neuro/index.js | pino-pretty",
     "support": "node build/clients/support.js",
     "build": "tsc",
-    "mailer": "ts-node ./mailer.ts"
+    "smm": "node build/add/personalSmm.js"
   }
 }
