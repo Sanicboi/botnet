@@ -100,6 +100,7 @@ export class Router {
       const act = user.action;
       user.action = null;
       await this.manager.save(user);
+      await this.manager.delete(Thread, t);
       await openai.beta.threads.del(t.id);
     } else {
       user.docType = "";
