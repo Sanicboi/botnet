@@ -1,5 +1,5 @@
 
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Channel } from "./Channel";
 
 
@@ -26,4 +26,7 @@ export class Post {
     
     @Column()
     text: string;
+
+    @CreateDateColumn()
+    createdAt: Date;
 }

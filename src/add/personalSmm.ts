@@ -16,7 +16,10 @@ const openai = new OpenAI({
 
 let adding = false;
 let editing = false;
+let editingOther = false;
+let creatingNew = false;
 let currentPost: Post | null = null;
+let currentPostText: string = "";
 AppDataSource.initialize().then(async () => {
     const manager = AppDataSource.manager;
     const session = new StringSession(process.env.PERSONAL_SMM_CLIENt_TOKEN);
@@ -69,12 +72,15 @@ AppDataSource.initialize().then(async () => {
     }, new NewMessage());
 
     cron.schedule('0 20 * * *', async () => {
-        const channels = await manager.find(Channel, {
-            where: {},
-            relations: {
-                posts: true
-            }
-        });
+        const channels = await manager
+        .getRepository(Channel)
+        .createQueryBuilder("channel")
+        .select()
+        .leftJoinAndSelect("channel.posts", "post")
+        .where("post.createdAt > :d", {
+            d: dayjs().subtract(1, "day").toDate()
+        })
+        .getMany();
         let buttons: InlineKeyboardButton[][] = [];
         let result = `Отчет за ${dayjs().toDate().toLocaleDateString('ru', {timeZone: 'Europe/Moscow',})}\n\n`;
         for (const channel of channels) {
@@ -151,6 +157,11 @@ AppDataSource.initialize().then(async () => {
             editing = false;
             currentPost = null;
         }
+
+        if (q.data == "terminate") {
+            editingOther = false;
+            currentPostText = "";
+        }
     });
 
     bot.onText(/\/list/, async (msg) => {
@@ -215,5 +226,64 @@ AppDataSource.initialize().then(async () => {
                 }
             })
         }
+
+        if (creatingNew) {
+            const res = await openai.chat.completions.create({
+                messages: [
+                    {
+                        content: "You are a professional post writer. Write a post based on the given data. THE POST SHOULD BE IN RUSSIAN!",
+                        role: "system"
+                    }, 
+                    {
+                        role: "user",
+                        content: msg.text!
+                    }
+                ],
+                model: "gpt-4o-mini"
+            });
+            currentPostText = res.choices[0].message.content!;
+            await bot.sendMessage(msg.from!.id, currentPostText);
+            creatingNew = false;
+            editingOther = true;
+        }
+
+        if (editingOther) {
+            const res = await openai.chat.completions.create({
+                model: "gpt-4o-mini",
+                messages: [
+                    {
+                        content: "You are a professional post writer. Edit a post based on the given data. THE POST SHOULD BE IN RUSSIAN!",
+                        role: "system"
+                    }, 
+                    {
+                        content: `Post: ${currentPostText}`,
+                        role: "system"
+                    },
+                    {
+                        role: "user",
+                        content: msg.text!
+                    }
+                ],
+            });
+            currentPostText = res.choices[0].message.content!;
+            await bot.sendMessage(msg.from!.id, currentPostText, {
+                reply_markup: {
+                    inline_keyboard: [
+                        [
+                            {
+                                text: "Finish",
+                                callback_data: "terminate"
+                            }
+                        ]
+                    ]
+                }
+            })
+        }
+    });
+
+
+    bot.onText(/\/generate/, async (msg) => {
+        creatingNew = true;
+        await bot.sendMessage(msg.from!.id, "The bot is waiting for the prompt");
     })
 })
