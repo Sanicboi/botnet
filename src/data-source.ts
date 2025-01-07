@@ -8,6 +8,8 @@ import { SupportRequest } from "./entity/SupportRequest";
 import { FileUpload } from "./entity/assistants/FileUpload";
 import { PromoCode } from "./entity/assistants/Promo";
 import { UserPromo } from "./entity/assistants/UserPromo";
+import { Channel } from "@grpc/grpc-js";
+import { Post } from "./entity/bots/Post";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -26,7 +28,9 @@ export const AppDataSource = new DataSource({
     SupportRequest,
     FileUpload,
     PromoCode,
-    UserPromo
+    UserPromo,
+    Channel,
+    Post
   ],
   migrations: [],
   subscribers: [],
