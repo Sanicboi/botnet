@@ -27,7 +27,7 @@ AppDataSource.initialize().then(async () => {
         useWSS: true
     });
 
-    const bot = new TelegramBot('', {
+    const bot = new TelegramBot(process.env.PERSONAL_SMM_BOT_TOKEN!, {
         polling: true
     });
 
