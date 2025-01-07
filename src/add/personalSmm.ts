@@ -141,10 +141,13 @@ AppDataSource.initialize().then(async () => {
             .getRepository(Channel)
             .createQueryBuilder('channel')
             .delete()
-            .where('channel.id = :id', {
+            .where('channel.username = :id', {
                 id
             })
             .execute();
+            await client.invoke(new Api.channels.LeaveChannel({
+                channel: id
+            }));
             await bot.sendMessage(q.from.id, 'Канал удален');
         }
         
@@ -188,6 +191,9 @@ AppDataSource.initialize().then(async () => {
             c.username = msg.text!;
             await manager.save(c);
             adding = false;
+            await client.invoke(new Api.channels.JoinChannel({
+                channel: c.username
+            }))
             await bot.sendMessage(msg.from!.id, `Канал сохранен`);
         }
 
