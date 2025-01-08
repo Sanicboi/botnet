@@ -407,7 +407,7 @@ export class OpenAI {
 
     for (const m of messages) {
       if (action?.format === "html-file") {
-        const b = Buffer.from(m, "utf-8");
+        const b = Buffer.from(m.replaceAll('html```', '').replaceAll('`', ''), "utf-8");
         await Router.tryDeletePrevious(msg.message_id + 2, msg.from!.id);
         await bot.sendDocument(
           msg.from!.id,
