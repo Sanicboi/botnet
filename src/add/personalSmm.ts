@@ -40,6 +40,10 @@ AppDataSource.initialize().then(async () => {
         {
             command: 'generate',
             description: 'Сгенерить пост'
+        },
+        {
+            command: 'report',
+            description: 'прислать отчет'
         }
     ])
 
@@ -81,7 +85,7 @@ AppDataSource.initialize().then(async () => {
         }
     }, new NewMessage());
 
-    cron.schedule('0 20 * * *', async () => {
+    bot.onText(/\/report/, async (msg) => {
         const channels = await manager
         .getRepository(Channel)
         .createQueryBuilder("channel")
@@ -110,12 +114,11 @@ AppDataSource.initialize().then(async () => {
 
         result += 'Какой пост улучшим?';
               
-        await bot.sendMessage(1292900617, result, {
+        await bot.sendMessage(msg.from!.id, result, {
             reply_markup: {
                 inline_keyboard: buttons
             }
         });
-
     })
 
     bot.on('callback_query', async q => {
@@ -169,11 +172,13 @@ AppDataSource.initialize().then(async () => {
         if (q.data === 'finish') {
             editing = false;
             currentPost = null;
+            await bot.sendMessage(q.from.id, "Генерация окончена");
         }
 
         if (q.data == "terminate") {
             editingOther = false;
             currentPostText = "";
+            await bot.sendMessage(q.from.id, "Генерация окончена");
         }
     });
 
