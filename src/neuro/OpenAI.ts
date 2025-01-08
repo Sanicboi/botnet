@@ -299,6 +299,11 @@ export class OpenAI {
       attachments: [
         {
           file_id: f.id,
+          tools: [
+            {
+              type: 'file_search'
+            }
+          ]
         },
       ],
     });
