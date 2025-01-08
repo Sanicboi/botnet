@@ -294,7 +294,7 @@ export class TextRouter extends Router {
   public async onVoice(msg: Message) {
     const user = await Router.manager.findOne(User, {
       where: {
-        chatId: String(msg.chat.id),
+        chatId: String(msg.from!.id),
       },
       relations: {
         threads: true,

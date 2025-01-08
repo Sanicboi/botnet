@@ -19,7 +19,7 @@ import docx from 'html-to-docx';
 
 interface IRunData {
   prompt: string;
-  thread: Thread;
+  thread?: Thread;
 }
 
 let agreementsMap = new Map<string, string>();
@@ -131,7 +131,8 @@ export class OpenAI {
     u: User,
   ): Promise<false | IRunData> {
     const t = u.threads.find((t) => t.actionId === u.actionId);
-    if (!t) return false;
+    if (!t && u.action?.id !== "voice") return false;
+    console.log("Thread found")
     const res =
       (msg.text ?? "") +
       "\n" +
@@ -216,6 +217,7 @@ export class OpenAI {
       file: fs.createReadStream(path.join(process.cwd(), "voice", name)),
       model: "whisper-1",
     });
+    console.log(transcription.text);
 
     fs.rmSync(path.join(process.cwd(), "voice", name));
 
@@ -353,6 +355,7 @@ export class OpenAI {
     data: IRunData,
     params: MessageCreateParams,
   ) {
+    if (!data.thread) return;
     await openai.beta.threads.messages.create(data.thread.id, params);
     const str = openai.beta.threads.runs.stream(data.thread.id, {
       assistant_id: u.actionId!,
