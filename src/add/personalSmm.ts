@@ -243,26 +243,6 @@ AppDataSource.initialize().then(async () => {
             })
         }
 
-        if (creatingNew) {
-            const res = await openai.chat.completions.create({
-                messages: [
-                    {
-                        content: "You are a professional post writer. Write a post based on the given data. THE POST SHOULD BE IN RUSSIAN!",
-                        role: "system"
-                    }, 
-                    {
-                        role: "user",
-                        content: msg.text!
-                    }
-                ],
-                model: "gpt-4o-mini"
-            });
-            currentPostText = res.choices[0].message.content!;
-            await bot.sendMessage(msg.from!.id, currentPostText);
-            creatingNew = false;
-            editingOther = true;
-        }
-
         if (editingOther) {
             const res = await openai.chat.completions.create({
                 model: "gpt-4o-mini",
@@ -295,6 +275,39 @@ AppDataSource.initialize().then(async () => {
                 }
             })
         }
+
+        if (creatingNew) {
+            const res = await openai.chat.completions.create({
+                messages: [
+                    {
+                        content: "You are a professional post writer. Write a post based on the given data. THE POST SHOULD BE IN RUSSIAN!",
+                        role: "system"
+                    }, 
+                    {
+                        role: "user",
+                        content: msg.text!
+                    }
+                ],
+                model: "gpt-4o-mini"
+            });
+            currentPostText = res.choices[0].message.content!;
+            await bot.sendMessage(msg.from!.id, currentPostText, {
+                reply_markup: {
+                    inline_keyboard: [
+                        [
+                            {
+                                text: 'Закончить',
+                                callback_data: 'terminate'
+                            }
+                        ]
+                    ]
+                }
+            });
+            creatingNew = false;
+            editingOther = true;
+        }
+
+        
     });
 
 
