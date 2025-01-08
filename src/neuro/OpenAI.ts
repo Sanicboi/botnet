@@ -131,7 +131,7 @@ export class OpenAI {
     u: User,
   ): Promise<false | IRunData> {
     const t = u.threads.find((t) => t.actionId === u.actionId);
-    if (!t && u.action?.id !== "voice") return false;
+    if (!t && u.actionId !== "voice") return false;
     console.log("Thread found")
     const res =
       (msg.text ?? "") +
