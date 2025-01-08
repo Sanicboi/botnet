@@ -418,7 +418,9 @@ export class OpenAI {
           },
         );
       } else if (action?.format === "text") {
-        await bot.sendMessage(msg.from!.id, m);
+        await bot.sendMessage(msg.from!.id, m, {
+          parse_mode: 'Markdown'
+        });
       } else if (action?.format === "word-file") {
         await Router.tryDeletePrevious(msg.message_id + 2, msg.from!.id);
         const doc: Buffer = await docx(m, null, {
