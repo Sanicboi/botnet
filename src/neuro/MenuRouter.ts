@@ -95,6 +95,7 @@ export class MenuRouter extends Router {
     bot.onText(/\/deletecontext/, async (msg) => {
       try {
         await OpenAI.deleteThread(msg);
+        await bot.sendMessage(msg.from!.id, "Контекст успешно удален");
       } catch (err) {
         Router.logger.fatal(err);
       }
