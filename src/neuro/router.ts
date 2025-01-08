@@ -90,7 +90,7 @@ export class Router {
         await Router.manager.save(user);
         return;
       }
-      const t = user.action.threads.find((el) => el.userId == user.chatId)!;
+      const t = user.action.threads.find((el) => el.userId == user.chatId);
       user.docType = "";
       user.agreementType = "";
       user.offerSize = "";
@@ -100,8 +100,10 @@ export class Router {
       const act = user.action;
       user.action = null;
       await this.manager.save(user);
-      await this.manager.delete(Thread, t);
-      await openai.beta.threads.del(t.id);
+      if (t) {
+        await this.manager.delete(Thread, t);
+        await openai.beta.threads.del(t.id);
+      }
     } else {
       user.docType = "";
       user.agreementType = "";
