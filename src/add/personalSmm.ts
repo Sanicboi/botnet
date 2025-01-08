@@ -32,6 +32,16 @@ AppDataSource.initialize().then(async () => {
     });
 
     await client.connect();
+    await bot.setMyCommands([
+        {
+            command: 'list',
+            description: 'Список каналов'
+        },
+        {
+            command: 'generate',
+            description: 'Сгенерить пост'
+        }
+    ])
 
     client.addEventHandler(async (e: NewMessageEvent) => {
         if (e.isChannel && e.message.sender?.className === "Channel") {
