@@ -110,17 +110,21 @@ export class SettingsRouter extends Router {
     }
 
     if (q.data === "change-model") {
-      await bot.sendMessage(q.from.id, "[Подробнее о моделях](https://docs.google.com/document/d/1VkachN7pXjuVQ5ybHeZLoNLZ2hcXLAALbwIsDmXjtoc/edit)", {
-        reply_markup: {
-          inline_keyboard: [
-            Btn("GPT 4 Omni mini", "model-gpt-4o-mini"),
-            Btn("GPT 4 Omni", "model-gpt-4o"),
-            Btn("GPT 4 Turbo", "model-gpt-4-turbo"),
-            Btn("Назад", "settings"),
-          ],
+      await bot.sendMessage(
+        q.from.id,
+        "[Подробнее о моделях](https://docs.google.com/document/d/1VkachN7pXjuVQ5ybHeZLoNLZ2hcXLAALbwIsDmXjtoc/edit)",
+        {
+          reply_markup: {
+            inline_keyboard: [
+              Btn("GPT 4 Omni mini", "model-gpt-4o-mini"),
+              Btn("GPT 4 Omni", "model-gpt-4o"),
+              Btn("GPT 4 Turbo", "model-gpt-4-turbo"),
+              Btn("Назад", "settings"),
+            ],
+          },
+          parse_mode: "Markdown",
         },
-        parse_mode: 'Markdown'
-      });
+      );
     }
   }
 

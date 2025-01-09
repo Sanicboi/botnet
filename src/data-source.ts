@@ -30,7 +30,7 @@ export const AppDataSource = new DataSource({
     PromoCode,
     UserPromo,
     Channel,
-    Post
+    Post,
   ],
   migrations: [],
   subscribers: [],

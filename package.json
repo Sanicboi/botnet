@@ -22,6 +22,7 @@
     "@grpc/proto-loader": "^0.7.13",
     "axios": "^1.7.9",
     "bullmq": "^5.7.15",
+    "bybit-api": "^3.10.28",
     "dayjs": "^1.11.13",
     "dotenv": "^16.4.7",
     "html-to-docx": "^1.8.0",

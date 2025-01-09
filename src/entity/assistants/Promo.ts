@@ -1,22 +1,20 @@
 import { Column, Entity, OneToMany, PrimaryColumn } from "typeorm";
 import { UserPromo } from "./UserPromo";
 
-
-
 @Entity()
 export class PromoCode {
-    @PrimaryColumn()
-    name: string;
-    
-    @Column()
-    expiresAt: Date;
+  @PrimaryColumn()
+  name: string;
 
-    @Column()
-    limit: number;
+  @Column()
+  expiresAt: Date;
 
-    @Column('real') // IN RUBLES
-    amount: number;
+  @Column()
+  limit: number;
 
-    @OneToMany(() => UserPromo, (userPromo) => userPromo.promo)
-    userPromos: UserPromo[];
+  @Column("real") // IN RUBLES
+  amount: number;
+
+  @OneToMany(() => UserPromo, (userPromo) => userPromo.promo)
+  userPromos: UserPromo[];
 }

@@ -25,7 +25,6 @@ AppDataSource.initialize();
 
 const manager = AppDataSource.manager;
 
-
 bot.setMyCommands([
   {
     command: "about",
@@ -120,31 +119,47 @@ bot.onText(/./, async (msg) => {
         u.waitingForPromo = false;
         const promo = await manager.findOne(PromoCode, {
           where: {
-            name: u.name
+            name: u.name,
           },
           relations: {
-            userPromos: true
-          }
+            userPromos: true,
+          },
         });
-        
+
         if (!promo) {
-          await bot.sendMessage(msg.from!.id, "Упс, промокод не найден(")
+          await bot.sendMessage(msg.from!.id, "Упс, промокод не найден(");
         } else {
           if (promo.expiresAt < new Date()) {
-            await bot.sendMessage(msg.from!.id, "Кажется, вы не успели(. Данный промокод уже истек.");
+            await bot.sendMessage(
+              msg.from!.id,
+              "Кажется, вы не успели(. Данный промокод уже истек.",
+            );
           } else if (promo.limit <= promo.userPromos.length) {
-            await bot.sendMessage(msg.from!.id, "Кажется, вы не успели(. Количество пользователей, активировавших этот промокод, превысило лимит.");
-          } else if (promo.userPromos.findIndex(el => el.userId === String(msg.from!.id))) {
-            await bot.sendMessage(msg.from!.id, "Кажется, вы уже ввели этот промокод.")
+            await bot.sendMessage(
+              msg.from!.id,
+              "Кажется, вы не успели(. Количество пользователей, активировавших этот промокод, превысило лимит.",
+            );
+          } else if (
+            promo.userPromos.findIndex(
+              (el) => el.userId === String(msg.from!.id),
+            )
+          ) {
+            await bot.sendMessage(
+              msg.from!.id,
+              "Кажется, вы уже ввели этот промокод.",
+            );
           } else {
-            const uPromo = new UserPromo()
+            const uPromo = new UserPromo();
             uPromo.promoId = promo.name;
             uPromo.promo = promo;
             uPromo.userId = u.chatId;
             uPromo.user = u;
             await manager.save(uPromo);
             u.addBalance += promo.amount;
-            await bot.sendMessage(msg.from!.id, "Промокод успешно активирован!");
+            await bot.sendMessage(
+              msg.from!.id,
+              "Промокод успешно активирован!",
+            );
           }
         }
 

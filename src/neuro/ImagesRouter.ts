@@ -84,11 +84,11 @@ export class ImagesRouter extends Router {
   public async onText(msg: TelegramBot.Message, user: User): Promise<boolean> {
     if (user.usingImageGeneration) {
       const image = await openai.images.generate({
-        prompt: msg.text ?? '',
-        model: 'dall-e-3',
+        prompt: msg.text ?? "",
+        model: "dall-e-3",
         n: 1,
-        quality: 'standard',
-        size: user.imageRes
+        quality: "standard",
+        size: user.imageRes,
       });
       await bot.sendPhoto(msg.from!.id, image.data[0].url!);
       return true;

@@ -15,7 +15,10 @@ import { MessageCreateParams } from "openai/resources/beta/threads/messages";
 import { FileUpload } from "../entity/assistants/FileUpload";
 import { wait } from "../utils/wait";
 //@ts-ignore
-import docx from 'html-to-docx';
+import docx from "html-to-docx";
+import { CoinMarketCapAPI } from "./CoinMarketCapAPI";
+import { TGChannelsAnalyzer } from "./TGChannelsAPI";
+import { BybitAPI } from "./BybitAPI";
 
 interface IRunData {
   prompt: string;
@@ -31,6 +34,11 @@ agreementsMap.set("Договор купли продажи\n", "offers-5");
 agreementsMap.set("Договор оказания услуг\n", "offers-7");
 agreementsMap.set("Трудовой договор\n", "offers-6");
 agreementsMap.set("Договор оферты\n", "offers-8");
+
+
+const cmc = new CoinMarketCapAPI();
+const tg = new TGChannelsAnalyzer();
+const bybit = new BybitAPI();
 
 /**
  * This class is a helper class that makes it easy to use OpenAI
@@ -82,10 +90,13 @@ export class OpenAI {
           {
             reply_markup: {
               inline_keyboard: [
-                Btn("Вернуться к выбору стиля и тона", "ac-asst_1BdIGF3mp94XvVfgS88fLIor")
-              ]
-            }
-          }
+                Btn(
+                  "Вернуться к выбору стиля и тона",
+                  "ac-asst_1BdIGF3mp94XvVfgS88fLIor",
+                ),
+              ],
+            },
+          },
         );
         break;
       default:
@@ -94,7 +105,9 @@ export class OpenAI {
     }
 
     if (act?.exampleFile) {
-      const rs = fs.createReadStream(path.join(process.cwd(), "assets", act.exampleFile))
+      const rs = fs.createReadStream(
+        path.join(process.cwd(), "assets", act.exampleFile),
+      );
       await bot.sendDocument(+thread.userId, rs, {
         caption: "Пример промпта",
       });
@@ -132,7 +145,7 @@ export class OpenAI {
   ): Promise<false | IRunData> {
     const t = u.threads.find((t) => t.actionId === u.actionId);
     if (!t && u.actionId !== "voice") return false;
-    console.log("Thread found")
+    console.log("Thread found");
     const res =
       (msg.text ?? "") +
       "\n" +
@@ -149,26 +162,36 @@ export class OpenAI {
     await Router.manager.save(u);
 
     if (u.addBalance === 0 && u.leftForToday === 0) {
-      await bot.sendMessage(msg.from!.id, "❌Упс! У вас закончились токены.\nЧтобы продолжить пользоваться ботом, вам нужно оформить подписку или купить отдельный комплект токенов…");
-      if (u.subscription !== 'none') { // is subscribed
+      await bot.sendMessage(
+        msg.from!.id,
+        "❌Упс! У вас закончились токены.\nЧтобы продолжить пользоваться ботом, вам нужно оформить подписку или купить отдельный комплект токенов…",
+      );
+      if (u.subscription !== "none") {
+        // is subscribed
         await wait(2);
-        await bot.sendMessage(msg.from!.id, `⚪️Ваша подписка:\n⤷${u.subscription}\n\n⚪️ Ваш комплект токенов на сегодня закончился :(\n\nКупите  отдельный комплект токенов, чтобы продолжить наслаждаться всем фукционалом бота без ограничений!\n\n`, {
-          reply_markup: {
-            inline_keyboard: [
-              Btn("Купить пакет токенов", "b-tokens"),
-            ]
-          }
-        })
+        await bot.sendMessage(
+          msg.from!.id,
+          `⚪️Ваша подписка:\n⤷${u.subscription}\n\n⚪️ Ваш комплект токенов на сегодня закончился :(\n\nКупите  отдельный комплект токенов, чтобы продолжить наслаждаться всем фукционалом бота без ограничений!\n\n`,
+          {
+            reply_markup: {
+              inline_keyboard: [Btn("Купить пакет токенов", "b-tokens")],
+            },
+          },
+        );
       } else {
         await wait(2);
-        await bot.sendMessage(msg.from!.id, `⚪️Ваша подписка:\n⤷ Ваша предыдущая подписка истекла \n\n⚪️ Ваш комплект токенов:\n⤷ ❌ Ваши токены закончились :(\n\nКупите подписку или отдельный комплект токенов, чтобы наслаждаться всем фукционалом бота без ограничений!\n\n⤷ 💪 Подписка дает вам до 135.000 токенов в сутки;\n\n⤷ 🤖 Доступ к GPT-o1, GPT-o1 Mini, GPT-4 Omni, GPT-4 Omni Mini, GPT-4 Turbo и др…\n\n⤷\n⚡ Мгновенные ответы без ожидания;\n⤷ 🎙 Распознавание голосовых сообщений и озвучка текста;\n\n⤷ 👩‍🎨 Доступ к Dalle-3 (генерация изображений) и другие режимы;\n\nОформить подписку можно всего в пару действий с помощью банковской карты\n\nПодписку можно отменить в любой момент за 1 секунду.\n`, {
-          reply_markup: {
-            inline_keyboard: [
-              Btn("Купить пакет токенов", "b-tokens"),
-              Btn("Купить подписку", "b-sub"),
-            ],
-          }
-        })
+        await bot.sendMessage(
+          msg.from!.id,
+          `⚪️Ваша подписка:\n⤷ Ваша предыдущая подписка истекла \n\n⚪️ Ваш комплект токенов:\n⤷ ❌ Ваши токены закончились :(\n\nКупите подписку или отдельный комплект токенов, чтобы наслаждаться всем фукционалом бота без ограничений!\n\n⤷ 💪 Подписка дает вам до 135.000 токенов в сутки;\n\n⤷ 🤖 Доступ к GPT-o1, GPT-o1 Mini, GPT-4 Omni, GPT-4 Omni Mini, GPT-4 Turbo и др…\n\n⤷\n⚡ Мгновенные ответы без ожидания;\n⤷ 🎙 Распознавание голосовых сообщений и озвучка текста;\n\n⤷ 👩‍🎨 Доступ к Dalle-3 (генерация изображений) и другие режимы;\n\nОформить подписку можно всего в пару действий с помощью банковской карты\n\nПодписку можно отменить в любой момент за 1 секунду.\n`,
+          {
+            reply_markup: {
+              inline_keyboard: [
+                Btn("Купить пакет токенов", "b-tokens"),
+                Btn("Купить подписку", "b-sub"),
+              ],
+            },
+          },
+        );
       }
       return false;
     }
@@ -188,6 +211,23 @@ export class OpenAI {
   public static async runText(msg: Message, u: User) {
     const data = await this.setupRun(msg, u);
     if (!data) return;
+
+    if (u.actionId === '') {
+      const r1 = await cmc.getOverallMarketReport();
+      const r2 = await tg.searchByWordCryptoReport(msg.text!);
+      const r3 = await bybit.getCryptoReport(msg.text!);
+
+      await this.run(msg, u, data, {
+        content: `
+          Анализ страха и жадности рынка:\n ${r1}\n
+          Анализ Телеграмм каналов о данной монете:\n ${r2}\n
+          Финансовый анализ:\n ${r3}\n
+        `,
+        role: 'user'
+      })
+
+      return;
+    }
 
     await this.run(msg, u, data, {
       content: msg.text!,
@@ -303,9 +343,9 @@ export class OpenAI {
           file_id: f.id,
           tools: [
             {
-              type: 'file_search'
-            }
-          ]
+              type: "file_search",
+            },
+          ],
         },
       ],
     });
@@ -407,7 +447,10 @@ export class OpenAI {
 
     for (const m of messages) {
       if (action?.format === "html-file") {
-        const b = Buffer.from(m.replaceAll('html```', '').replaceAll('`', ''), "utf-8");
+        const b = Buffer.from(
+          m.replaceAll("html```", "").replaceAll("`", ""),
+          "utf-8",
+        );
         await Router.tryDeletePrevious(msg.message_id + 2, msg.from!.id);
         await bot.sendDocument(
           msg.from!.id,
@@ -422,24 +465,30 @@ export class OpenAI {
         );
       } else if (action?.format === "text") {
         await bot.sendMessage(msg.from!.id, m, {
-          parse_mode: 'Markdown'
+          parse_mode: "Markdown",
         });
       } else if (action?.format === "word-file") {
         await Router.tryDeletePrevious(msg.message_id + 2, msg.from!.id);
         const doc: Buffer = await docx(m, null, {
           table: {
             row: {
-              cantSplit: true
-            }
-          }
+              cantSplit: true,
+            },
+          },
         });
-        await bot.sendDocument(msg.from!.id, doc, {
-          caption: "Ваш ответ готов. Если нужно что-то еще - пишите."
-        }, {
-          contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-          filename: 'report.docx'
-        });
-      } 
+        await bot.sendDocument(
+          msg.from!.id,
+          doc,
+          {
+            caption: "Ваш ответ готов. Если нужно что-то еще - пишите.",
+          },
+          {
+            contentType:
+              "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            filename: "report.docx",
+          },
+        );
+      }
     }
 
     if (u.countTokens) {

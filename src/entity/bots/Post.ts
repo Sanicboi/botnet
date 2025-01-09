@@ -1,32 +1,36 @@
-
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from "typeorm";
 import { Channel } from "./Channel";
-
-
 
 @Entity()
 export class Post {
-    @PrimaryGeneratedColumn()
-    id: number;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @Column()
-    postId: string;
+  @Column()
+  postId: string;
 
-    @ManyToOne(() => Channel, (channel) => channel.posts)
-    @JoinColumn({
-        name: "channelId"
-    })
-    channel: Channel;
+  @ManyToOne(() => Channel, (channel) => channel.posts)
+  @JoinColumn({
+    name: "channelId",
+  })
+  channel: Channel;
 
-    @Column()
-    channelId: string;
+  @Column()
+  channelId: string;
 
-    @Column()
-    topic: string;
-    
-    @Column()
-    text: string;
+  @Column()
+  topic: string;
 
-    @CreateDateColumn()
-    createdAt: Date;
+  @Column()
+  text: string;
+
+  @CreateDateColumn()
+  createdAt: Date;
 }

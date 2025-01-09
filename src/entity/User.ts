@@ -126,7 +126,7 @@ export class User {
   agreementType: string;
 
   @Column({
-    default: 0
+    default: 0,
   })
   inviteCount: number;
 
@@ -134,7 +134,7 @@ export class User {
   promos: UserPromo[];
 
   @Column({
-    default: false
+    default: false,
   })
   waitingForPromo: boolean;
 }
