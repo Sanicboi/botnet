@@ -212,7 +212,7 @@ export class OpenAI {
     const data = await this.setupRun(msg, u);
     if (!data) return;
 
-    if (u.actionId === '') {
+    if (u.actionId === 'asst_Yi7ajro25YJRPccS4hqePcvb') {
       const r1 = await cmc.getOverallMarketReport();
       const r2 = await tg.searchByWordCryptoReport(msg.text!);
       const r3 = await bybit.getCryptoReport(msg.text!);
