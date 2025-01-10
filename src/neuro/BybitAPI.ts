@@ -1,14 +1,14 @@
-import bybit from 'bybit-api';
 import dayjs from 'dayjs';
 import { openai } from '.';
+import { RestClientV5 } from 'bybit-api';
 
 
 
 export class BybitAPI {
 
-    private api: bybit.RestClientV5;
+    private api: RestClientV5;
     constructor() {
-        this.api = new bybit.RestClientV5({ 
+        this.api = new RestClientV5({ 
             key: process.env.BYBIT_KEY,
             secret: process.env.BYBIT_SECRET
         });
