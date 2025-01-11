@@ -137,4 +137,9 @@ export class User {
     default: false,
   })
   waitingForPromo: boolean;
+
+  @Column({
+    default: false,
+  })
+  firstCryptoResponse: boolean;
 }

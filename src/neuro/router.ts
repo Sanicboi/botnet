@@ -97,6 +97,7 @@ export class Router {
       user.textStyle = "";
       user.textTone = "";
       user.actionId = null;
+      user.firstCryptoResponse = false;
       const act = user.action;
       user.action = null;
       await this.manager.save(user);

@@ -64,6 +64,9 @@ export class OpenAI {
     thread.actionId = u.actionId;
     thread.userId = u.chatId;
     await Router.manager.save(thread);
+    if (u.actionId === 'asst_Yi7ajro25YJRPccS4hqePcvb') {
+      u.firstCryptoResponse = true;
+    }
 
     switch (u.actionId) {
       case "asst_14B08GDgJphVClkmmtQYo0aq":
@@ -212,7 +215,9 @@ export class OpenAI {
     const data = await this.setupRun(msg, u);
     if (!data) return;
 
-    if (u.actionId === 'asst_Yi7ajro25YJRPccS4hqePcvb') {
+    if (u.actionId === 'asst_Yi7ajro25YJRPccS4hqePcvb' && u.firstCryptoResponse) {
+      u.firstCryptoResponse = false;
+      await Router.manager.save(u);
       const r1 = await cmc.getOverallMarketReport();
       const r2 = await tg.searchByWordCryptoReport(msg.text!);
       const r3 = await bybit.getCryptoReport(msg.text!);
