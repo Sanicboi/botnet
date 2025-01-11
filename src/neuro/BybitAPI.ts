@@ -15,7 +15,7 @@ export class BybitAPI {
     }
 
     public async getCryptoReport(crypto: string): Promise<string> {
-        const res = await this.api.getIndexPriceKline({
+        const res1 = await this.api.getIndexPriceKline({
             category: 'linear',
             symbol: `${crypto}USDT`,
             interval: '1',
@@ -23,7 +23,12 @@ export class BybitAPI {
             end: dayjs().unix() * 1000
         });
 
-        const analysis = await openai.chat.completions.create({
+        const res2 = await this.api.getRiskLimit({
+            category: 'linear',
+            symbol: `${crypto}USDT`
+        });
+
+        const analysis1 = await openai.chat.completions.create({
             messages: [
                 {
                     role: 'system',
@@ -31,11 +36,43 @@ export class BybitAPI {
                 },
                 {
                     role: 'user',
-                    content: JSON.stringify(res.result.list)
+                    content: JSON.stringify(res1.result.list)
                 }
             ],
             model: 'gpt-4o-mini'
         });
+
+        const analysis2 = await openai.chat.completions.create({
+            messages: [
+                {
+                    role: 'system',
+                    content: 'Ты - крипто-аналитик. ПРоанализируй данные о рисках данной криптовалюты'
+                },
+                {
+                    role: 'user',
+                    content: JSON.stringify(res2.result.list)
+                }
+            ],
+            model: 'gpt-4o-mini'
+        });
+
+        const analysis = await openai.chat.completions.create({
+            messages: [
+                {
+                    role: 'system',
+                    content: 'Ты - крипто-аналитик. Суммаризируй данные тебе анализы цен криптовалюты и анализ рисков криптовалюты',
+                },
+                {
+                    role: 'user',
+                    content: analysis1.choices[0].message.content!
+                },
+                {
+                    role: 'user',
+                    content: analysis2.choices[0].message.content!
+                },
+            ],
+            model: 'gpt-4o-mini'
+        })
         return analysis.choices[0].message.content!;
     }
 }
