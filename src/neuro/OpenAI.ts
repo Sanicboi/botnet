@@ -66,6 +66,7 @@ export class OpenAI {
     await Router.manager.save(thread);
     if (u.actionId === 'asst_Yi7ajro25YJRPccS4hqePcvb') {
       u.firstCryptoResponse = true;
+      await Router.manager.save(u);
     }
 
     switch (u.actionId) {
