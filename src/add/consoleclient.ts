@@ -1,11 +1,12 @@
 //@ts-ignore
 import input from 'input';
 import { Api, TelegramClient } from 'telegram';
+import { StringSession } from 'telegram/sessions';
 require("dotenv").config();
 
 (async () => {
     const token = await input.text("Введите токен:");
-    const client = new TelegramClient(token, 
+    const client = new TelegramClient(new StringSession(token), 
         +process.env.TG_API_ID!,
         process.env.TG_API_HASH!,
         {
@@ -32,7 +33,7 @@ require("dotenv").config();
             }
         }
 
-        
+
 
         command = await input.text("Command:");
     }

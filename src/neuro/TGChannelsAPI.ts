@@ -36,7 +36,7 @@ export class TGChannelsAnalyzer {
       });
       all.push(...msgs);
     }
-    const edited = all.map((el) => el.text);
+    const edited = all.map((el) => el.text).slice(0, 10);
     const res = await openai.chat.completions.create({
       messages: [
         {
