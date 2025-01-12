@@ -1,8 +1,8 @@
-import { Column, JoinColumn, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
 import { Lead } from "./Lead";
 import { User } from "../User";
 
-
+@Entity()
 export class UserBot {
     @PrimaryColumn()
     token: string;
