@@ -35,7 +35,6 @@ agreementsMap.set("Договор оказания услуг\n", "offers-7");
 agreementsMap.set("Трудовой договор\n", "offers-6");
 agreementsMap.set("Договор оферты\n", "offers-8");
 
-
 const cmc = new CoinMarketCapAPI();
 const tg = new TGChannelsAnalyzer();
 const bybit = new BybitAPI();
@@ -64,7 +63,7 @@ export class OpenAI {
     thread.actionId = u.actionId;
     thread.userId = u.chatId;
     await Router.manager.save(thread);
-    if (u.actionId === 'asst_Yi7ajro25YJRPccS4hqePcvb') {
+    if (u.actionId === "asst_Yi7ajro25YJRPccS4hqePcvb") {
       u.firstCryptoResponse = true;
       await Router.manager.save(u);
     }
@@ -216,7 +215,10 @@ export class OpenAI {
     const data = await this.setupRun(msg, u);
     if (!data) return;
 
-    if (u.actionId === 'asst_Yi7ajro25YJRPccS4hqePcvb' && u.firstCryptoResponse) {
+    if (
+      u.actionId === "asst_Yi7ajro25YJRPccS4hqePcvb" &&
+      u.firstCryptoResponse
+    ) {
       u.firstCryptoResponse = false;
       await Router.manager.save(u);
       const r1 = await cmc.getOverallMarketReport();
@@ -229,8 +231,8 @@ export class OpenAI {
           Анализ Телеграмм каналов о данной монете:\n ${r2}\n
           Финансовый анализ:\n ${r3}\n
         `,
-        role: 'user'
-      })
+        role: "user",
+      });
 
       return;
     }

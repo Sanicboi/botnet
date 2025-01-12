@@ -1,29 +1,35 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryColumn,
+} from "typeorm";
 import { Lead } from "./Lead";
 import { User } from "../User";
 
 @Entity()
 export class UserBot {
-    @PrimaryColumn()
-    token: string;
+  @PrimaryColumn()
+  token: string;
 
-    @Column({
-        nullable: true
-    })
-    lastSent: Date;
+  @Column({
+    nullable: true,
+  })
+  lastSent: Date;
 
-    @OneToMany(() => Lead, (lead) => lead.bot)
-    leads: Lead[];
+  @OneToMany(() => Lead, (lead) => lead.bot)
+  leads: Lead[];
 
-    @ManyToOne(() => User, (user) => user.bots)
-    @JoinColumn({
-        name: 'userId'
-    })
-    user: User;
+  @ManyToOne(() => User, (user) => user.bots)
+  @JoinColumn({
+    name: "userId",
+  })
+  user: User;
 
-
-    @Column({
-        nullable: true
-    })
-    userId: string;
+  @Column({
+    nullable: true,
+  })
+  userId: string;
 }

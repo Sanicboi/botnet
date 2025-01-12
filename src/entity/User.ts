@@ -147,12 +147,12 @@ export class User {
 
   @OneToMany(() => UserBot, (bot) => bot.user)
   bots: UserBot[];
-  
+
   @OneToMany(() => Lead, (lead) => lead.user)
   leads: Lead[];
 
   @Column({
-    default: 10
+    default: 10,
   })
   perMailing: number;
 }

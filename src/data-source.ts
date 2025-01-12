@@ -34,7 +34,7 @@ export const AppDataSource = new DataSource({
     Channel,
     Post,
     Lead,
-    UserBot
+    UserBot,
   ],
   migrations: [],
   subscribers: [],
