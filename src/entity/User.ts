@@ -12,6 +12,8 @@ import { Action } from "./assistants/Action";
 import OpenAI from "openai";
 import { FileUpload } from "./assistants/FileUpload";
 import { UserPromo } from "./assistants/UserPromo";
+import { UserBot } from "./bots/UserBot";
+import { Lead } from "./bots/Lead";
 
 @Entity()
 export class User {
@@ -22,7 +24,7 @@ export class User {
   sphere: string;
 
   @Column({ nullable: true })
-  leads: string;
+  clients: string;
 
   @Column({ nullable: true })
   callDate: string;
@@ -142,4 +144,15 @@ export class User {
     default: false,
   })
   firstCryptoResponse: boolean;
+
+  @OneToMany(() => UserBot, (bot) => bot.user)
+  bots: UserBot[];
+  
+  @OneToMany(() => Lead, (lead) => lead.user)
+  leads: Lead[];
+
+  @Column({
+    default: 10
+  })
+  perMailing: number;
 }
