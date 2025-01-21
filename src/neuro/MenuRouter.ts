@@ -116,9 +116,9 @@ export class MenuRouter extends Router {
       await Router.resetWaiters(user);
       await bot.sendMessage(
         msg.from!.id,
-        `Баланс и подписка\n\n🟣 Формат доступа:\n⤷ ${user.subscription === "exlusive" ? "Exclusive" : user.subscription === "premium" ? "Premium" : user.subscription === "pro" ? "PRO+" : user.subscription === "lite" ? "Lite" : "Бесплатный доступ"}
+        `Баланс и подписка\n\n🟣 Формат доступа:\n⤷ ${user.subscription === "exclusive" ? "Exclusive" : user.subscription === "premium" ? "Premium" : user.subscription === "pro" ? "PRO+" : user.subscription === "lite" ? "Lite" : "Бесплатный доступ"}
          ⤷ Сегодня осталось: ${Math.round((user.leftForToday / 3.4) * 10000)} / ${
-           user.subscription === "exlusive"
+           user.subscription === "exclusive"
              ? 135000
              : user.subscription === "premium"
                ? 45000
@@ -129,7 +129,7 @@ export class MenuRouter extends Router {
                    : 0
          } токенов
          ⤷ Новое пополнение через: ${user.subscription === "none" ? "Нет" : `${24 - now.hour()}:${59 - now.minute()}`}
-         ⤷ Следующий платеж: ${user.endDate == null ? "Нет" : user.endDate.toUTCString()}
+         ⤷ Следующий платеж: ${user.nextPayment == null ? "Нет" : user.nextPayment.toUTCString()}
       
       🟣 Ваш комплект токенов:
          ⤷ ${Math.round((user.addBalance / 3.4) * 10000)}
