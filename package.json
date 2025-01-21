@@ -50,6 +50,7 @@
     "support": "node build/clients/support.js",
     "build": "tsc",
     "smm": "node build/add/personalSmm.js",
-    "client": "ts-node ./src/add/consoleclient.ts"
+    "client": "ts-node ./src/add/consoleclient.ts",
+    "mailer": "ts-node ./src/add/simplemailer.ts"
   }
 }

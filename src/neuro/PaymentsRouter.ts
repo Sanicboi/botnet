@@ -4,6 +4,8 @@ import { bot } from ".";
 import { Btn } from "./utils";
 import { ICreatePayment, YooCheckout } from "@a2seven/yoo-checkout";
 import { User } from "../entity/User";
+import cron from "node-cron";
+import dayjs from "dayjs";
 
 const checkout = new YooCheckout({
   secretKey: process.env.YOOKASSA_KEY ?? "",
@@ -32,6 +34,22 @@ tokenPacksReverse.set(1490, 68);
 tokenPacksReverse.set(3525, 170);
 tokenPacksReverse.set(4990, 340);
 
+const subsMap = new Map<string, number>();
+subsMap.set('none', 0);
+subsMap.set('lite', 1.7);
+subsMap.set('pro', 10);
+subsMap.set('premium', 15);
+subsMap.set('exclusive', 45);
+
+const subMapReverse = new Map<number, 'none' | 'lite' | 'pro' | 'premium' | 'exclusive'>();
+subMapReverse.set(0, 'none');
+subMapReverse.set(490, "lite");
+subMapReverse.set(790, "pro");
+subMapReverse.set(1490, "premium");
+subMapReverse.set(3490, "exclusive");
+
+
+
 /**
  * router that handles everything for the payments
  */
@@ -42,6 +60,7 @@ export class PaymentsRouter extends Router {
   constructor() {
     super();
     this.onQuery = this.onQuery.bind(this);
+    cron.schedule('0 0 * * *', this.onCron.bind(this))
   }
 
   /**
@@ -122,6 +141,44 @@ export class PaymentsRouter extends Router {
       }
     }
 
+    if (q.data?.startsWith("sub-")) {
+      const t = q.data.split('-')[1];
+      const n = subMap.get(t);
+      if (!n) return;
+      const info: ICreatePayment = {
+        amount: {
+          currency: "RUB",
+          value: `${n}.00`,
+        },
+        capture: true,
+        confirmation: {
+          type: "redirect",
+          return_url: "https://t.me/NComrades_bot",
+        },
+        description: `Оплата подписки`,
+        merchant_customer_id: String(q.from.id),
+        save_payment_method: true
+      };
+      const payment = await checkout.createPayment(info);
+      await bot.sendMessage(
+        q.from.id,
+        'Пожалуйста, оплатите счет. После оплаты нажмите "Я оплатил"',
+        {
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: "Оплатить",
+                  url: payment.confirmation.confirmation_url,
+                },
+              ],
+              Btn("Я оплатил", `ihavepaid-sub-${payment.id}`),
+            ],
+          },
+        },
+      );
+    }
+
     if (q.data?.startsWith("ihavepaid-")) {
       if (q.data.startsWith("ihavepaid-tokens-")) {
         const paymentId = q.data.substring(17);
@@ -155,6 +212,73 @@ export class PaymentsRouter extends Router {
           );
         }
       }
+
+      if (q.data.startsWith("ihavepaid-sub-")) {
+        const paymentId = q.data.substring(14);
+        try {
+          const res = await checkout.getPayment(paymentId);
+          if (res.status === "succeeded" && res.merchant_customer_id === String(q.from.id)) {
+            const u = await Router.manager.findOneBy(User, {
+              chatId: res.merchant_customer_id,
+            });
+            if (!u) return;
+            if (res.payment_method.saved) {
+              u.paymentMethod = res.payment_method.id;
+            }
+            u.nextPayment = dayjs().add(30, 'days').toDate();
+            u.subscription = subMapReverse.get(parseInt(res.amount.value)) ?? 'none';
+            u.leftForToday = subsMap.get(u.subscription) ?? 0;
+            await Router.manager.save(u);
+          }
+        } catch (error) {
+          
+        }
+      }
+    }
+  }
+
+  private async onCron() {
+    const users = await Router
+      .manager
+      .createQueryBuilder()
+      .select()
+      .from(User, "user")
+      .where("user.subscription <> :s", {
+        s: 'none'
+      })
+      .getMany();
+    
+    for (const user of users) {
+      if (user.nextPayment && user.nextPayment <= new Date()) {
+        if (user.paymentMethod) {
+          const d: ICreatePayment = {
+            amount: {
+              value: `${subMap.get(user.subscription)}.00`,
+              currency: 'RUB'
+            },
+            capture: true,
+            payment_method_id: user.paymentMethod,
+            description: "Оплата подписки"
+          }
+          const res = await checkout.createPayment(d);
+          if (res.status === 'succeeded') {
+            user.nextPayment = dayjs().add(30, 'days').toDate();
+          } else {
+            user.subscription = 'none';
+            user.leftForToday = 0;
+            await Router.manager.save(user);
+            continue;
+          }
+        } else {
+          user.subscription = 'none';
+          user.leftForToday = 0;
+          await Router.manager.save(user);
+        }
+      } 
+      
+      user.leftForToday = subsMap.get(user.subscription) ?? 0;
+      await Router.manager.save(user);
+
     }
   }
 }

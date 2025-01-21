@@ -67,12 +67,12 @@ export class User {
   @Column({
     default: "none",
   })
-  subscription: "none" | "lite" | "pro" | "premium" | "exlusive";
+  subscription: "none" | "lite" | "pro" | "premium" | "exclusive";
 
   @Column({
     nullable: true,
   })
-  endDate?: Date;
+  nextPayment?: Date;
 
   @Column("float", {
     default: 0,
@@ -155,4 +155,9 @@ export class User {
     default: 10,
   })
   perMailing: number;
+
+  @Column({
+    nullable: true
+  })
+  paymentMethod: string;
 }

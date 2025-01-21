@@ -456,7 +456,7 @@ export class OpenAI {
     for (const m of messages) {
       if (action?.format === "html-file") {
         const b = Buffer.from(
-          m.replaceAll("html```", "").replaceAll("`", ""),
+          m.replaceAll("```html", "").replaceAll("`", ""),
           "utf-8",
         );
         await Router.tryDeletePrevious(msg.message_id + 2, msg.from!.id);
@@ -477,7 +477,7 @@ export class OpenAI {
         });
       } else if (action?.format === "word-file") {
         await Router.tryDeletePrevious(msg.message_id + 2, msg.from!.id);
-        const doc: Buffer = await docx(m, null, {
+        const doc: Buffer = await docx(m.replaceAll('```html', '').replaceAll('`', ''), null, {
           table: {
             row: {
               cantSplit: true,

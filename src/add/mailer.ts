@@ -4,6 +4,7 @@ import { AppDataSource } from "../data-source";
 import { UserBot } from "../entity/bots/UserBot";
 import { LogLevel } from "telegram/extensions/Logger";
 import { Lead } from "../entity/bots/Lead";
+import { StringSession } from "telegram/sessions";
 
 export class Mailer {
   private clients: Map<string, TelegramClient> = new Map<
@@ -20,7 +21,7 @@ export class Mailer {
     const bots = await this.manager.find(UserBot);
     for (const b of bots) {
       const client = new TelegramClient(
-        b.token,
+        new StringSession(b.token),
         +process.env.TG_API_ID!,
         process.env.TG_API_HASH!,
         {
@@ -51,5 +52,13 @@ export class Mailer {
       .getMany();
 
     let totalLeads = leads.length;
+    
+    leads: while (totalLeads > 0) {
+      for (let bot of bots) {
+        if (totalLeads === 0) break leads;
+
+        
+      }
+    }
   }
 }
