@@ -14,14 +14,14 @@ export class TGChannelsAnalyzer {
         useWSS: true,
       },
     );
-    this.client.start({
-      async onError(err) {
-        console.log(err);
-        return true;
-      },
-      phoneNumber: "88005553535",
-      phoneCode: async () => "1234",
-    });
+    // this.client.start({
+    //   async onError(err) {
+    //     console.log(err);
+    //     return true;
+    //   },
+    //   phoneNumber: "88005553535",
+    //   phoneCode: async () => "1234",
+    // });
   }
 
   public async searchByWordCryptoReport(crypto: string): Promise<string> {
