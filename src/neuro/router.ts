@@ -51,11 +51,11 @@ export class Router {
    * @param user User object
    */
   public static async resetSub(user: User) {
-    if (user.endDate && user.endDate <= new Date()) {
-      user.endDate = undefined;
-      user.subscription = "none";
-      await this.manager.save(user);
-    }
+    // if (user.endDate && user.endDate <= new Date()) {
+    //   user.endDate = undefined;
+    //   user.subscription = "none";
+    //   await this.manager.save(user);
+    // }
   }
 
   /**
