@@ -193,13 +193,12 @@ export class PaymentsRouter extends Router {
                 const amount = parseInt(res.amount.value);
                 const tokens = tokenPacksReverse.get(amount);
                 if (tokens) {
-                  u.addBalance += amount;
+                  u.addBalance += tokenPacksReverse.get(amount)!;
                   await Router.manager.save(u);
                   await bot.sendMessage(
                     q.from.id,
                     "Платеж прошел успешно! Можете вернуться в меню",
                   );
-                  await bot.deleteMessage(q.from.id, q.message!.message_id);
                 }
               }
             }
