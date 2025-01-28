@@ -224,12 +224,14 @@ export class OpenAI {
       const r1 = await cmc.getOverallMarketReport();
       const r2 = await tg.searchByWordCryptoReport(msg.text!);
       const r3 = await bybit.getCryptoReport(msg.text!);
+      const r4 = await cmc.getMetadataReport(msg.text!);
 
       await this.run(msg, u, data, {
         content: `
-          Анализ страха и жадности рынка:\n ${r1}\n
+          Анализ рынка:\n ${r1}\n
           Анализ Телеграмм каналов о данной монете:\n ${r2}\n
           Финансовый анализ:\n ${r3}\n
+          Общий анализ монеты:\n ${r4}\n
         `,
         role: "user",
       });
