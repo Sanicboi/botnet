@@ -63,7 +63,7 @@ export class OpenAI {
     thread.actionId = u.actionId;
     thread.userId = u.chatId;
     await Router.manager.save(thread);
-    if (u.actionId === "asst_Yi7ajro25YJRPccS4hqePcvb") {
+    if (u.actionId === "asst_Yi7ajro25YJRPccS4hqePcvb" || u.actionId === "asst_naVdwMABoWcDLD2vs9W2hnD9") {
       u.firstCryptoResponse = true;
       await Router.manager.save(u);
     }
@@ -237,6 +237,19 @@ export class OpenAI {
       });
 
       return;
+    }
+
+    if (
+      u.firstCryptoResponse
+      && u.actionId === "asst_naVdwMABoWcDLD2vs9W2hnD9"
+    ) {
+      u.firstCryptoResponse = false;
+      await Router.manager.save(u);
+      const r1 = await cmc.getOverallMarketReport();
+      await this.run(msg, u, data, {
+        content: `Анализ рынка:\n ${r1}\nПрочие данные: ${msg.text}`,
+        role: 'user'
+      });
     }
 
     await this.run(msg, u, data, {
