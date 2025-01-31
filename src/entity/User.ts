@@ -157,7 +157,7 @@ export class User {
   perMailing: number;
 
   @Column({
-    nullable: true
+    nullable: true,
   })
   paymentMethod: string;
 }

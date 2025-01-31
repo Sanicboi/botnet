@@ -1,7 +1,7 @@
 import { User } from "../entity/User";
 import { CallbackQuery, Message } from "node-telegram-bot-api";
 import { Router } from "./router";
-import { bot, openai } from ".";
+import { bot, formatter, openai } from ".";
 import { Btn } from "./utils";
 import { Thread } from "../entity/assistants/Thread";
 import { MessageFormatter } from "../utils/MessageFormatter";
@@ -19,6 +19,7 @@ import docx from "html-to-docx";
 import { CoinMarketCapAPI } from "./CoinMarketCapAPI";
 import { TGChannelsAnalyzer } from "./TGChannelsAPI";
 import { BybitAPI } from "./BybitAPI";
+import { OutputBotFormatter } from "./output/formatter";
 
 interface IRunData {
   prompt: string;
@@ -63,7 +64,10 @@ export class OpenAI {
     thread.actionId = u.actionId;
     thread.userId = u.chatId;
     await Router.manager.save(thread);
-    if (u.actionId === "asst_Yi7ajro25YJRPccS4hqePcvb" || u.actionId === "asst_naVdwMABoWcDLD2vs9W2hnD9") {
+    if (
+      u.actionId === "asst_Yi7ajro25YJRPccS4hqePcvb" ||
+      u.actionId === "asst_naVdwMABoWcDLD2vs9W2hnD9"
+    ) {
       u.firstCryptoResponse = true;
       await Router.manager.save(u);
     }
@@ -240,15 +244,15 @@ export class OpenAI {
     }
 
     if (
-      u.firstCryptoResponse
-      && u.actionId === "asst_naVdwMABoWcDLD2vs9W2hnD9"
+      u.firstCryptoResponse &&
+      u.actionId === "asst_naVdwMABoWcDLD2vs9W2hnD9"
     ) {
       u.firstCryptoResponse = false;
       await Router.manager.save(u);
       const r1 = await cmc.getOverallMarketReport();
       await this.run(msg, u, data, {
         content: `Анализ рынка:\n ${r1}\nПрочие данные: ${msg.text}`,
-        role: 'user'
+        role: "user",
       });
     }
 
@@ -467,51 +471,10 @@ export class OpenAI {
     const action = await Router.manager.findOneBy(Action, {
       id: u.actionId!,
     });
+    if (!action) return;
 
     for (const m of messages) {
-      if (action?.format === "html-file") {
-        const b = Buffer.from(
-          m.replaceAll("```html", "").replaceAll("`", ""),
-          "utf-8",
-        );
-        await Router.tryDeletePrevious(msg.message_id + 2, msg.from!.id);
-        await bot.sendDocument(
-          msg.from!.id,
-          b,
-          {
-            caption: "Ваш ответ готов. Если нужно что-то еще - пишите.",
-          },
-          {
-            contentType: "text/html",
-            filename: "report.html",
-          },
-        );
-      } else if (action?.format === "text") {
-        await bot.sendMessage(msg.from!.id, m, {
-          parse_mode: "Markdown",
-        });
-      } else if (action?.format === "word-file") {
-        await Router.tryDeletePrevious(msg.message_id + 2, msg.from!.id);
-        const doc: Buffer = await docx(m.replaceAll('```html', '').replaceAll('`', ''), null, {
-          table: {
-            row: {
-              cantSplit: true,
-            },
-          },
-        });
-        await bot.sendDocument(
-          msg.from!.id,
-          doc,
-          {
-            caption: "Ваш ответ готов. Если нужно что-то еще - пишите.",
-          },
-          {
-            contentType:
-              "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            filename: "report.docx",
-          },
-        );
-      }
+      await formatter.respondOpenai(msg.from!.id, m, action.format);
     }
 
     if (u.countTokens) {

@@ -52,12 +52,10 @@ export class Mailer {
       .getMany();
 
     let totalLeads = leads.length;
-    
+
     leads: while (totalLeads > 0) {
       for (let bot of bots) {
         if (totalLeads === 0) break leads;
-
-        
       }
     }
   }

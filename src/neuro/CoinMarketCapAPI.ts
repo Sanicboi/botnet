@@ -13,11 +13,14 @@ export class CoinMarketCapAPI {
         },
       },
     );
-    const r2 = axios.get("https://pro-api.coinmarketcap.com/v1/global-metrics/quotes/latest", {
-      headers: {
-        "X-CMC_PRO_API_KEY": this.token,
-      }
-    });
+    const r2 = axios.get(
+      "https://pro-api.coinmarketcap.com/v1/global-metrics/quotes/latest",
+      {
+        headers: {
+          "X-CMC_PRO_API_KEY": this.token,
+        },
+      },
+    );
 
     const responses = await Promise.all([r1, r2]);
 
@@ -31,7 +34,7 @@ export class CoinMarketCapAPI {
         },
         {
           role: "user",
-          content: JSON.stringify(responses.map(el => el.data)),
+          content: JSON.stringify(responses.map((el) => el.data)),
         },
       ],
     });
@@ -39,14 +42,17 @@ export class CoinMarketCapAPI {
   }
 
   public async getMetadataReport(crypto: string) {
-    const response = await axios.get("https://pro-api.coinmarketcap.com/v2/cryptocurrency/info", {
-      params: {
-        symbol: crypto,
+    const response = await axios.get(
+      "https://pro-api.coinmarketcap.com/v2/cryptocurrency/info",
+      {
+        params: {
+          symbol: crypto,
+        },
+        headers: {
+          "X-CMC_PRO_API_KEY": this.token,
+        },
       },
-      headers: {
-        "X-CMC_PRO_API_KEY": this.token,
-      }
-    });
+    );
 
     return JSON.stringify(response.data);
   }

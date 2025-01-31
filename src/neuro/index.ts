@@ -11,6 +11,7 @@ import { ImagesRouter } from "./ImagesRouter";
 import { PaymentsRouter } from "./PaymentsRouter";
 import { PromoCode } from "../entity/assistants/Promo";
 import { UserPromo } from "../entity/assistants/UserPromo";
+import { OutputBotFormatter } from "./output/formatter";
 const logger = pino();
 
 export const bot = new TelegramBot(process.env.NEURO_TOKEN ?? "", {
@@ -63,7 +64,7 @@ bot.setMyCommands([
     description: "📜Условия использования & политика",
   },
 ]);
-
+export const formatter = new OutputBotFormatter(bot);
 const menuRouter = new MenuRouter();
 const settingsRouter = new SettingsRouter();
 const textRouter = new TextRouter();
