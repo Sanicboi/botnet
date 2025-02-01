@@ -267,14 +267,17 @@ export class OpenAI {
    * @param msg Message object
    * @param u User (Threads fetched)
    * @param generate Whether text should be generated after the transcription
+   * @param asFile Whether the document attached is consideered a voice message
    * @returns Nothing
    */
-  public static async runVoice(msg: Message, u: User, generate: boolean) {
+  public static async runVoice(msg: Message, u: User, generate: boolean, asFile: boolean = false) {
     const data = await this.setupRun(msg, u);
     if (!data) return;
-    if (!msg.voice) return;
+    if (asFile && !msg.document) return;
+    if (!asFile && !msg.voice) return;
 
-    const url = await bot.getFileLink(msg.voice.file_id);
+    let url: string;
+    url = await bot.getFileLink(asFile ? msg.document!.file_id : msg.voice!.file_id);
     const res = await axios.get(url, {
       responseType: "arraybuffer",
     });
@@ -344,38 +347,46 @@ export class OpenAI {
     if (!msg.document) return;
 
     const url = await bot.getFileLink(msg.document.file_id);
-    const res = await axios.get(url, {
-      responseType: "arraybuffer",
-    });
+    const type = mime.lookup(path.extname(url));
 
-    const file = new File([res.data], v4() + path.extname(url), {
-      type: mime.lookup(path.extname(url)) || "text/plain",
-    });
 
-    const f = await openai.files.create({
-      purpose: "assistants",
-      file,
-    });
+    if (type === "audio/ogg" || type === "audio/mpeg" || type === "audio/webm" || type === "audio/wav") {
+      await this.runVoice(msg, u, u.actionId !== "voice", true);
+    } else {
+      const res = await axios.get(url, {
+        responseType: "arraybuffer",
+      });
+      const file = new File([res.data], v4() + path.extname(url), {
+        type: type || "text/plain",
+      });
+  
+      const f = await openai.files.create({
+        purpose: "assistants",
+        file,
+      });
+  
+      const upload = new FileUpload();
+      upload.id = f.id;
+      upload.userId = u.chatId;
+      await Router.manager.save(upload);
+  
+      await this.run(msg, u, data, {
+        role: "user",
+        content: msg.text ?? "Входные данные в виде файла",
+        attachments: [
+          {
+            file_id: f.id,
+            tools: [
+              {
+                type: "file_search",
+              },
+            ],
+          },
+        ],
+      });
+    }
 
-    const upload = new FileUpload();
-    upload.id = f.id;
-    upload.userId = u.chatId;
-    await Router.manager.save(upload);
-
-    await this.run(msg, u, data, {
-      role: "user",
-      content: msg.text ?? "Входные данные в виде файла",
-      attachments: [
-        {
-          file_id: f.id,
-          tools: [
-            {
-              type: "file_search",
-            },
-          ],
-        },
-      ],
-    });
+    
   }
 
   /**
