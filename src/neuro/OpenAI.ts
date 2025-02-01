@@ -350,7 +350,7 @@ export class OpenAI {
     const type = mime.lookup(path.extname(url));
     console.log(type);
 
-    if (type === "audio/ogg" || type === "audio/mpeg" || type === "audio/webm" || type === "audio/wav") {
+    if (type === "audio/ogg" || type === "audio/mpeg" || type === "audio/webm" || type === "audio/wave") {
       console.log("Audio")
       await this.runVoice(msg, u, u.actionId !== "voice", true);
     } else {
