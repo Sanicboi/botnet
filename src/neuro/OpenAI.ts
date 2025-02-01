@@ -356,7 +356,7 @@ export class OpenAI {
       console.log("Audio")
       await this.runVoice(msg, u, u.actionId !== "voice", true);
     } else {
-      console.log(msg.text);
+      console.log(msg.caption);
       const res = await axios.get(url, {
         responseType: "arraybuffer",
       });
@@ -376,7 +376,7 @@ export class OpenAI {
   
       await this.run(msg, u, data, {
         role: "user",
-        content: msg.text ?? "Входные данные в виде файла",
+        content: msg.caption ?? "Входные данные в виде файла",
         attachments: [
           {
             file_id: f.id,
