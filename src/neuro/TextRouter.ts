@@ -63,6 +63,7 @@ export class TextRouter extends Router {
     super();
 
     bot.on("document", async (msg) => {
+      console.log(msg);
       const user = await Router.manager.findOne(User, {
         where: {
           chatId: String(msg.chat.id),
