@@ -351,6 +351,7 @@ export class OpenAI {
 
 
     if (type === "audio/ogg" || type === "audio/mpeg" || type === "audio/webm" || type === "audio/wav") {
+      console.log("Audio")
       await this.runVoice(msg, u, u.actionId !== "voice", true);
     } else {
       const res = await axios.get(url, {
