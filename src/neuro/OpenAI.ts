@@ -348,7 +348,7 @@ export class OpenAI {
 
     const url = await bot.getFileLink(msg.document.file_id);
     const type = mime.lookup(path.extname(url));
-
+    console.log(type);
 
     if (type === "audio/ogg" || type === "audio/mpeg" || type === "audio/webm" || type === "audio/wav") {
       console.log("Audio")
