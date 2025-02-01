@@ -149,10 +149,10 @@ export class OpenAI {
   private static async setupRun(
     msg: Message,
     u: User,
+    send: boolean = true
   ): Promise<false | IRunData> {
     const t = u.threads.find((t) => t.actionId === u.actionId);
     if (!t && u.actionId !== "voice") return false;
-    console.log("Thread found");
     const res =
       (msg.text ?? "") +
       "\n" +
@@ -202,7 +202,9 @@ export class OpenAI {
       }
       return false;
     }
-    await bot.sendMessage(msg.from!.id, "генерирую ответ ✨...");
+    if (send) {
+      await bot.sendMessage(msg.from!.id, "генерирую ответ ✨...");
+    }
     return {
       thread: t,
       prompt: res,
@@ -271,7 +273,7 @@ export class OpenAI {
    * @returns Nothing
    */
   public static async runVoice(msg: Message, u: User, generate: boolean, asFile: boolean = false) {
-    const data = await this.setupRun(msg, u);
+    const data = await this.setupRun(msg, u, !asFile);
     if (!data) return;
     if (asFile && !msg.document) return;
     if (!asFile && !msg.voice) return;
