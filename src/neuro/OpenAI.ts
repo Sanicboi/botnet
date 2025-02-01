@@ -356,6 +356,7 @@ export class OpenAI {
       console.log("Audio")
       await this.runVoice(msg, u, u.actionId !== "voice", true);
     } else {
+      console.log(msg.text);
       const res = await axios.get(url, {
         responseType: "arraybuffer",
       });
