@@ -87,7 +87,7 @@ bot.on("callback_query", async (q) => {
     if (!member || !u) return await bot.sendMessage(q.from.id, "Кажется, вы не выполнили все условия");
 
     await bot.sendMessage(q.from.id, "Отлично! А вот и обещанные материалы:\n https://teletype.in/@smartcomrade/PI7rcWYq-wV");
-    await MessageFormatter.sendDocumentBot("promts.pdf", bot, q.from.id);
+    await MessageFormatter.sendDocumentBot("prompts.pdf", bot, q.from.id);
     await MessageFormatter.sendDocumentBot("other.pdf", bot, q.from.id);
 })
 
