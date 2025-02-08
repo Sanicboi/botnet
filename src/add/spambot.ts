@@ -59,7 +59,7 @@ bot.onText(/\/start/, async (msg) => {
     //     await AppDataSource.manager.save(user);
     // }
 
-    await MessageFormatter.sendTextFromFileBot(bot, "startleadmagnoit.txt", msg.from!.id);
+    await MessageFormatter.sendTextFromFileBot(bot, "startleadmagnit.txt", msg.from!.id);
 })
 
 bot.onText(/\/materials/, async (msg) => {
