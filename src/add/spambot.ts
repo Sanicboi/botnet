@@ -82,7 +82,7 @@ bot.on("callback_query", async (q) => {
         chatId: String(q.from.id)
     });
 
-    const member = await bot.getChatMember(123, q.from.id);
+    const member = await bot.getChatMember(-1002458365675, q.from.id);
 
     if (!member || !u) return await bot.sendMessage(q.from.id, "Кажется, вы не выполнили все условия");
 
