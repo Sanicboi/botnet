@@ -72,56 +72,32 @@ export class Router {
   }
 
   /**
-   * Resets all the waiters and the current
-   * @param user User object (Action, Action.threads and Files are required)
-   * @param sendResetMessage Whether to send the Context deleted message to the user after its deletion
+   * Resets all the waiters on the user and current dependant values
+   * @param user User object 
    * @returns Nothing
    */
   public static async resetWaiters(
     user: User,
-    sendResetMessage: boolean = false,
   ) {
     if (user.waitingForName) user.waitingForName = false;
     if (user.usingImageGeneration) user.usingImageGeneration = false;
-    if (user.action) {
-      if (user.action.id === "voice") {
-        user.actionId = null;
-        user.action = null;
-        await Router.manager.save(user);
-        return;
-      }
-      const t = user.action.threads.find((el) => el.userId == user.chatId);
-      user.docType = "";
-      user.agreementType = "";
-      user.offerSize = "";
-      user.textStyle = "";
-      user.textTone = "";
-      user.actionId = null;
-      user.firstCryptoResponse = false;
-      const act = user.action;
-      user.action = null;
-      await this.manager.save(user);
-      if (t) {
-        await this.manager.delete(Thread, t);
-        await openai.beta.threads.del(t.id);
-      }
-    } else {
-      user.docType = "";
-      user.agreementType = "";
-      user.offerSize = "";
-      user.textStyle = "";
-      user.textTone = "";
-      user.actionId = null;
-      user.action = null;
-      await this.manager.save(user);
-    }
-    if (user.files) {
-      for (const file of user.files) {
-        await openai.files.del(file.id);
-        await Router.manager.delete(FileUpload, file.id);
-      }
-      user.files = [];
-    }
+    user.docType = "";
+    user.agreementType = "";
+    user.offerSize = "";
+    user.textStyle = "";
+    user.textTone = "";
+    user.firstCryptoResponse = false;
+    user.action = null;
+    user.actionId = null;
+    
+    await Router.manager.save(user);
+    // if (user.files) {
+    //   for (const file of user.files) {
+    //     await openai.files.del(file.id);
+    //     await Router.manager.delete(FileUpload, file.id);
+    //   }
+    //   user.files = [];
+    // }
   }
 
   /**

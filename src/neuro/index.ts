@@ -53,7 +53,7 @@ bot.setMyCommands([
   },
   {
     command: "deletecontext",
-    description: "🔁Перезапустить бота",
+    description: "🔁Контекст и знания AI-сотрудника",
   },
   {
     command: "settings",

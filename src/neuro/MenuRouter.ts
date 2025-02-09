@@ -8,6 +8,7 @@ import { MessageFormatter } from "../utils/MessageFormatter";
 import { Btn } from "./utils";
 import { OpenAI } from "./OpenAI";
 import { wait } from "../utils/wait";
+import { Thread } from "../entity/assistants/Thread";
 
 export class MenuRouter extends Router {
   constructor() {
@@ -67,17 +68,17 @@ export class MenuRouter extends Router {
         const refId = msg.text!.split(" ")[1];
         user = new User();
         user.chatId = String(msg.from!.id);
-        user.addBalance = Math.round((10000 * 3.4) / 10000);
+        // user.addBalance = Math.round((10000 * 3.4) / 10000);
         if (refId) {
           const creator = await Router.manager.findOneBy(User, {
             chatId: refId,
           });
           if (creator) {
             if (creator.inviteCount <= 29) {
-              creator.addBalance += Math.round((3000 * 3.4) / 10000);
+              creator.addBalance += Math.round((1000 * 3.4) / 10000);
               creator.inviteCount++;
               await Router.manager.save(creator);
-              user.addBalance += Math.round((5000 * 3.4) / 10000);
+              // user.addBalance += Math.round((5000 * 3.4) / 10000);
             }
           }
         }
@@ -88,14 +89,29 @@ export class MenuRouter extends Router {
 
       await bot.sendMessage(
         msg.from!.id,
-        "Привет! На связи SmartComarde. Готов улучшить продуктивность своего бизнеса с помощью ИИ? Выбирай категорию меню ниже.",
+        "Приветствую, дорогой друг!👋\n\nSmartComrade - это многофункциональная платформа с обученными нейро-сотрудниками разных направлений!\nЗдесь мы объединили лучшее из мира нейро-сетей в одном месте.\n\nСделай свою коммуникацию с нейро-сетями профессиональной вместе с нами)\n\nИ да, не нужны никакие зарубежные карты!))\n\nНе забудь забрать афигенные полезные материалы по нейро-сетям в нашем боте помощнике! @SC_NewsBot\nА также, будем рады видеть тебя в нашем канале: https://t.me/SmartComrade1",
       );
     });
 
     bot.onText(/\/deletecontext/, async (msg) => {
       try {
-        await OpenAI.deleteThread(msg);
-        await bot.sendMessage(msg.from!.id, "Контекст успешно удален");
+        const threads = await Router.manager.find(Thread, {
+          relations: {
+            action: {
+              assistant: true
+            }
+          },
+          where: {
+            userId: String(msg.from!.id)
+          }
+        });
+        const toButtons: InlineKeyboardButton[][] = threads.map(el => Btn(`${el.action.assistant} - ${el.action.name}`, `del-${el.id}`));
+        await bot.sendMessage(msg.from!.id, "Контекст и знания сотрудника!\n\nЧто это и зачем?\nНаши нейро-сотрудники самообучаемые. Чем дольше вы взаимодействуете с конкретной функцией сотрудника он запоминает какие ответы лучше выдавать, тем самым создавая уникальные и персонализированные ответы и рекомендаци.\n\nЕсли вы хотите удалить весь контекст и сделать память нейро-сотрудника в виде изначально поставленных настроек, то вы можете это сделать это ниже! 👇");
+        await bot.sendMessage(msg.from!.id, "Для удаления контекста выберите сферу и функцию сотрудника:", {
+          reply_markup: {
+            inline_keyboard: toButtons
+          }
+        });
       } catch (err) {
         Router.logger.fatal(err);
       }
@@ -372,6 +388,10 @@ export class MenuRouter extends Router {
             ],
           },
         });
+      }
+
+      if (q.data?.startsWith("del-")) {
+        await OpenAI.deleteThread(q);
       }
     } catch (err) {
       Router.logger.fatal(err);

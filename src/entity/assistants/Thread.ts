@@ -1,6 +1,7 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
 import { User } from "../User";
 import { Action } from "./Action";
+import { FileUpload } from "./FileUpload";
 
 @Entity()
 export class Thread {
@@ -28,4 +29,7 @@ export class Thread {
     nullable: true,
   })
   actionId: string;
+
+  @OneToMany(() => FileUpload, (file) => file.thread)
+  files: FileUpload[];
 }

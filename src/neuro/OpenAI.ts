@@ -398,10 +398,10 @@ export class OpenAI {
    * @param msg Message object
    * @returns Nothing
    */
-  public static async deleteThread(msg: Message) {
+  public static async deleteThread(q: CallbackQuery) {
     const u = await Router.manager.findOne(User, {
       where: {
-        chatId: String(msg.from!.id),
+        chatId: String(q.from.id),
       },
       relations: {
         action: {
@@ -411,17 +411,22 @@ export class OpenAI {
       },
     });
     if (!u) return;
-    if (u.actionId === "voice") {
-      u.actionId = null;
-      u.action = null;
-      await Router.manager.save(u);
-      await bot.sendMessage(
-        msg.from!.id,
-        "Транскрибация закончена. Выберите другую функцию",
-      );
-      return;
+    const threadId = q.data!.substring(4); // del-...
+    
+    const files = await Router.manager.find(FileUpload, {
+      where: {
+        userId: u.chatId,
+        threadId
+      }
+    });
+
+    for (const file of files) {
+      await openai.files.del(file.id);
+      await Router.manager.remove(file);
     }
-    await Router.resetWaiters(u, true);
+
+    await openai.beta.threads.del(threadId);
+    await Router.manager.delete(Thread, threadId);
   }
 
   /**

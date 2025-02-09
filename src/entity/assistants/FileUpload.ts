@@ -1,5 +1,7 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
+import { AfterRemove, Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
 import { User } from "../User";
+import { Thread } from "./Thread";
+import { openai } from "../../neuro";
 
 @Entity()
 export class FileUpload {
@@ -14,4 +16,16 @@ export class FileUpload {
 
   @Column()
   userId: string;
+
+  @ManyToOne(() => Thread, (thread) => thread.files, {
+    onDelete: 'CASCADE'
+  })
+  @JoinColumn({
+    name: 'threadId'
+  })
+  thread: Thread;
+
+  @Column()
+  threadId: string;
+
 }
