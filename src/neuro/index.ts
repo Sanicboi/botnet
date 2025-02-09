@@ -90,7 +90,7 @@ bot.on("callback_query", async (q) => {
     if (!user) return;
     const reset = await imagesRouter.onQuery(q, user);
     if (reset) {
-      await Router.resetWaiters(user, false);
+      await Router.resetWaiters(user);
     }
     await Router.resetSub(user);
     await textRouter.onQuery(q);
