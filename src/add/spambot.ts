@@ -25,8 +25,8 @@ bot.setMyCommands([
         description: "🚀Полезные материалы"
     },
     {
-        command: "💡Поддержка",
-        description: "support"
+        command: "support",
+        description: "💡Поддержка"
     }
 ]);
 
