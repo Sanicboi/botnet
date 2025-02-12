@@ -12,13 +12,17 @@ export class Lead {
   })
   threadId: string;
 
-  @ManyToOne(() => UserBot, (bot) => bot.leads)
+  @ManyToOne(() => UserBot, (bot) => bot.leads, {
+    nullable: true
+  })
   @JoinColumn({
-    name: "botId",
+    name: "botId"
   })
   bot: UserBot;
 
-  @Column()
+  @Column({
+    nullable: true
+  })
   botId: string;
 
   @Column({

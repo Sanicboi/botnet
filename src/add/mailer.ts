@@ -5,29 +5,33 @@ import { UserBot } from "../entity/bots/UserBot";
 import { LogLevel } from "telegram/extensions/Logger";
 import { Lead } from "../entity/bots/Lead";
 import { StringSession } from "telegram/sessions";
-import { bot, openai } from "../neuro";
 import { wait } from "../utils/wait";
 import { FloodWaitError } from "telegram/errors";
 import { NewMessage, NewMessageEvent } from "telegram/events";
 import TelegramBot, { Message } from "node-telegram-bot-api";
-
+import OpenAI from "openai";
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_KEY
+})
 export class Mailer {
   private clients: Map<string, TelegramClient> = new Map<
     string,
     TelegramClient
   >();
   private manager: EntityManager = AppDataSource.manager;
-  private asst: string = "";
-  private reporter: TelegramBot = new TelegramBot(process.env.MAILER_TOKEN!, {
-    polling: true
-  });
-  private reportChatId: number = 0;
+  private asst: string = "asst_I66lzkKeACqLSCn0Vt5w1ges";
+  private reporter: TelegramBot;
+  private reportChatId: number = -4786637108;
 
   constructor() {
+    this.reporter = new TelegramBot(process.env.REPORTER_TG_TOKEN!, {
+      polling: true
+    });
     this.setup();
   }
 
   private async setup() {
+    await AppDataSource.initialize();
     const bots = await this.manager.find(UserBot);
     for (const b of bots) {
       const client = new TelegramClient(
@@ -45,23 +49,24 @@ export class Mailer {
       }));
       this.clients.set(b.token, client);
     }
+    this.reporter.onText(/\/mail/, this.mail.bind(this))
+    this.reporter.onText(/\/leads/, this.getAllAnswered.bind(this))
 
-    bot.onText(/\/mail/, this.mail.bind(this))
-    bot.onText(/\/leads/, this.getAllAnswered.bind(this))
   }
 
   private async mail() {
+    console.log("on mail")
     const leads = await this.manager
-      .createQueryBuilder()
+      .getRepository(Lead)
+      .createQueryBuilder("lead")
       .select()
-      .from(Lead, "lead")
-      .where("lead.botId IS NULL")
+      .where("lead.threadId IS NULL")
       .getMany();
-
+    console.log(leads)
     const bots = await this.manager
-      .createQueryBuilder()
+      .getRepository(UserBot)
+      .createQueryBuilder("bot")
       .select()
-      .from(UserBot, "bot")
       // .where("bot.userId = :id", {
       //   id: userId,
       // })
@@ -71,12 +76,13 @@ export class Mailer {
     let msgs: string[] = [];
     let rounds = Math.ceil(left / 25);
     let currentLead = 0;
+    console.log(left, rounds)
     for (let i = 0; i < rounds; i++) {
       let promises: Promise<string[]>[] = [];
 
       for (let j = 0; j < Math.min(left, 25); j++) {
+        promises.push(this.generate(leads[currentLead]));
         currentLead++;
-        promises.push(this.generate.call(this, leads[currentLead]));
         left--;
       }
 
@@ -105,11 +111,12 @@ export class Mailer {
   }
 
   private async generate(lead: Lead): Promise<string[]> {
+    console.log("started generating")
     const thread = await openai.beta.threads.create({
       messages: [
         {
           role: "user",
-          content: "Начни диалог",
+          content: "Начни диалог. Ты не знаешь имени пользователя.",
         },
       ],
     });
@@ -122,7 +129,7 @@ export class Mailer {
         assistant_id: this.asst,
       })
       .finalMessages();
-
+    console.log(msgs);
     return msgs.map((el) => {
       if (el.content[0].type === "text") {
         for (const ann of el.content[0].text.annotations) {
@@ -136,13 +143,17 @@ export class Mailer {
 
   private async send(bot: UserBot, lead: Lead, msg: string) {
     try {
+      console.log("trying sending")
       const client = this.clients.get(bot.token)!;
       await client.sendMessage(lead.username, {
         message: msg,
       });
       lead.sentAt = new Date();
+      lead.bot = bot;
+      lead.botId = bot.token;
       await this.manager.save(lead);
     } catch (err) {
+      console.error(err)
       if (err instanceof FloodWaitError) {
         bot.floodErr = true;
         await this.manager.save(bot);
@@ -174,7 +185,15 @@ export class Mailer {
       }
 
       if (lead.handled) return;
-      
+
+      await wait(2)
+      await client.invoke(new Api.messages.ReadHistory({
+        peer: lead.username
+      }));
+      await client.invoke(new Api.messages.SetTyping({
+        peer: lead.username,
+        action: new Api.SendMessageTypingAction()
+      }))
       await openai.beta.threads.messages.create(lead.threadId, {
         content: e.message.text,
         role: 'user'
@@ -191,7 +210,9 @@ export class Mailer {
           }
 
           if (!lead.bot.floodErr) {
-            await client.sendMessage(msg.content[0].text.value);
+            await client.sendMessage(lead.username, {
+              message: msg.content[0].text.value
+            });
           }
         }
       }
