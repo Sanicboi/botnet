@@ -27,6 +27,11 @@ export class Lead {
   responded: boolean;
 
   @Column({
+    default: false
+  })
+  handled: boolean
+
+  @Column({
     nullable: true
   })
   sentAt: Date;

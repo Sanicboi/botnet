@@ -25,6 +25,11 @@ services:
     build: .
     command: npm run spambot
     env_file: .env
+  mailer:
+    restart: always
+    build: .
+    command: npm run mailer
+    env_file: .env
   # support:
   #   restart: always
   #   build: .

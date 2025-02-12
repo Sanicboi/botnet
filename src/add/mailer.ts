@@ -9,7 +9,7 @@ import { bot, openai } from "../neuro";
 import { wait } from "../utils/wait";
 import { FloodWaitError } from "telegram/errors";
 import { NewMessage, NewMessageEvent } from "telegram/events";
-import TelegramBot from "node-telegram-bot-api";
+import TelegramBot, { Message } from "node-telegram-bot-api";
 
 export class Mailer {
   private clients: Map<string, TelegramClient> = new Map<
@@ -47,10 +47,10 @@ export class Mailer {
     }
 
     bot.onText(/\/mail/, this.mail.bind(this))
-    bot.onText
+    bot.onText(/\/leads/, this.getAllAnswered.bind(this))
   }
 
-  public async mail() {
+  private async mail() {
     const leads = await this.manager
       .createQueryBuilder()
       .select()
@@ -172,6 +172,8 @@ export class Mailer {
         await this.manager.save(lead);
         await this.reporter.sendMessage(this.reportChatId, `Ответ на сообщение от лида ${lead.username}`);
       }
+
+      if (lead.handled) return;
       
       await openai.beta.threads.messages.create(lead.threadId, {
         content: e.message.text,
@@ -194,6 +196,33 @@ export class Mailer {
         }
       }
     }
+  }
 
+
+  private async getAllAnswered(msg: Message) {
+    const leads = await this.manager
+      .getRepository(Lead)
+      .createQueryBuilder("lead")
+      .select()
+      .where("lead.answered = true")
+      .andWhere("lead.handled = false")
+      .leftJoin("lead.bot", "bot")
+      .orderBy("lead.sentAt", "ASC")
+      .getMany();
+
+    let result = `All leads that are not yet handled (ordered by send date ascending, aka old first):\n`;
+    let botMap = new Map<string, string>();
+    for (const [token, client] of this.clients) {
+      const me = await client.getMe();
+      botMap.set(token, me.username!);
+    }
+    for (const lead of leads) {
+      result += `${lead.username}, Bot connected to it: ${botMap.get(lead.bot.token)}\n`
+    }
+
+    await this.reporter.sendMessage(msg.from!.id, result);
   }
 }
+
+
+const m = new Mailer();
