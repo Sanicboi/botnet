@@ -5,7 +5,7 @@ import { UserBot } from "../entity/bots/UserBot";
 import { LogLevel } from "telegram/extensions/Logger";
 import { Lead } from "../entity/bots/Lead";
 import { StringSession } from "telegram/sessions";
-import { openai } from "../neuro";
+import { bot, openai } from "../neuro";
 import { wait } from "../utils/wait";
 import { FloodWaitError } from "telegram/errors";
 import { NewMessage, NewMessageEvent } from "telegram/events";
@@ -45,9 +45,12 @@ export class Mailer {
       }));
       this.clients.set(b.token, client);
     }
+
+    bot.onText(/\/mail/, this.mail.bind(this))
+    bot.onText
   }
 
-  public async mail(userId: string) {
+  public async mail() {
     const leads = await this.manager
       .createQueryBuilder()
       .select()
@@ -137,6 +140,8 @@ export class Mailer {
       await client.sendMessage(lead.username, {
         message: msg,
       });
+      lead.sentAt = new Date();
+      await this.manager.save(lead);
     } catch (err) {
       if (err instanceof FloodWaitError) {
         bot.floodErr = true;
