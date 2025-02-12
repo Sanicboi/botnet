@@ -21,12 +21,17 @@ export class Lead {
   @Column()
   botId: string;
 
-  @ManyToOne(() => User, (user) => user.leads)
-  @JoinColumn({
-    name: "userId",
+  @Column({
+    default: false
   })
-  user: User;
+  responded: boolean;
 
-  @Column()
-  userId: string;
+  // @ManyToOne(() => User, (user) => user.leads)
+  // @JoinColumn({
+  //   name: "userId",
+  // })
+  // user: User;
+
+  // @Column()
+  // userId: string;
 }

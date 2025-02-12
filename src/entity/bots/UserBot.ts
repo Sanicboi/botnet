@@ -14,22 +14,25 @@ export class UserBot {
   @PrimaryColumn()
   token: string;
 
-  @Column({
-    nullable: true,
-  })
-  lastSent: Date;
+  // @Column({
+  //   nullable: true,
+  // })
+  // lastSent: Date;
 
   @OneToMany(() => Lead, (lead) => lead.bot)
   leads: Lead[];
 
-  @ManyToOne(() => User, (user) => user.bots)
-  @JoinColumn({
-    name: "userId",
-  })
-  user: User;
+  @Column({default: false})
+  floodErr: boolean;
 
-  @Column({
-    nullable: true,
-  })
-  userId: string;
+  // @ManyToOne(() => User, (user) => user.bots)
+  // @JoinColumn({
+  //   name: "userId",
+  // })
+  // user: User;
+
+  // @Column({
+  //   nullable: true,
+  // })
+  // userId: string;
 }

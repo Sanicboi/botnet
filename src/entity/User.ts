@@ -145,11 +145,11 @@ export class User {
   })
   firstCryptoResponse: boolean;
 
-  @OneToMany(() => UserBot, (bot) => bot.user)
-  bots: UserBot[];
+  // @OneToMany(() => UserBot, (bot) => bot.user)
+  // bots: UserBot[];
 
-  @OneToMany(() => Lead, (lead) => lead.user)
-  leads: Lead[];
+  // @OneToMany(() => Lead, (lead) => lead.user)
+  // leads: Lead[];
 
   @Column({
     default: 10,
