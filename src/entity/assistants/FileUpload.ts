@@ -1,7 +1,6 @@
-import { AfterRemove, Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
+import {  Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
 import { User } from "../User";
 import { Thread } from "./Thread";
-import { openai } from "../../neuro";
 
 @Entity()
 export class FileUpload {

@@ -372,6 +372,8 @@ export class OpenAI {
       const upload = new FileUpload();
       upload.id = f.id;
       upload.userId = u.chatId;
+      upload.thread = data.thread!;
+      upload.threadId = data.thread!.id;
       await Router.manager.save(upload);
   
       await this.run(msg, u, data, {
