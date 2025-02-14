@@ -52,7 +52,7 @@ const src = new DataSource({
         try {
             if (!n) continue;
             const lead = new Lead();
-            lead.username = n;
+            lead.username = n.substring(1);
             await src.manager.save(lead);
         } catch (error) {
             console.error(error);
