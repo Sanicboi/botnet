@@ -74,13 +74,12 @@ export class Mailer {
 
     let left = Math.min(leads.length, bots.length * 10);
     let msgs: string[] = [];
-    let rounds = Math.ceil(left / 25);
+    let rounds = Math.ceil(left / 10);
     let currentLead = 0;
     console.log(left, rounds)
     for (let i = 0; i < rounds; i++) {
       let promises: Promise<string[]>[] = [];
-
-      for (let j = 0; j < Math.min(left, 25); j++) {
+      for (let j = 0; j < Math.min(left, 10); j++) {
         promises.push(this.generate(leads[currentLead]));
         currentLead++;
         left--;
@@ -90,6 +89,7 @@ export class Mailer {
       for (let k of batch) {
         msgs.push(...k);
       }
+      await wait(2);
     }
 
     left = Math.min(leads.length, bots.length * 15);
@@ -129,14 +129,15 @@ export class Mailer {
         assistant_id: this.asst,
       })
       .finalMessages();
-    console.log(msgs);
     return msgs.map((el) => {
       if (el.content[0].type === "text") {
         for (const ann of el.content[0].text.annotations) {
           el.content[0].text.value.replaceAll(ann.text, "");
         }
+        console.log("text");
         return el.content[0].text.value;
       }
+      console.log("no text")
       return "";
     });
   }
