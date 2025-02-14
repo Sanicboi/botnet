@@ -198,7 +198,7 @@ export class PaymentsRouter extends Router {
                   await Router.manager.save(u);
                   await bot.sendMessage(
                     q.from.id,
-                    "Платеж прошел успешно! Можете вернуться в меню",
+                    "Оплата успешно прошла 🚀\nБаланс токенов пополнен, подробнее: /balance\nПриятного пользования😉",
                   );
                 }
               }
@@ -233,6 +233,7 @@ export class PaymentsRouter extends Router {
               subMapReverse.get(parseInt(res.amount.value)) ?? "none";
             u.leftForToday = subsMap.get(u.subscription) ?? 0;
             await Router.manager.save(u);
+            await bot.sendMessage(+u.chatId, "Оплата успешно прошла 🚀\nПодписка обновлена, подробнее: /balance\nПриятного пользования😉")
           }
         } catch (error) {}
       }
