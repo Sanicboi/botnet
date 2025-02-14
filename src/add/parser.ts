@@ -7,7 +7,7 @@ import { SupportRequest } from "../entity/SupportRequest";
 import { FileUpload } from "../entity/assistants/FileUpload";
 import { PromoCode } from "../entity/assistants/Promo";
 import { UserPromo } from "../entity/assistants/UserPromo";
-import { Channel } from "@grpc/grpc-js";
+import { Channel } from "../entity/bots/Channel";
 import { Post } from "../entity/bots/Post";
 import { Lead } from "../entity/bots/Lead";
 import { UserBot } from "../entity/bots/UserBot";
