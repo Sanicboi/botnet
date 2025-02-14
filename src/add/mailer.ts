@@ -72,7 +72,7 @@ export class Mailer {
       // })
       .getMany();
 
-    let left = Math.min(leads.length, bots.length * 15);
+    let left = Math.min(leads.length, bots.length * 10);
     let msgs: string[] = [];
     let rounds = Math.ceil(left / 25);
     let currentLead = 0;
@@ -141,9 +141,10 @@ export class Mailer {
     });
   }
 
-  private async send(bot: UserBot, lead: Lead, msg: string) {
+  private async send(bot: UserBot, lead: Lead, msg: string): Promise<[boolean, boolean]> {
     try {
       console.log("trying sending")
+      if (bot.floodErr) return [false, true];
       const client = this.clients.get(bot.token)!;
       await client.sendMessage(lead.username, {
         message: msg,
@@ -152,13 +153,17 @@ export class Mailer {
       lead.bot = bot;
       lead.botId = bot.token;
       await this.manager.save(lead);
+      await this.reporter.sendMessage(this.reportChatId, `Отправлено сообщение ${lead.username}`);
+      return [true, false];
     } catch (err) {
       console.error(err)
       if (err instanceof FloodWaitError) {
         bot.floodErr = true;
         await this.manager.save(bot);
+        return [false, true];
       } else {
         console.error(err);
+        return [false, false];
       }
     }
   }
