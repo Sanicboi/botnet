@@ -74,12 +74,12 @@ export class Mailer {
 
     let left = Math.min(leads.length, bots.length * 10);
     let msgs: string[] = [];
-    let rounds = Math.ceil(left / 10);
+    let rounds = Math.ceil(left / 5);
     let currentLead = 0;
     console.log(left, rounds)
     for (let i = 0; i < rounds; i++) {
       let promises: Promise<string[]>[] = [];
-      for (let j = 0; j < Math.min(left, 10); j++) {
+      for (let j = 0; j < Math.min(left, 5); j++) {
         promises.push(this.generate(leads[currentLead]));
         currentLead++;
         left--;
