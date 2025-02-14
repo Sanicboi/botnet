@@ -187,6 +187,26 @@ export class TextRouter extends Router {
 
     if (q.data?.startsWith("offer-")) {
       u.offerSize = sizeMap.get(q.data!)!;
+      await Router.manager.save(u);
+      await bot.sendMessage(q.from!.id, "Выберите модель составления оффера.\nНе знаешь какую выбрать? Смотри справку: https://docs.google.com/document/d/1785aqFyeHDYV3QjfJwpA4TC-K1UjScqRRDsQoFk7Uy8/edit", {
+        reply_markup: {
+          inline_keyboard: [
+            Btn("AIDA", "ot-aida"),
+            Btn("PAS", "ot-pas"),
+            Btn("FAB", "ot-fab"),
+            Btn("4Ps", "ot-4ps"),
+            Btn("Quest", "ot-quest"),
+            Btn("ACC", "ot-acc"),
+            Btn("Смешанная", "ot-mixed")
+          ]
+        }
+      })
+      
+    }
+
+    if (q.data?.startsWith("ot-")) {
+      u.offerType = q.data.substring(4);
+      await Router.manager.save(u);
       await OpenAI.createThread(q, u, "asst_14B08GDgJphVClkmmtQYo0aq");
     }
 

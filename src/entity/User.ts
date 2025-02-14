@@ -160,4 +160,9 @@ export class User {
     nullable: true,
   })
   paymentMethod: string;
+
+  @Column({
+    nullable: true,
+  })
+  offerType: string;
 }

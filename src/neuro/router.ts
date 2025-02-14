@@ -84,6 +84,7 @@ export class Router {
     user.docType = "";
     user.agreementType = "";
     user.offerSize = "";
+    user.offerType = "";
     user.textStyle = "";
     user.textTone = "";
     user.firstCryptoResponse = false;

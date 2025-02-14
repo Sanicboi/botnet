@@ -159,6 +159,7 @@ export class OpenAI {
       u.textStyle +
       u.textTone +
       u.offerSize +
+      + (u.offerType ? ("\n" + "Модель оффера: " + u.offerType + "\n") : "")
       u.docType +
       u.agreementType;
     u.textStyle = "";
@@ -166,6 +167,7 @@ export class OpenAI {
     u.offerSize = "";
     u.docType = "";
     u.agreementType = "";
+    u.offerType = "";
     await Router.manager.save(u);
 
     if (u.addBalance === 0 && u.leftForToday === 0) {
