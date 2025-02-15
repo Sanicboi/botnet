@@ -87,6 +87,8 @@ export class Router {
     user.offerType = "";
     user.textStyle = "";
     user.textTone = "";
+    user.postStyle = "";
+    user.postType = "";
     user.firstCryptoResponse = false;
     user.action = null;
     user.actionId = null;

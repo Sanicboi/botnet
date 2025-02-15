@@ -165,4 +165,14 @@ export class User {
     nullable: true,
   })
   offerType: string;
+
+  @Column({
+    nullable: true
+  })
+  postType: string;
+
+  @Column({
+    nullable: true
+  })
+  postStyle: string;
 }

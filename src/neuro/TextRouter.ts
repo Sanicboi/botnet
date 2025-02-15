@@ -127,6 +127,31 @@ export class TextRouter extends Router {
       });
     }
 
+    if (q.data?.startsWith("pt-")) {
+      u.postType = q.data.substring(3);
+      await Router.manager.save(u);
+      await bot.sendMessage(q.from.id, "Отлично, с типом определились. Теперь выбери стиль", {
+        reply_markup: {
+          inline_keyboard: [
+            Btn("Мотивационный", "ps-Мотивационный"),
+            Btn("Деловой", "ps-Деловой"),
+            Btn("Экспертный", "ps-Экспертный"),
+            Btn("Обучающий", "ps-Обучающий"),
+            Btn("Разговорный", "ps-Разговорный"),
+            Btn("Научный", "ps-Научный"),
+            Btn("Рекламный", "ps-Рекламный"),
+            Btn("Вызывающий", "ps-Вызывающий")
+          ]
+        }
+      });
+    }
+
+    if (q.data?.startsWith("ps-")) {
+      u.postStyle = q.data.substring(3);
+      await Router.manager.save(u);
+      await OpenAI.createThread(q, u, "asst_J3MtW6o63CAOy6OGjDEUUWu2");
+    }
+
     if (q.data!.startsWith("ac-")) {
       console.log("Action");
       if (q.data!.endsWith("-asst_1BdIGF3mp94XvVfgS88fLIor")) {
@@ -168,6 +193,19 @@ export class TextRouter extends Router {
               Btn("Оферта", "doct-offer"),
             ],
           },
+        });
+        return;
+      }
+
+      if (q.data!.endsWith("-asst_J3MtW6o63CAOy6OGjDEUUWu2")) {
+        await bot.sendMessage(q.from.id, "Приветствую!👋 Я AI составитель постов. Я помогу тебе с написанием постов.\nПрежде чем написать пост, давай определимся с типом, а потом со стилем контента, выбирай по кнопкам ниже👇", {
+          reply_markup: {
+            inline_keyboard: [
+              Btn("Информационный", "pt-informational"),
+              Btn("Пользовательский", "pt-custom"),
+              Btn("Полезный", "pt-helpful")
+            ]
+          }
         });
         return;
       }

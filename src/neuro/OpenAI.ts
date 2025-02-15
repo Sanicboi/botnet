@@ -160,6 +160,8 @@ export class OpenAI {
       u.textTone +
       u.offerSize +
       + (u.offerType ? ("\n" + "Модель оффера: " + u.offerType + "\n") : "")
+      + (u.postStyle ? ("\n" + "Стиль поста:" + u.postStyle + "\n") : "")
+      + (u.postType ? ("\n" + "Тип поста:" + u.postType + "\n") : "")
       u.docType +
       u.agreementType;
     u.textStyle = "";
@@ -168,6 +170,8 @@ export class OpenAI {
     u.docType = "";
     u.agreementType = "";
     u.offerType = "";
+    u.postStyle = "";
+    u.postType = "";
     await Router.manager.save(u);
 
     if (u.addBalance === 0 && u.leftForToday === 0) {
