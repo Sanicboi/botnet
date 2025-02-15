@@ -20,6 +20,7 @@ import { CoinMarketCapAPI } from "./CoinMarketCapAPI";
 import { TGChannelsAnalyzer } from "./TGChannelsAPI";
 import { BybitAPI } from "./BybitAPI";
 import { OutputBotFormatter } from "./output/formatter";
+import { AudioInput } from "./AudioInput";
 
 interface IRunData {
   prompt: string;
@@ -146,7 +147,7 @@ export class OpenAI {
    * @param u User (expecting a user with Threads fetched)
    * @returns false if can't run, otherwise data of the run
    */
-  private static async setupRun(
+  public static async setupRun(
     msg: Message,
     u: User,
     send: boolean = true
@@ -214,6 +215,51 @@ export class OpenAI {
     return {
       thread: t,
       prompt: res,
+    };
+  }
+
+  public static async setupRunCQ(msg: CallbackQuery, u: User, send: boolean = true): Promise<Pick<IRunData, "thread"> | false> {
+    const t = u.threads.find((t) => t.actionId === u.actionId);
+    if (!t && u.actionId !== "voice") return false;
+    if (u.addBalance === 0 && u.leftForToday === 0) {
+      await bot.sendMessage(
+        msg.from!.id,
+        "❌Упс! У вас закончились токены.\nЧтобы продолжить пользоваться ботом, вам нужно оформить подписку или купить отдельный комплект токенов…",
+      );
+      if (u.subscription !== "none") {
+        // is subscribed
+        await wait(2);
+        await bot.sendMessage(
+          msg.from!.id,
+          `⚪️Ваша подписка:\n⤷${u.subscription}\n\n⚪️ Ваш комплект токенов на сегодня закончился :(\n\nКупите  отдельный комплект токенов, чтобы продолжить наслаждаться всем фукционалом бота без ограничений!\n\n`,
+          {
+            reply_markup: {
+              inline_keyboard: [Btn("Купить пакет токенов", "b-tokens")],
+            },
+          },
+        );
+      } else {
+        await wait(2);
+        await bot.sendMessage(
+          msg.from!.id,
+          `⚪️Ваша подписка:\n⤷ Ваша предыдущая подписка истекла \n\n⚪️ Ваш комплект токенов:\n⤷ ❌ Ваши токены закончились :(\n\nКупите подписку или отдельный комплект токенов, чтобы наслаждаться всем фукционалом бота без ограничений!\n\n⤷ 💪 Подписка дает вам до 135.000 токенов в сутки;\n\n⤷ 🤖 Доступ к GPT-o1, GPT-o1 Mini, GPT-4 Omni, GPT-4 Omni Mini, GPT-4 Turbo и др…\n\n⤷\n⚡ Мгновенные ответы без ожидания;\n⤷ 🎙 Распознавание голосовых сообщений и озвучка текста;\n\n⤷ 👩‍🎨 Доступ к Dalle-3 (генерация изображений) и другие режимы;\n\nОформить подписку можно всего в пару действий с помощью банковской карты\n\nПодписку можно отменить в любой момент за 1 секунду.\n`,
+          {
+            reply_markup: {
+              inline_keyboard: [
+                Btn("Купить пакет токенов", "b-tokens"),
+                Btn("Купить подписку", "b-sub"),
+              ],
+            },
+          },
+        );
+      }
+      return false;
+    }
+    if (send) {
+      await bot.sendMessage(msg.from!.id, "генерирую ответ ✨...");
+    }
+    return {
+      thread: t
     };
   }
 
@@ -286,27 +332,45 @@ export class OpenAI {
 
     let url: string;
     url = await bot.getFileLink(asFile ? msg.document!.file_id : msg.voice!.file_id);
-    const res = await axios.get(url, {
-      responseType: "arraybuffer",
-    });
-    const name = v4() + path.extname(url);
-    fs.writeFileSync(path.join(process.cwd(), "voice", name), res.data);
-    const transcription = await openai.audio.transcriptions.create({
-      file: fs.createReadStream(path.join(process.cwd(), "voice", name)),
-      model: "whisper-1",
-    });
-    console.log(transcription.text);
+    // const res = await axios.get(url, {
+    //   responseType: "arraybuffer",
+    // });
+    // const name = v4() + path.extname(url);
+    // fs.writeFileSync(path.join(process.cwd(), "voice", name), res.data);
+    // const transcription = await openai.audio.transcriptions.create({
+    //   file: fs.createReadStream(path.join(process.cwd(), "voice", name)),
+    //   model: "whisper-1",
+    // });
+    // console.log(transcription.text);
 
-    fs.rmSync(path.join(process.cwd(), "voice", name));
+    // fs.rmSync(path.join(process.cwd(), "voice", name));
+    let audioFile = new AudioInput(url);
+    await audioFile.initFromUrl(u);
+    if (asFile) {
+      // Prompt for transcription
+      await bot.sendMessage(msg.from!.id, `Транскрибация будет стоить ${audioFile.getCost()} токенов. Хотите продолжить?`, {
+        reply_markup: {
+          inline_keyboard: [
+            Btn('Да', `transcribe-${audioFile.inDB.id}`),
+            Btn('Нет', `no-transcribe`)
+          ]
+        }
+      })
 
-    if (generate) {
-      await this.run(msg, u, data, {
-        content: transcription.text,
-        role: "user",
-      });
     } else {
-      await bot.sendMessage(msg.from!.id, transcription.text);
+      audioFile = new AudioInput(audioFile.inDB.id);
+      const result = await audioFile.transcribe(u);
+      if (generate) {
+        await this.run(msg, u, data, {
+          content: result,
+          role: "user",
+        });
+      } else {
+        await bot.sendMessage(msg.from!.id, result);
+      }
     }
+
+
   }
 
   /**
@@ -444,10 +508,10 @@ export class OpenAI {
    * @param data Run data
    * @param params Message content params
    */
-  private static async run(
-    msg: Message,
+  public static async run(
+    msg: Message | CallbackQuery,
     u: User,
-    data: IRunData,
+    data: Pick<IRunData, "thread">,
     params: MessageCreateParams,
   ) {
     if (!data.thread) return;
@@ -470,6 +534,8 @@ export class OpenAI {
     await this.sendResult(msg, u, asText, run.usage!.total_tokens);
   }
 
+
+
   /**
    * This method sends the result of the generation to the user
    * @param msg Message Object
@@ -478,7 +544,7 @@ export class OpenAI {
    * @param tokenCount Token count
    */
   private static async sendResult(
-    msg: Message,
+    msg: Message | CallbackQuery,
     u: User,
     messages: string[],
     tokenCount: number,

@@ -8,6 +8,7 @@ import { Action } from "../entity/assistants/Action";
 import { User } from "../entity/User";
 import { Btn } from "./utils";
 import { OpenAI } from "./OpenAI";
+import { AudioInput } from "./AudioInput";
 
 const sizeMap = new Map<string, string>();
 sizeMap.set("offer-long", "Оффер большой (70-90 слов)\n");
@@ -152,7 +153,7 @@ export class TextRouter extends Router {
       await OpenAI.createThread(q, u, "asst_J3MtW6o63CAOy6OGjDEUUWu2");
     }
 
-    if (q.data!.startsWith("ac-")) {
+    if (q.data?.startsWith("ac-")) {
       console.log("Action");
       if (q.data!.endsWith("-asst_1BdIGF3mp94XvVfgS88fLIor")) {
         const asst = await Router.manager.findOneBy(Action, {
@@ -221,6 +222,23 @@ export class TextRouter extends Router {
       }
 
       await OpenAI.createThread(q, u, q.data!.substring(3));
+    }
+
+    if (q.data?.startsWith("transcribe-")) {
+      const id = q.data?.substring(11);
+      const f = new AudioInput(id);
+      const result = await f.transcribe(u);
+      if (u.action?.id === "voice") {
+          const data = await OpenAI.setupRunCQ(q, u);
+          if (!data) return;
+          await OpenAI.run(q, u, data, {
+            content: result,
+            role: "user",
+          });
+
+        } else {
+          await bot.sendMessage(q.from.id, result);
+        }
     }
 
     if (q.data?.startsWith("offer-")) {

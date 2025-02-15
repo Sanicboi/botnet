@@ -14,6 +14,7 @@ import { FileUpload } from "./assistants/FileUpload";
 import { UserPromo } from "./assistants/UserPromo";
 import { UserBot } from "./bots/UserBot";
 import { Lead } from "./bots/Lead";
+import { AudioFile } from "./assistants/AudioFile";
 
 @Entity()
 export class User {
@@ -175,4 +176,7 @@ export class User {
     nullable: true
   })
   postStyle: string;
+
+  @OneToMany(() => AudioFile, (audio) => audio.user)
+  audios: AudioFile[];
 }
