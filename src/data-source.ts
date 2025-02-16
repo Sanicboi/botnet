@@ -12,6 +12,7 @@ import { Channel } from "./entity/bots/Channel";
 import { Post } from "./entity/bots/Post";
 import { Lead } from "./entity/bots/Lead";
 import { UserBot } from "./entity/bots/UserBot";
+import { AudioInput } from "./neuro/AudioInput";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -35,6 +36,7 @@ export const AppDataSource = new DataSource({
     Post,
     Lead,
     UserBot,
+    AudioInput
   ],
   migrations: [],
   subscribers: [],
