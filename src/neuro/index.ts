@@ -128,7 +128,7 @@ bot.onText(/./, async (msg) => {
         });
 
         if (!promo) {
-          await bot.sendMessage(msg.from!.id, "Упс, промокод не найден(");
+          await bot.sendMessage(msg.from!.id, "❌Упс! Что-то пошло не так. Убедитесь, что промокод введен правильно и попробуйте еще раз. ❗️Важно: один и тот же промокод нельзя активировать несколько раз");
         } else {
           if (promo.expiresAt < new Date()) {
             await bot.sendMessage(
