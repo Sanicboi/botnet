@@ -6,6 +6,8 @@ RUN npm install
 COPY . .
 EXPOSE 8082
 EXPOSE 50051
-RUN apt install ffmpeg
+RUN apt-get -y update
+RUN apt-get -y upgrade
+RUN apt-get install -y ffmpeg
 RUN npm run build
 CMD ["npm", "start"]
