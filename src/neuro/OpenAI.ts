@@ -21,6 +21,7 @@ import { TGChannelsAnalyzer } from "./TGChannelsAPI";
 import { BybitAPI } from "./BybitAPI";
 import { OutputBotFormatter } from "./output/formatter";
 import { AudioInput } from "./AudioInput";
+import { TInvest } from "./TInvest";
 
 interface IRunData {
   prompt: string;
@@ -67,7 +68,8 @@ export class OpenAI {
     await Router.manager.save(thread);
     if (
       u.actionId === "asst_Yi7ajro25YJRPccS4hqePcvb" ||
-      u.actionId === "asst_naVdwMABoWcDLD2vs9W2hnD9"
+      u.actionId === "asst_naVdwMABoWcDLD2vs9W2hnD9" ||
+      u.actionId === "asst_y6WZIorpOfNMMWhFkhWzNhEf"
     ) {
       u.firstCryptoResponse = true;
       await Router.manager.save(u);
@@ -272,7 +274,15 @@ export class OpenAI {
   public static async runText(msg: Message, u: User) {
     const data = await this.setupRun(msg, u);
     if (!data) return;
-
+    if (u.firstCryptoResponse && u.actionId === "asst_y6WZIorpOfNMMWhFkhWzNhEf") {
+      u.firstCryptoResponse = false;
+      await Router.manager.save(u);
+      const r = await TInvest.getAnalysis(msg.text!);
+      await this.run(msg, u, data, {
+        content: r,
+        role: 'user'
+      });
+    }
     if (
       u.actionId === "asst_Yi7ajro25YJRPccS4hqePcvb" &&
       u.firstCryptoResponse

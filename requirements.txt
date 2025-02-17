@@ -1,0 +1,4 @@
+asyncio
+tinkoff-investments
+flask
+openai
