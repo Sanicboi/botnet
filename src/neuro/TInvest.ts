@@ -27,12 +27,13 @@ export class TInvest {
         });
 
         //@ts-ignore
-        const lastPrices = await api.marketdata.getLastPrices({
-            instrumentId: [
-                instrument.uid
-            ],
-            lastPriceType: LastPriceType.LAST_PRICE_EXCHANGE,
-        });
+        // const lastPrices = await api.marketdata.getLastPrices({
+        //     instrumentId: [
+        //         instrument.uid
+        //     ],
+        //     lastPriceType: LastPriceType.LAST_PRICE_EXCHANGE,
+        //     figi: [],
+        // });
 
         const result = await openai.chat.completions.create({
             messages: [
@@ -42,7 +43,7 @@ export class TInvest {
                 },
                 {
                     role: 'user',
-                    content: `Свечи: ${JSON.stringify(candles.candles)}\n\nПоследняя цена: ${JSON.stringify(lastPrices.lastPrices)}`
+                    content: `Свечи: ${JSON.stringify(candles.candles)}`
                 }
             ],
             model: 'gpt-4o-mini'
