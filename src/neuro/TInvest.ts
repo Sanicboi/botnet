@@ -15,8 +15,8 @@ export class TInvest {
         const instrument = (await api.instruments.findInstrument({
             query: ticker
         })).instruments[0];
-
-
+        
+        console.log(instrument);
         
         const candles = await api.marketdata.getCandles({
             instrumentId: instrument.uid,
