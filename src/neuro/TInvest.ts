@@ -22,7 +22,8 @@ export class TInvest {
         const candles = await api.marketdata.getCandles({
             instrumentId: instrument.uid,
             interval: CandleInterval.CANDLE_INTERVAL_4_HOUR,
-            from: dayjs().subtract(3, 'day').toDate()
+            from: dayjs().subtract(3, 'day').toDate(),
+            to: dayjs().toDate()
         });
 
         //@ts-ignore
