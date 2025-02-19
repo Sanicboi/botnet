@@ -15,14 +15,14 @@ export class TInvest {
 
         const instrument = (await api.instruments.findInstrument({
             query: ticker
-        })).instruments[0];
+        })).instruments;
         
         console.log(instrument);
         
         const candles = await api.marketdata.getLastPrices({
-            instrumentId: [instrument.uid],
+            instrumentId: [instrument[0].uid],
             lastPriceType: LastPriceType.LAST_PRICE_UNSPECIFIED,
-            figi: [instrument.figi]
+            figi: [instrument[0].figi]
         });
         console.log(candles);
 
@@ -43,7 +43,7 @@ export class TInvest {
                 },
                 {
                     role: 'user',
-                    content: `Свечи: ${JSON.stringify(candles.lastPrices)}`
+                    content: `Последние цены: ${JSON.stringify(candles.lastPrices)}`
                 }
             ],
             model: 'gpt-4o-mini'
