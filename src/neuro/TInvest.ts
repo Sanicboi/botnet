@@ -25,6 +25,7 @@ export class TInvest {
             from: dayjs().subtract(3, 'day').toDate(),
             to: dayjs().toDate()
         });
+        console.log(candles.candles);
 
         //@ts-ignore
         // const lastPrices = await api.marketdata.getLastPrices({
