@@ -22,7 +22,7 @@ export class TInvest {
         const candles = await api.marketdata.getCandles({
             instrumentId: instrument.uid,
             interval: CandleInterval.CANDLE_INTERVAL_1_MIN,
-            ...api.helpers.fromTo("-3d")
+            ...api.helpers.fromTo("-1d")
         });
         console.log(candles);
 
