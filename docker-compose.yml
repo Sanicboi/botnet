@@ -30,15 +30,6 @@ services:
     build: .
     command: npm run mailer
     env_file: .env
-
-  invest:
-    restart: always
-    build:
-      context: .
-      dockerfile: ./src/investApi/Dockerfile
-    env_file: .env
-    ports:
-      -"6667:6667"
   # support:
   #   restart: always
   #   build: .
