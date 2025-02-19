@@ -3,6 +3,7 @@ import {TinkoffInvestApi} from "tinkoff-invest-api";
 import { InstrumentIdType } from "tinkoff-invest-api/cjs/generated/instruments";
 import { CandleInterval, LastPriceType } from "tinkoff-invest-api/cjs/generated/marketdata";
 import { openai } from ".";
+import dayjs from "dayjs";
 
 const api = new TinkoffInvestApi({
     token: process.env.T_INVEST_TOKEN!
@@ -20,7 +21,8 @@ export class TInvest {
         
         const candles = await api.marketdata.getCandles({
             instrumentId: instrument.uid,
-            interval: CandleInterval.CANDLE_INTERVAL_DAY,
+            interval: CandleInterval.CANDLE_INTERVAL_4_HOUR,
+            from: dayjs().subtract(3, 'day').toDate()
         });
 
         //@ts-ignore
