@@ -13,16 +13,11 @@ export class TInvest {
 
     public static async getAnalysis(ticker: string): Promise<string> {
 
-        const instrument = (await api.instruments.findInstrument({
-            query: ticker
-        })).instruments;
-        
-        console.log(instrument);
         
         const candles = await api.marketdata.getLastPrices({
-            instrumentId: [instrument[0].uid],
+            instrumentId: [ticker],
             lastPriceType: LastPriceType.LAST_PRICE_UNSPECIFIED,
-            figi: [instrument[0].figi]
+            figi: []
         });
         console.log(candles);
 
