@@ -19,10 +19,10 @@ export class TInvest {
         
         console.log(instrument);
         
-        const candles = await api.marketdata.getCandles({
-            instrumentId: instrument.uid,
-            interval: CandleInterval.CANDLE_INTERVAL_1_MIN,
-            ...api.helpers.fromTo("-1d")
+        const candles = await api.marketdata.getLastPrices({
+            instrumentId: [instrument.uid],
+            lastPriceType: LastPriceType.LAST_PRICE_UNSPECIFIED,
+            figi: [instrument.figi]
         });
         console.log(candles);
 
@@ -39,11 +39,11 @@ export class TInvest {
             messages: [
                 {
                     role: 'developer',
-                    content: 'Ты - инвестор. Твоя задача - проанализировать данные о свечах и последних ценах акции. Сделай максимально подробный отчет.',
+                    content: 'Ты - инвестор. Твоя задача - проанализировать данные о  последних ценах акции. Сделай максимально подробный отчет.',
                 },
                 {
                     role: 'user',
-                    content: `Свечи: ${JSON.stringify(candles.candles)}`
+                    content: `Свечи: ${JSON.stringify(candles.lastPrices)}`
                 }
             ],
             model: 'gpt-4o-mini'
