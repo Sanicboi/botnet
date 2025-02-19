@@ -1,7 +1,7 @@
 import axios from "axios";
 import {TinkoffInvestApi} from "tinkoff-invest-api";
 import { InstrumentIdType } from "tinkoff-invest-api/cjs/generated/instruments";
-import { CandleInterval, LastPriceType } from "tinkoff-invest-api/cjs/generated/marketdata";
+import { CandleInterval, GetCandlesRequest_CandleSource, LastPriceType } from "tinkoff-invest-api/cjs/generated/marketdata";
 import { openai } from ".";
 import dayjs from "dayjs";
 
@@ -21,11 +21,10 @@ export class TInvest {
         
         const candles = await api.marketdata.getCandles({
             instrumentId: instrument.uid,
-            interval: CandleInterval.CANDLE_INTERVAL_10_MIN,
-            from: dayjs().subtract(3, 'day').toDate(),
-            to: dayjs().toDate()
+            interval: CandleInterval.CANDLE_INTERVAL_1_MIN,
+            ...api.helpers.fromTo("-3d")
         });
-        console.log(candles.candles);
+        console.log(candles);
 
         //@ts-ignore
         // const lastPrices = await api.marketdata.getLastPrices({
