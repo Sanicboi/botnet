@@ -278,6 +278,7 @@ export class OpenAI {
       u.firstCryptoResponse = false;
       await Router.manager.save(u);
       const r = await TInvest.getAnalysis(msg.text!);
+      console.log(r);
       await this.run(msg, u, data, {
         content: r,
         role: 'user'
