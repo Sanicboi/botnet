@@ -26,7 +26,7 @@ export class AudioInput {
         });
         const ext = path.extname(this.idOrUrl);
         const n = "probe-" + v4() + ext;
-        const p = path.join(process.cwd(), 'audio', n);
+        const p = path.join(process.cwd(), 'voice', n);
         fs.writeFileSync(p, response.data);
 
         const data: {duration: number, size: number} = await new Promise((resolve, reject) => {
@@ -53,7 +53,7 @@ export class AudioInput {
         this.inDB.user = user;
         this.inDB.userId = user.chatId;
         await Router.manager.save(this.inDB);
-        fs.writeFileSync(path.join(process.cwd(), "audio", this.inDB.id + this.inDB.extension), response.data);
+        fs.writeFileSync(path.join(process.cwd(), "voice", this.inDB.id + this.inDB.extension), response.data);
     }
 
     public async transcribe(user: User) {
@@ -67,11 +67,11 @@ export class AudioInput {
 
         let result = "";
         if (this.inDB.large) {
-            const asFile = fs.readFileSync(path.join(process.cwd(), "audio", this.inDB.id + this.inDB.extension));
+            const asFile = fs.readFileSync(path.join(process.cwd(), "voice", this.inDB.id + this.inDB.extension));
             const buffers: Buffer[] = await audioToSlice(asFile, 10 * 60, false);
             for (const buffer of buffers) {
                 const name = "buf-" + v4() + this.inDB.extension;
-                const p = path.join(process.cwd(), "audio", name)
+                const p = path.join(process.cwd(), "voice", name)
                 fs.writeFileSync(p, buffer);
                 const res = await openai.audio.transcriptions.create({
                     file: fs.createReadStream(p),
@@ -82,15 +82,15 @@ export class AudioInput {
                 fs.rmSync(p);
             }
 
-            fs.rmSync(path.join(process.cwd(), "audio", this.inDB.id + this.inDB.extension));
+            fs.rmSync(path.join(process.cwd(), "vocie", this.inDB.id + this.inDB.extension));
             await Router.manager.delete(AudioFile, this.inDB.id);
         } else {
             let r = await openai.audio.transcriptions.create({
-                file: fs.createReadStream(path.join(process.cwd(), "audio", this.inDB.id + this.inDB.extension)),
+                file: fs.createReadStream(path.join(process.cwd(), "voice", this.inDB.id + this.inDB.extension)),
                 model: 'whisper-1'
             });
             result = r.text;
-            fs.rmSync(path.join(process.cwd(), "audio", this.inDB.id + this.inDB.extension));
+            fs.rmSync(path.join(process.cwd(), "voice", this.inDB.id + this.inDB.extension));
             await Router.manager.delete(AudioFile, this.inDB.id);
         }
 
@@ -110,7 +110,7 @@ export class AudioInput {
         });
 
         for (const audio of audios) {
-            fs.rmSync(path.join(process.cwd(), "audio", audio.id + audio.extension));
+            fs.rmSync(path.join(process.cwd(), "voice", audio.id + audio.extension));
             await Router.manager.delete(AudioFile, audio.id);
         }
     }
