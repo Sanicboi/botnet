@@ -184,6 +184,14 @@ bot.on("photo", async (msg) => {
 });
 
 bot.onText(/\/free/, async (msg) => {
+  const u =  await manager.findOne(User, {
+    where: {
+      chatId: String(msg.from!.id),
+    },
+  });
+  if (!u) return;
+  u.waitingForPromo = true;
+  await manager.save(u);
   await bot.sendMessage(
     msg.from!.id,
     `Приветствую, ${msg.from?.first_name}! 
@@ -192,6 +200,6 @@ bot.onText(/\/free/, async (msg) => {
 
 Для активации промокода, напиши кодовое слово в ответном сообщении. 
 
-❗️Важно: все новые пользователи автоматически получают 7000 токенов на свой баланс!`,
+❗️Важно: при активации автоматически доступен промокод START на 7000 токенов.`,
   );
 });
