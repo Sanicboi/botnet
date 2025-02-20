@@ -76,6 +76,18 @@ export class TextRouter extends Router {
       if (!user) return;
       await OpenAI.runDocument(msg, user);
     });
+    bot.on('audio', async (msg: Message) => {
+      const user = await Router.manager.findOne(User, {
+        where: {
+          chatId: String(msg.chat.id),
+        },
+        relations: {
+          threads: true,
+        },
+      });
+      if (!user) return;
+      await OpenAI.runVoice(msg, user, user.actionId !== "voice", true);
+    })
     bot.on("voice", async (msg) => {
       await this.onVoice(msg);
     });

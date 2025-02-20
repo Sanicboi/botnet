@@ -338,11 +338,11 @@ export class OpenAI {
   public static async runVoice(msg: Message, u: User, generate: boolean, asFile: boolean = false) {
     const data = await this.setupRun(msg, u, !asFile);
     if (!data) return;
-    if (asFile && !msg.document) return;
+    if (asFile && !msg.audio) return;
     if (!asFile && !msg.voice) return;
 
     let url: string;
-    url = await bot.getFileLink(asFile ? msg.document!.file_id : msg.voice!.file_id);
+    url = await bot.getFileLink(asFile ? msg.audio!.file_id : msg.voice!.file_id);
     // const res = await axios.get(url, {
     //   responseType: "arraybuffer",
     // });
@@ -434,10 +434,6 @@ export class OpenAI {
     const type = mime.lookup(path.extname(url));
     console.log(type);
 
-    if (type === "audio/ogg" || type === "audio/mpeg" || type === "audio/webm" || type === "audio/wave") {
-      console.log("Audio")
-      await this.runVoice(msg, u, u.actionId !== "voice", true);
-    } else {
       console.log(msg.caption);
       const res = await axios.get(url, {
         responseType: "arraybuffer",
@@ -471,8 +467,7 @@ export class OpenAI {
             ],
           },
         ],
-      });
-    }
+      })
 
     
   }
