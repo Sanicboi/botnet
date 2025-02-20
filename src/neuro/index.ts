@@ -120,7 +120,7 @@ bot.onText(/./, async (msg) => {
         u.waitingForPromo = false;
         const promo = await manager.findOne(PromoCode, {
           where: {
-            name: u.name,
+            name: msg.text,
           },
           relations: {
             userPromos: true,
