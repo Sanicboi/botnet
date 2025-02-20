@@ -143,7 +143,7 @@ bot.onText(/./, async (msg) => {
           } else if (
             promo.userPromos.findIndex(
               (el) => el.userId === String(msg.from!.id),
-            )
+            ) >= 0
           ) {
             await bot.sendMessage(
               msg.from!.id,
