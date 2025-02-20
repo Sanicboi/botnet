@@ -24,9 +24,13 @@ export class AudioInput {
         const response = await axios.get(this.idOrUrl, {
             responseType: "arraybuffer"
         });
+        const ext = path.extname(this.idOrUrl);
+        const n = "probe-" + v4() + ext;
+        const p = path.join(process.cwd(), 'audio', n);
+        fs.writeFileSync(p, response.data);
 
         const data: {duration: number, size: number} = await new Promise((resolve, reject) => {
-            ffmpeg.ffprobe(response.data, (err, data) => {
+            ffmpeg.ffprobe(p, (err, data) => {
                 if (err) {
                     reject(err);
                     return;
@@ -38,7 +42,7 @@ export class AudioInput {
                 })
             })
         });
-
+        fs.rmSync(p);
         this.inDB = new AudioFile();
 
         this.inDB.size = data.size;
@@ -49,7 +53,6 @@ export class AudioInput {
         this.inDB.user = user;
         this.inDB.userId = user.chatId;
         await Router.manager.save(this.inDB);
-        
         fs.writeFileSync(path.join(process.cwd(), "audio", this.inDB.id + this.inDB.extension), response.data);
     }
 
