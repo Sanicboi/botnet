@@ -357,6 +357,7 @@ export class OpenAI {
     // fs.rmSync(path.join(process.cwd(), "voice", name));
     let audioFile = new AudioInput(url);
     await audioFile.initFromUrl(u);
+    console.log(audioFile);
     if (asFile) {
       // Prompt for transcription
       await bot.sendMessage(msg.from!.id, `Транскрибация будет стоить ${audioFile.getCost()} токенов. Хотите продолжить?`, {
