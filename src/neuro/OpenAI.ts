@@ -21,7 +21,7 @@ import { TGChannelsAnalyzer } from "./TGChannelsAPI";
 import { BybitAPI } from "./BybitAPI";
 import { OutputBotFormatter } from "./output/formatter";
 import { AudioInput } from "./AudioInput";
-import { TInvest } from "./TInvest";
+import { Invest } from "./Invest";
 
 interface IRunData {
   prompt: string;
@@ -277,7 +277,7 @@ export class OpenAI {
     if (u.firstCryptoResponse && u.actionId === "asst_y6WZIorpOfNMMWhFkhWzNhEf") {
       u.firstCryptoResponse = false;
       await Router.manager.save(u);
-      const r = await TInvest.getAnalysis(msg.text!);
+      const r = await Invest.getAnalysis(msg.text!);
       console.log(r);
       await this.run(msg, u, data, {
         content: r,
