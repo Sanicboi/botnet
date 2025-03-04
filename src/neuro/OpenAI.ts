@@ -60,67 +60,73 @@ export class OpenAI {
       id: actId,
     });
     await Router.manager.save(u);
-    const t = await openai.beta.threads.create();
-    const thread = new Thread();
-    thread.id = t.id;
-    thread.actionId = u.actionId;
-    thread.userId = u.chatId;
-    await Router.manager.save(thread);
-    if (
-      u.actionId === "asst_Yi7ajro25YJRPccS4hqePcvb" ||
-      u.actionId === "asst_naVdwMABoWcDLD2vs9W2hnD9" ||
-      u.actionId === "asst_y6WZIorpOfNMMWhFkhWzNhEf"
-    ) {
-      u.firstCryptoResponse = true;
-      await Router.manager.save(u);
-    }
+    let thread: Thread | null = await Router.manager.findOneBy(Thread, {
+      userId: u.chatId,
+      actionId: actId,
+    });
+    if (!thread) {
+      const t = await openai.beta.threads.create();
+      thread = new Thread();
+      thread.id = t.id;
+      thread.actionId = u.actionId;
+      thread.userId = u.chatId;
+      await Router.manager.save(thread);
+      if (
+        u.actionId === "asst_Yi7ajro25YJRPccS4hqePcvb" ||
+        u.actionId === "asst_naVdwMABoWcDLD2vs9W2hnD9" ||
+        u.actionId === "asst_y6WZIorpOfNMMWhFkhWzNhEf"
+      ) {
+        u.firstCryptoResponse = true;
+        await Router.manager.save(u);
+      }
 
-    switch (u.actionId) {
-      case "asst_14B08GDgJphVClkmmtQYo0aq":
-        await bot.sendMessage(
-          +thread.userId,
-          "Отлично, с размером определились.",
-        );
-        await bot.sendMessage(+thread.userId, act!.welcomeMessage);
-        break;
-      case "asst_WHhZd8u8rXpAHADdjIwBM9CJ":
-        await bot.sendMessage(
-          +u.chatId,
-          `Приветствую!👋 Я AI составитель договоров. Я помогу тебе составить "${u.agreementType.replace("\n", "")}" \n🔶Для того, чтобы составить договор, мне необходима вводная информация.\nПришли мне вводную информацию ответным сообщением или файлом (word)\n\nОжидаю информацию)😉`,
-        );
-        await bot.sendMessage(
-          +u.chatId,
-          `Ниже указал вводную информацию, которая мне необходима:\n👇\n\n${MessageFormatter.readTextFromFile(agreementsMap.get(u.agreementType)! + ".txt")}`,
-        );
-        break;
-      case "asst_1BdIGF3mp94XvVfgS88fLIor":
-        await bot.sendMessage(
-          +thread.userId,
-          `${u.textStyle ?? "Стиль не выбран"}\n${u.textTone ?? "Тон не выбран"}\nОтлично, со стилем и тоном определились! 😉\n\nТеперь для создания текста мне необходимо получить от тебя вводную информацию:\n1)Тема\n2)Для кого создается текст  (студенты, инвесторы…)\n3)Размер текста по времени (5 мин; 10 мин; 30 мин)\n\nОтвет пришли мне в ответном сообщении!\nОжидаю информацию)😉`,
-          {
-            reply_markup: {
-              inline_keyboard: [
-                Btn(
-                  "Вернуться к выбору стиля и тона",
-                  "ac-asst_1BdIGF3mp94XvVfgS88fLIor",
-                ),
-              ],
-            },
-          },
-        );
-        break;
-      default:
-        await bot.sendMessage(+thread.userId, act!.welcomeMessage);
-        break;
-    }
+      switch (u.actionId) {
+        case "asst_14B08GDgJphVClkmmtQYo0aq":
+          await bot.sendMessage(
+            +thread.userId,
+            "Отлично, с размером определились."
+          );
+          await bot.sendMessage(+thread.userId, act!.welcomeMessage);
+          break;
+        case "asst_WHhZd8u8rXpAHADdjIwBM9CJ":
+          await bot.sendMessage(
+            +u.chatId,
+            `Приветствую!👋 Я AI составитель договоров. Я помогу тебе составить "${u.agreementType.replace("\n", "")}" \n🔶Для того, чтобы составить договор, мне необходима вводная информация.\nПришли мне вводную информацию ответным сообщением или файлом (word)\n\nОжидаю информацию)😉`
+          );
+          await bot.sendMessage(
+            +u.chatId,
+            `Ниже указал вводную информацию, которая мне необходима:\n👇\n\n${MessageFormatter.readTextFromFile(agreementsMap.get(u.agreementType)! + ".txt")}`
+          );
+          break;
+        case "asst_1BdIGF3mp94XvVfgS88fLIor":
+          await bot.sendMessage(
+            +thread.userId,
+            `${u.textStyle ?? "Стиль не выбран"}\n${u.textTone ?? "Тон не выбран"}\nОтлично, со стилем и тоном определились! 😉\n\nТеперь для создания текста мне необходимо получить от тебя вводную информацию:\n1)Тема\n2)Для кого создается текст  (студенты, инвесторы…)\n3)Размер текста по времени (5 мин; 10 мин; 30 мин)\n\nОтвет пришли мне в ответном сообщении!\nОжидаю информацию)😉`,
+            {
+              reply_markup: {
+                inline_keyboard: [
+                  Btn(
+                    "Вернуться к выбору стиля и тона",
+                    "ac-asst_1BdIGF3mp94XvVfgS88fLIor"
+                  ),
+                ],
+              },
+            }
+          );
+          break;
+        default:
+          await bot.sendMessage(+thread.userId, act!.welcomeMessage);
+          break;
+      }
 
-    if (act?.exampleFile) {
-      const rs = fs.createReadStream(
-        path.join(process.cwd(), "assets", act.exampleFile),
-      );
-      await bot.sendDocument(+thread.userId, rs, {
-        caption: "Пример промпта",
-      });
+      if (act?.exampleFile) {
+        const rs = fs.createReadStream(
+          path.join(process.cwd(), "assets", act.exampleFile)
+        );
+        await bot.sendDocument(+thread.userId, rs, {
+          caption: "Пример промпта",
+        });
+      }
     }
 
     await bot.sendMessage(+thread.userId, "Модель для генерации:", {
@@ -128,15 +134,15 @@ export class OpenAI {
         inline_keyboard: [
           Btn(
             `${u.model === "gpt-4o-mini" ? "✅" : ""} GPT 4 Omni mini`,
-            "aimodel-gpt-4o-mini",
+            "aimodel-gpt-4o-mini"
           ),
           Btn(
             `${u.model === "gpt-4o" ? "✅" : ""} GPT 4 Omni`,
-            "aimodel-gpt-4o",
+            "aimodel-gpt-4o"
           ),
           Btn(
             `${u.model === "gpt-4-turbo" ? "✅" : ""} GPT 4 Turbo`,
-            "aimodel-gpt-4-turbo",
+            "aimodel-gpt-4-turbo"
           ),
         ],
       },
@@ -162,11 +168,10 @@ export class OpenAI {
       u.textStyle +
       u.textTone +
       u.offerSize +
-      + (u.offerType ? ("\n" + "Модель оффера: " + u.offerType + "\n") : "")
-      + (u.postStyle ? ("\n" + "Стиль поста:" + u.postStyle + "\n") : "")
-      + (u.postType ? ("\n" + "Тип поста:" + u.postType + "\n") : "")
-      u.docType +
-      u.agreementType;
+      +(u.offerType ? "\n" + "Модель оффера: " + u.offerType + "\n" : "") +
+      (u.postStyle ? "\n" + "Стиль поста:" + u.postStyle + "\n" : "") +
+      (u.postType ? "\n" + "Тип поста:" + u.postType + "\n" : "");
+    u.docType + u.agreementType;
     u.textStyle = "";
     u.textTone = "";
     u.offerSize = "";
@@ -180,7 +185,7 @@ export class OpenAI {
     if (u.addBalance === 0 && u.leftForToday === 0) {
       await bot.sendMessage(
         msg.from!.id,
-        "❌Упс! У вас закончились токены.\nЧтобы продолжить пользоваться ботом, вам нужно оформить подписку или купить отдельный комплект токенов…",
+        "❌Упс! У вас закончились токены.\nЧтобы продолжить пользоваться ботом, вам нужно оформить подписку или купить отдельный комплект токенов…"
       );
       if (u.subscription !== "none") {
         // is subscribed
@@ -192,7 +197,7 @@ export class OpenAI {
             reply_markup: {
               inline_keyboard: [Btn("Купить пакет токенов", "b-tokens")],
             },
-          },
+          }
         );
       } else {
         await wait(2);
@@ -206,7 +211,7 @@ export class OpenAI {
                 Btn("Купить подписку", "b-sub"),
               ],
             },
-          },
+          }
         );
       }
       return false;
@@ -220,13 +225,17 @@ export class OpenAI {
     };
   }
 
-  public static async setupRunCQ(msg: CallbackQuery, u: User, send: boolean = true): Promise<Pick<IRunData, "thread"> | false> {
+  public static async setupRunCQ(
+    msg: CallbackQuery,
+    u: User,
+    send: boolean = true
+  ): Promise<Pick<IRunData, "thread"> | false> {
     const t = u.threads.find((t) => t.actionId === u.actionId);
     if (!t && u.actionId !== "voice") return false;
     if (u.addBalance === 0 && u.leftForToday === 0) {
       await bot.sendMessage(
         msg.from!.id,
-        "❌Упс! У вас закончились токены.\nЧтобы продолжить пользоваться ботом, вам нужно оформить подписку или купить отдельный комплект токенов…",
+        "❌Упс! У вас закончились токены.\nЧтобы продолжить пользоваться ботом, вам нужно оформить подписку или купить отдельный комплект токенов…"
       );
       if (u.subscription !== "none") {
         // is subscribed
@@ -238,7 +247,7 @@ export class OpenAI {
             reply_markup: {
               inline_keyboard: [Btn("Купить пакет токенов", "b-tokens")],
             },
-          },
+          }
         );
       } else {
         await wait(2);
@@ -252,7 +261,7 @@ export class OpenAI {
                 Btn("Купить подписку", "b-sub"),
               ],
             },
-          },
+          }
         );
       }
       return false;
@@ -261,7 +270,7 @@ export class OpenAI {
       await bot.sendMessage(msg.from!.id, "генерирую ответ ✨...");
     }
     return {
-      thread: t
+      thread: t,
     };
   }
 
@@ -274,14 +283,17 @@ export class OpenAI {
   public static async runText(msg: Message, u: User) {
     const data = await this.setupRun(msg, u);
     if (!data) return;
-    if (u.firstCryptoResponse && u.actionId === "asst_y6WZIorpOfNMMWhFkhWzNhEf") {
+    if (
+      u.firstCryptoResponse &&
+      u.actionId === "asst_y6WZIorpOfNMMWhFkhWzNhEf"
+    ) {
       u.firstCryptoResponse = false;
       await Router.manager.save(u);
       const r = await Invest.getAnalysis(msg.text!);
       console.log(r);
       await this.run(msg, u, data, {
         content: r,
-        role: 'user'
+        role: "user",
       });
     }
     if (
@@ -335,14 +347,21 @@ export class OpenAI {
    * @param asFile Whether the document attached is consideered a voice message
    * @returns Nothing
    */
-  public static async runVoice(msg: Message, u: User, generate: boolean, asFile: boolean = false) {
+  public static async runVoice(
+    msg: Message,
+    u: User,
+    generate: boolean,
+    asFile: boolean = false
+  ) {
     const data = await this.setupRun(msg, u, !asFile);
     if (!data) return;
     if (asFile && !msg.audio) return;
     if (!asFile && !msg.voice) return;
 
     let url: string;
-    url = await bot.getFileLink(asFile ? msg.audio!.file_id : msg.voice!.file_id);
+    url = await bot.getFileLink(
+      asFile ? msg.audio!.file_id : msg.voice!.file_id
+    );
     // const res = await axios.get(url, {
     //   responseType: "arraybuffer",
     // });
@@ -360,15 +379,18 @@ export class OpenAI {
     console.log(audioFile);
     if (asFile) {
       // Prompt for transcription
-      await bot.sendMessage(msg.from!.id, `Транскрибация будет стоить ${audioFile.getCost()} токенов. Хотите продолжить?`, {
-        reply_markup: {
-          inline_keyboard: [
-            Btn('Да', `transcribe-${audioFile.inDB.id}`),
-            Btn('Нет', `no-transcribe`)
-          ]
+      await bot.sendMessage(
+        msg.from!.id,
+        `Транскрибация будет стоить ${audioFile.getCost()} токенов. Хотите продолжить?`,
+        {
+          reply_markup: {
+            inline_keyboard: [
+              Btn("Да", `transcribe-${audioFile.inDB.id}`),
+              Btn("Нет", `no-transcribe`),
+            ],
+          },
         }
-      })
-
+      );
     } else {
       audioFile = new AudioInput(audioFile.inDB.id);
       const result = await audioFile.transcribe(u);
@@ -381,8 +403,6 @@ export class OpenAI {
         await bot.sendMessage(msg.from!.id, result);
       }
     }
-
-
   }
 
   /**
@@ -434,42 +454,40 @@ export class OpenAI {
     const type = mime.lookup(path.extname(url));
     console.log(type);
 
-      console.log(msg.caption);
-      const res = await axios.get(url, {
-        responseType: "arraybuffer",
-      });
-      const file = new File([res.data], v4() + path.extname(url), {
-        type: type || "text/plain",
-      });
-  
-      const f = await openai.files.create({
-        purpose: "assistants",
-        file,
-      });
-  
-      const upload = new FileUpload();
-      upload.id = f.id;
-      upload.userId = u.chatId;
-      upload.thread = data.thread!;
-      upload.threadId = data.thread!.id;
-      await Router.manager.save(upload);
-  
-      await this.run(msg, u, data, {
-        role: "user",
-        content: msg.caption ?? "Входные данные в виде файла",
-        attachments: [
-          {
-            file_id: f.id,
-            tools: [
-              {
-                type: "file_search",
-              },
-            ],
-          },
-        ],
-      })
+    console.log(msg.caption);
+    const res = await axios.get(url, {
+      responseType: "arraybuffer",
+    });
+    const file = new File([res.data], v4() + path.extname(url), {
+      type: type || "text/plain",
+    });
 
-    
+    const f = await openai.files.create({
+      purpose: "assistants",
+      file,
+    });
+
+    const upload = new FileUpload();
+    upload.id = f.id;
+    upload.userId = u.chatId;
+    upload.thread = data.thread!;
+    upload.threadId = data.thread!.id;
+    await Router.manager.save(upload);
+
+    await this.run(msg, u, data, {
+      role: "user",
+      content: msg.caption ?? "Входные данные в виде файла",
+      attachments: [
+        {
+          file_id: f.id,
+          tools: [
+            {
+              type: "file_search",
+            },
+          ],
+        },
+      ],
+    });
   }
 
   /**
@@ -491,12 +509,12 @@ export class OpenAI {
     });
     if (!u) return;
     const threadId = q.data!.substring(4); // del-...
-    
+
     const files = await Router.manager.find(FileUpload, {
       where: {
         userId: u.chatId,
-        threadId
-      }
+        threadId,
+      },
     });
 
     for (const file of files) {
@@ -506,6 +524,7 @@ export class OpenAI {
 
     await openai.beta.threads.del(threadId);
     await Router.manager.delete(Thread, threadId);
+    await bot.sendMessage(q.from.id, "Контекст успешно удален");
   }
 
   /**
@@ -519,7 +538,7 @@ export class OpenAI {
     msg: Message | CallbackQuery,
     u: User,
     data: Pick<IRunData, "thread">,
-    params: MessageCreateParams,
+    params: MessageCreateParams
   ) {
     if (!data.thread) return;
     await openai.beta.threads.messages.create(data.thread.id, params);
@@ -541,8 +560,6 @@ export class OpenAI {
     await this.sendResult(msg, u, asText, run.usage!.total_tokens);
   }
 
-
-
   /**
    * This method sends the result of the generation to the user
    * @param msg Message Object
@@ -554,7 +571,7 @@ export class OpenAI {
     msg: Message | CallbackQuery,
     u: User,
     messages: string[],
-    tokenCount: number,
+    tokenCount: number
   ) {
     const cost =
       (tokenCount / 1000000) *
@@ -581,7 +598,7 @@ export class OpenAI {
     if (u.countTokens) {
       await bot.sendMessage(
         msg.from!.id,
-        `Количество токенов: ${Math.round((cost / 34) * 10000)}`,
+        `Количество токенов: ${Math.round((cost / 34) * 10000)}`
       );
     }
   }

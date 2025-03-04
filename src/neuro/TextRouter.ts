@@ -190,9 +190,9 @@ export class TextRouter extends Router {
         await bot.sendMessage(q.from!.id, "Выберите размер оффера", {
           reply_markup: {
             inline_keyboard: [
-              Btn("Большой", "offer-long"),
-              Btn("Средний", "offer-medium"),
-              Btn("Маленький", "offer-short"),
+              Btn("Большой (120-150 слов)", "offer-long"),
+              Btn("Средний (90-120 слов)", "offer-medium"),
+              Btn("Маленький (60-90 слов)", "offer-short"),
             ],
           },
         });
@@ -256,7 +256,7 @@ export class TextRouter extends Router {
     if (q.data?.startsWith("offer-")) {
       u.offerSize = sizeMap.get(q.data!)!;
       await Router.manager.save(u);
-      await bot.sendMessage(q.from!.id, "Выберите модель составления оффера.\nНе знаешь какую выбрать? Смотри справку: https://docs.google.com/document/d/1785aqFyeHDYV3QjfJwpA4TC-K1UjScqRRDsQoFk7Uy8/edit", {
+      await bot.sendMessage(q.from!.id, "Для создания оффера давайте определимся с моделью!\nВыбери подходящую модель по кнопке ниже 👇\nНе знаешь какую выбрать? Смотри [справку](https://docs.google.com/document/d/1785aqFyeHDYV3QjfJwpA4TC-K1UjScqRRDsQoFk7Uy8/edit)", {
         reply_markup: {
           inline_keyboard: [
             Btn("AIDA", "ot-aida"),
@@ -267,7 +267,8 @@ export class TextRouter extends Router {
             Btn("ACC", "ot-acc"),
             Btn("Смешанная", "ot-mixed")
           ]
-        }
+        },
+        parse_mode: 'Markdown'
       })
       
     }
@@ -397,3 +398,4 @@ export class TextRouter extends Router {
     await OpenAI.runVoice(msg, user, true);
   }
 }
+
