@@ -21,7 +21,7 @@ export class Mailer {
   private manager: EntityManager = AppDataSource.manager;
   private asst: string = "asst_0yxkzSPNtPwwpFerJFhUMW8m";
   private reporter: TelegramBot;
-  private reportChatId: number = 2074310819;
+  private reportChatId: number = 1391491967;
 
   constructor() {
     this.reporter = new TelegramBot(process.env.REPORTER_TG_TOKEN!, {
@@ -187,7 +187,8 @@ export class Mailer {
       if (!lead.responded) {
         lead.responded = true;
         await this.manager.save(lead);
-        await this.reporter.sendMessage(this.reportChatId, `Ответ на сообщение от лида ${lead.username}`);
+        const me = await client.getMe();
+        await this.reporter.sendMessage(this.reportChatId, `Ответ на сообщение от лида ${lead.username}. Бот ${me.username} ${me.phone}`);
       }
 
       if (lead.handled) return;
