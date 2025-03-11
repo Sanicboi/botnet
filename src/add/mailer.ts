@@ -116,7 +116,7 @@ export class Mailer {
       messages: [
         {
           role: "user",
-          content: "Начни диалог. Ты не знаешь имени пользователя.",
+          content: `Имя: ${lead.name}`,
         },
       ],
     });
