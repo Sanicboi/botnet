@@ -72,7 +72,7 @@ export class Mailer {
       // })
       .getMany();
 
-    let left = Math.min(leads.length, bots.length * 10);
+    let left = Math.min(leads.length, bots.length * 7);
     let msgs: string[] = [];
     let rounds = Math.ceil(left / 5);
     let currentLead = 0;
@@ -92,7 +92,7 @@ export class Mailer {
       await wait(2);
     }
 
-    left = Math.min(leads.length, bots.length * 15);
+    left = Math.min(leads.length, bots.length * 7);
     currentLead = 0;
     while (left > 0) {
       let promises: Promise<any>[] = [];
