@@ -19,9 +19,9 @@ export class Mailer {
     TelegramClient
   >();
   private manager: EntityManager = AppDataSource.manager;
-  private asst: string = "asst_I66lzkKeACqLSCn0Vt5w1ges";
+  private asst: string = "asst_0yxkzSPNtPwwpFerJFhUMW8m";
   private reporter: TelegramBot;
-  private reportChatId: number = -1002253745351;
+  private reportChatId: number = 2074310819;
 
   constructor() {
     this.reporter = new TelegramBot(process.env.REPORTER_TG_TOKEN!, {
