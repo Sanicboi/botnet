@@ -21,18 +21,6 @@ export class User {
   @PrimaryColumn()
   chatId: string;
 
-  @Column({ nullable: true })
-  sphere: string;
-
-  @Column({ nullable: true })
-  clients: string;
-
-  @Column({ nullable: true })
-  callDate: string;
-
-  @Column({ nullable: true })
-  optimize: string;
-
   @Column({ default: "n" })
   qt: "n" | "s" | "l" | "d" | "a" | "o";
 
@@ -103,30 +91,7 @@ export class User {
   @OneToMany(() => FileUpload, (f) => f.user)
   files: FileUpload[];
 
-  @Column({
-    default: "",
-  })
-  offerSize: string;
 
-  @Column({
-    default: "",
-  })
-  textStyle: string;
-
-  @Column({
-    default: "",
-  })
-  textTone: string;
-
-  @Column({
-    default: "",
-  })
-  docType: string;
-
-  @Column({
-    default: "",
-  })
-  agreementType: string;
 
   @Column({
     default: 0,
@@ -162,21 +127,17 @@ export class User {
   })
   paymentMethod: string;
 
-  @Column({
-    nullable: true,
-  })
-  offerType: string;
-
-  @Column({
-    nullable: true
-  })
-  postType: string;
-
-  @Column({
-    nullable: true
-  })
-  postStyle: string;
 
   @OneToMany(() => AudioFile, (audio) => audio.user)
   audios: AudioFile[];
+
+  @Column({
+    default: ''
+  })
+  dialogueData: string; // Per-Dialogue initial data
+
+  @Column({
+    default: ''
+  })
+  addData: string; // Constant data
 }
