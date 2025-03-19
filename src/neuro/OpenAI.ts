@@ -80,53 +80,55 @@ export class OpenAI {
         await Router.manager.save(u);
       }
 
-      switch (u.actionId) {
-        case "asst_14B08GDgJphVClkmmtQYo0aq":
-          await bot.sendMessage(
-            +thread.userId,
-            "Отлично, с размером определились."
-          );
-          await bot.sendMessage(+thread.userId, act!.welcomeMessage);
-          break;
-        case "asst_WHhZd8u8rXpAHADdjIwBM9CJ":
-          await bot.sendMessage(
-            +u.chatId,
-            `Приветствую!👋 Я AI составитель договоров. Я помогу тебе составить "${u.agreementType.replace("\n", "")}" \n🔶Для того, чтобы составить договор, мне необходима вводная информация.\nПришли мне вводную информацию ответным сообщением или файлом (word)\n\nОжидаю информацию)😉`
-          );
-          await bot.sendMessage(
-            +u.chatId,
-            `Ниже указал вводную информацию, которая мне необходима:\n👇\n\n${MessageFormatter.readTextFromFile(agreementsMap.get(u.agreementType)! + ".txt")}`
-          );
-          break;
-        case "asst_1BdIGF3mp94XvVfgS88fLIor":
-          await bot.sendMessage(
-            +thread.userId,
-            `${u.textStyle ?? "Стиль не выбран"}\n${u.textTone ?? "Тон не выбран"}\nОтлично, со стилем и тоном определились! 😉\n\nТеперь для создания текста мне необходимо получить от тебя вводную информацию:\n1)Тема\n2)Для кого создается текст  (студенты, инвесторы…)\n3)Размер текста по времени (5 мин; 10 мин; 30 мин)\n\nОтвет пришли мне в ответном сообщении!\nОжидаю информацию)😉`,
-            {
-              reply_markup: {
-                inline_keyboard: [
-                  Btn(
-                    "Вернуться к выбору стиля и тона",
-                    "ac-asst_1BdIGF3mp94XvVfgS88fLIor"
-                  ),
-                ],
-              },
-            }
-          );
-          break;
-        default:
-          await bot.sendMessage(+thread.userId, act!.welcomeMessage);
-          break;
-      }
+      
+    }
 
-      if (act?.exampleFile) {
-        const rs = fs.createReadStream(
-          path.join(process.cwd(), "assets", act.exampleFile)
+    switch (u.actionId) {
+      case "asst_14B08GDgJphVClkmmtQYo0aq":
+        await bot.sendMessage(
+          +thread.userId,
+          "Отлично, с размером определились."
         );
-        await bot.sendDocument(+thread.userId, rs, {
-          caption: "Пример промпта",
-        });
-      }
+        await bot.sendMessage(+thread.userId, act!.welcomeMessage);
+        break;
+      case "asst_WHhZd8u8rXpAHADdjIwBM9CJ":
+        await bot.sendMessage(
+          +u.chatId,
+          `Приветствую!👋 Я AI составитель договоров. Я помогу тебе составить "${u.agreementType.replace("\n", "")}" \n🔶Для того, чтобы составить договор, мне необходима вводная информация.\nПришли мне вводную информацию ответным сообщением или файлом (word)\n\nОжидаю информацию)😉`
+        );
+        await bot.sendMessage(
+          +u.chatId,
+          `Ниже указал вводную информацию, которая мне необходима:\n👇\n\n${MessageFormatter.readTextFromFile(agreementsMap.get(u.agreementType)! + ".txt")}`
+        );
+        break;
+      case "asst_1BdIGF3mp94XvVfgS88fLIor":
+        await bot.sendMessage(
+          +thread.userId,
+          `${u.textStyle ?? "Стиль не выбран"}\n${u.textTone ?? "Тон не выбран"}\nОтлично, со стилем и тоном определились! 😉\n\nТеперь для создания текста мне необходимо получить от тебя вводную информацию:\n1)Тема\n2)Для кого создается текст  (студенты, инвесторы…)\n3)Размер текста по времени (5 мин; 10 мин; 30 мин)\n\nОтвет пришли мне в ответном сообщении!\nОжидаю информацию)😉`,
+          {
+            reply_markup: {
+              inline_keyboard: [
+                Btn(
+                  "Вернуться к выбору стиля и тона",
+                  "ac-asst_1BdIGF3mp94XvVfgS88fLIor"
+                ),
+              ],
+            },
+          }
+        );
+        break;
+      default:
+        await bot.sendMessage(+thread.userId, act!.welcomeMessage);
+        break;
+    }
+
+    if (act?.exampleFile) {
+      const rs = fs.createReadStream(
+        path.join(process.cwd(), "assets", act.exampleFile)
+      );
+      await bot.sendDocument(+thread.userId, rs, {
+        caption: "Пример промпта",
+      });
     }
 
     await bot.sendMessage(+thread.userId, "Модель для генерации:", {
