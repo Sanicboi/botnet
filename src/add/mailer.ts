@@ -19,9 +19,9 @@ export class Mailer {
     TelegramClient
   >();
   private manager: EntityManager = AppDataSource.manager;
-  private asst: string = "asst_I66lzkKeACqLSCn0Vt5w1ges";
+  private asst: string = "asst_0yxkzSPNtPwwpFerJFhUMW8m";
   private reporter: TelegramBot;
-  private reportChatId: number = -1002253745351;
+  private reportChatId: number = 1391491967;
 
   constructor() {
     this.reporter = new TelegramBot(process.env.REPORTER_TG_TOKEN!, {
@@ -72,7 +72,7 @@ export class Mailer {
       // })
       .getMany();
 
-    let left = Math.min(leads.length, bots.length * 10);
+    let left = Math.min(leads.length, bots.length * 7);
     let msgs: string[] = [];
     let rounds = Math.ceil(left / 5);
     let currentLead = 0;
@@ -92,7 +92,7 @@ export class Mailer {
       await wait(2);
     }
 
-    left = Math.min(leads.length, bots.length * 15);
+    left = Math.min(leads.length, bots.length * 7);
     currentLead = 0;
     while (left > 0) {
       let promises: Promise<any>[] = [];
@@ -116,7 +116,7 @@ export class Mailer {
       messages: [
         {
           role: "user",
-          content: "Начни диалог. Ты не знаешь имени пользователя.",
+          content: `Имя: ${lead.name}`,
         },
       ],
     });
@@ -187,19 +187,20 @@ export class Mailer {
       if (!lead.responded) {
         lead.responded = true;
         await this.manager.save(lead);
-        await this.reporter.sendMessage(this.reportChatId, `Ответ на сообщение от лида ${lead.username}`);
+        const me = await client.getMe();
+        await this.reporter.sendMessage(this.reportChatId, `Ответ на сообщение от лида ${lead.username}. Бот ${me.username} ${me.phone}`);
       }
 
       if (lead.handled) return;
-
-      await wait(2)
-      await client.invoke(new Api.messages.ReadHistory({
-        peer: lead.username
-      }));
-      await client.invoke(new Api.messages.SetTyping({
-        peer: lead.username,
-        action: new Api.SendMessageTypingAction()
-      }))
+      /*
+      //await wait(2)
+      //await client.invoke(new Api.messages.ReadHistory({
+       // peer: lead.username
+     // }));
+      //await client.invoke(new Api.messages.SetTyping({
+        //peer: lead.username,
+        //action: new Api.SendMessageTypingAction()
+      //}))
       await openai.beta.threads.messages.create(lead.threadId, {
         content: e.message.text,
         role: 'user'
@@ -221,7 +222,9 @@ export class Mailer {
             });
           }
         }
+      
       }
+      */
     }
   }
 

@@ -273,7 +273,7 @@ export class TextRouter extends Router {
       
     }
 
-    if (q.data?.startsWith("ot-")) {
+    if (q.data?.startsWith("ot-")) { // offer type
       u.offerType = q.data.substring(4);
       await Router.manager.save(u);
       await OpenAI.createThread(q, u, "asst_14B08GDgJphVClkmmtQYo0aq");

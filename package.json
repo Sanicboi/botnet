@@ -56,9 +56,7 @@
     "smm": "node build/add/personalSmm.js",
     "client": "ts-node ./src/add/consoleclient.ts",
     "mailer": "ts-node ./src/add/mailer.ts",
-    "login": "ts-node ./src/login.local.ts",
-    "spambot": "ts-node ./src/add/spambot.ts",
-    "parser": "ts-node ./src/add/parser.ts",
-    "avatars": "ts-node ./src/avatars.local.ts"
+    "login": "ts-node ./src/add/login.ts",
+    "spambot": "ts-node ./src/add/spambot.ts"
   }
 }

@@ -40,6 +40,11 @@ export class Lead {
   })
   sentAt: Date;
 
+  @Column({
+    nullable: true
+  })
+  name: string;
+
   // @ManyToOne(() => User, (user) => user.leads)
   // @JoinColumn({
   //   name: "userId",
