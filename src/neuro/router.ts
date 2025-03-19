@@ -81,14 +81,7 @@ export class Router {
   ) {
     if (user.waitingForName) user.waitingForName = false;
     if (user.usingImageGeneration) user.usingImageGeneration = false;
-    user.docType = "";
-    user.agreementType = "";
-    user.offerSize = "";
-    user.offerType = "";
-    user.textStyle = "";
-    user.textTone = "";
-    user.postStyle = "";
-    user.postType = "";
+    user.dialogueData = '';
     user.firstCryptoResponse = false;
     user.action = null;
     user.actionId = null;

@@ -16,9 +16,6 @@ import { FileUpload } from "../entity/assistants/FileUpload";
 import { wait } from "../utils/wait";
 //@ts-ignore
 import docx from "html-to-docx";
-import { CoinMarketCapAPI } from "./CoinMarketCapAPI";
-import { TGChannelsAnalyzer } from "./TGChannelsAPI";
-import { BybitAPI } from "./BybitAPI";
 import { OutputBotFormatter } from "./output/formatter";
 import { AudioInput } from "./AudioInput";
 import { Invest } from "./Invest";
@@ -38,9 +35,6 @@ agreementsMap.set("Договор оказания услуг\n", "offers-7");
 agreementsMap.set("Трудовой договор\n", "offers-6");
 agreementsMap.set("Договор оферты\n", "offers-8");
 
-const cmc = new CoinMarketCapAPI();
-const tg = new TGChannelsAnalyzer();
-const bybit = new BybitAPI();
 
 /**
  * This class is a helper class that makes it easy to use OpenAI
@@ -276,42 +270,7 @@ export class OpenAI {
         role: "user",
       });
     }
-    if (
-      u.actionId === "asst_Yi7ajro25YJRPccS4hqePcvb" &&
-      u.firstCryptoResponse
-    ) {
-      u.firstCryptoResponse = false;
-      await Router.manager.save(u);
-      const r1 = await cmc.getOverallMarketReport();
-      const r2 = await tg.searchByWordCryptoReport(msg.text!);
-      const r3 = await bybit.getCryptoReport(msg.text!);
-      const r4 = await cmc.getMetadataReport(msg.text!);
-
-      await this.run(msg, u, data, {
-        content: `
-          Анализ рынка:\n ${r1}\n
-          Анализ Телеграмм каналов о данной монете:\n ${r2}\n
-          Финансовые данные:\n ${r3}\n
-          Общий анализ монеты:\n ${r4}\n
-        `,
-        role: "user",
-      });
-
-      return;
-    }
-
-    if (
-      u.firstCryptoResponse &&
-      u.actionId === "asst_naVdwMABoWcDLD2vs9W2hnD9"
-    ) {
-      u.firstCryptoResponse = false;
-      await Router.manager.save(u);
-      const r1 = await cmc.getOverallMarketReport();
-      await this.run(msg, u, data, {
-        content: `Анализ рынка:\n ${r1}\nПрочие данные: ${msg.text}`,
-        role: "user",
-      });
-    }
+    
 
     await this.run(msg, u, data, {
       content: msg.text!,
