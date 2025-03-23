@@ -151,7 +151,9 @@ export class OpenAI {
     const res =
       (msg.text ?? "") +
       "\n" +
-      u.dialogueData;
+      u.dialogueData
+      + "\n" +
+      u.addData;
     
     u.dialogueData = "";
     await Router.manager.save(u);
