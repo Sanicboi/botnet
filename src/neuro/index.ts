@@ -12,6 +12,7 @@ import { PaymentsRouter } from "./PaymentsRouter";
 import { PromoCode } from "../entity/assistants/Promo";
 import { UserPromo } from "../entity/assistants/UserPromo";
 import { OutputBotFormatter } from "./output/formatter";
+import { AdditionalInfo } from "../entity/assistants/AdditionalInfo";
 const logger = pino();
 
 export const bot = new TelegramBot(process.env.NEURO_TOKEN ?? "", {
@@ -117,6 +118,7 @@ bot.onText(/./, async (msg) => {
         relations: {
           action: true,
           threads: true,
+          data: true
         },
       });
       if (!u) return;
@@ -172,9 +174,24 @@ bot.onText(/./, async (msg) => {
         return;
       }
 
-      if (u.waitingForData) {
-        u.addData = msg.text!;
-        await Router.manager.save(u);
+      if (u.waitingForData != '') {
+        const idx = u.data.findIndex(el => el.assistantId === u.waitingForData);
+        if (idx !== -1) {
+          // Edit the current
+          u.waitingForData = '';
+          await Router.manager.save(u);
+          u.data[idx].text = msg.text!;
+          await Router.manager.save(u.data[idx]);
+        } else {
+          const info = new AdditionalInfo();
+          info.userId = u.chatId;
+          info.assistantId = u.waitingForData;
+          info.text = msg.text!;
+          u.waitingForData = '';
+          await Router.manager.save(u);
+          await Router.manager.save(info);
+        }
+        
         await bot.sendMessage(msg.from!.id, 'Данные успешно добавлены 💫');
         return;
       }

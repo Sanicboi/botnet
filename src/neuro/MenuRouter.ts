@@ -282,16 +282,20 @@ export class MenuRouter extends Router {
     });
 
     bot.onText(/\/data/, async (msg) => {
-      const u = await Router.manager.findOneBy(User, {
-        chatId: String(msg.from?.id)
+      
+      const assistants = await Router.manager.find(Assistant);
+
+      let kb: InlineKeyboardButton[][] = []; 
+      
+      for (const assistant of assistants) {
+        kb.push(Btn(assistant.name, `data-${assistant.id}`));
+      }
+
+      await bot.sendMessage(msg.from!.id, "Выберите раздел", {
+        reply_markup: {
+          inline_keyboard: kb
+        }
       });
-
-      if (!u) return;
-
-      u.waitingForData = true;
-      await Router.manager.save(u);
-
-      await bot.sendMessage(msg.from!.id, 'Заполни основные данные, а я их зафиксирую:\n1)Имя Фамилия\n2)Пол\n3)Город (Страна проживания)\n4)Жизненный путь / интересные факты (по желанию)\nОтвет можешь прислать ответным сообщением, расписал информация по пунктам!\nОжидаю ответа!😉')
     })
 
     this.onCallback = this.onCallback.bind(this);
@@ -449,6 +453,26 @@ export class MenuRouter extends Router {
 
       if (q.data?.startsWith("del-")) {
         await OpenAI.deleteThread(q);
+      }
+
+      if (q.data?.startsWith("data-")) {
+        const user = await Router.manager.findOneBy(User, {
+          chatId: String(q.from.id)
+        });
+
+        if (!user) return;
+
+        user.waitingForData = q.data.substring(5);
+        await Router.manager.save(user);
+
+        const asst = await Router.manager.findOneBy(Assistant, {
+          id: user.waitingForData
+        });
+
+        if (!asst) return;
+
+        await bot.sendMessage(q.from.id, asst.dataToFill);
+        
       }
     } catch (err) {
       Router.logger.fatal(err);

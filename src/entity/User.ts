@@ -15,6 +15,7 @@ import { UserPromo } from "./assistants/UserPromo";
 import { UserBot } from "./bots/UserBot";
 import { Lead } from "./bots/Lead";
 import { AudioFile } from "./assistants/AudioFile";
+import { AdditionalInfo } from "./assistants/AdditionalInfo";
 
 @Entity()
 export class User {
@@ -136,13 +137,12 @@ export class User {
   })
   dialogueData: string; // Per-Dialogue initial data
 
+
   @Column({
     default: ''
   })
-  addData: string; // Constant data
+  waitingForData: string;
 
-  @Column({
-    default: false
-  })
-  waitingForData: boolean;
+  @OneToMany(() => AdditionalInfo, (info) => info.user)
+  data: AdditionalInfo[];
 }

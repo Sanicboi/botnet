@@ -13,6 +13,7 @@ import { Post } from "./entity/bots/Post";
 import { Lead } from "./entity/bots/Lead";
 import { UserBot } from "./entity/bots/UserBot";
 import { AudioFile } from "./entity/assistants/AudioFile";
+import { AdditionalInfo } from "./entity/assistants/AdditionalInfo";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -36,7 +37,8 @@ export const AppDataSource = new DataSource({
     Post,
     Lead,
     UserBot,
-    AudioFile
+    AudioFile,
+    AdditionalInfo
   ],
   migrations: [],
   subscribers: [],
