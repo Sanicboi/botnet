@@ -18,7 +18,6 @@ import { wait } from "../utils/wait";
 import docx from "html-to-docx";
 import { OutputBotFormatter } from "./output/formatter";
 import { AudioInput } from "./AudioInput";
-import { Invest } from "./Invest";
 
 interface IRunData {
   prompt: string;
@@ -138,7 +137,7 @@ export class OpenAI {
   /**
    * Internal method to get the necessary data for the run
    * @param msg Message object
-   * @param u User (expecting a user with Threads fetched)
+   * @param u User (expecting a user with Threads, Action and Data fetched)
    * @returns false if can't run, otherwise data of the run
    */
   public static async setupRun(
@@ -148,12 +147,12 @@ export class OpenAI {
   ): Promise<false | IRunData> {
     const t = u.threads.find((t) => t.actionId === u.actionId);
     if (!t && u.actionId !== "voice") return false;
+    const data = u.data.find(el => el.assistantId === t?.action.assistantId);
     const res =
       (msg.text ?? "") +
       "\n" +
       u.dialogueData
-      + "\n" +
-      u.addData;
+      + "\n" + (data ? data?.text : '');
     
     u.dialogueData = "";
     await Router.manager.save(u);
@@ -253,25 +252,12 @@ export class OpenAI {
   /**
    * This method runs the model on a text message
    * @param msg Message object
-   * @param u User (Threads fetched)
+   * @param u User (Threads, Data and Action fetched)
    * @returns Nothing
    */
   public static async runText(msg: Message, u: User) {
     const data = await this.setupRun(msg, u);
     if (!data) return;
-    if (
-      u.firstCryptoResponse &&
-      u.actionId === "asst_y6WZIorpOfNMMWhFkhWzNhEf"
-    ) {
-      u.firstCryptoResponse = false;
-      await Router.manager.save(u);
-      const r = await Invest.getAnalysis(msg.text!);
-      console.log(r);
-      await this.run(msg, u, data, {
-        content: r,
-        role: "user",
-      });
-    }
     
 
     await this.run(msg, u, data, {
@@ -283,7 +269,7 @@ export class OpenAI {
   /**
    * This method handles voice messages
    * @param msg Message object
-   * @param u User (Threads fetched)
+   * @param u User (Threads, Data and Action fetched)
    * @param generate Whether text should be generated after the transcription
    * @param asFile Whether the document attached is consideered a voice message
    * @returns Nothing
@@ -349,7 +335,7 @@ export class OpenAI {
   /**
    * This method runs the model on photo message
    * @param msg Message object
-   * @param u User (Threads fetched)
+   * @param u User (Threads, Action and Data fetched)
    * @returns Nothing
    */
   public static async runPhoto(msg: Message, u: User) {
@@ -382,7 +368,7 @@ export class OpenAI {
   /**
    * This method runs the model on document message
    * @param msg Message object
-   * @param u User (Threads fetched)
+   * @param u User (Threads, Data and Action fetched)
    * @returns Nothing
    */
   public static async runDocument(msg: Message, u: User) {

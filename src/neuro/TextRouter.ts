@@ -30,6 +30,8 @@ export class TextRouter extends Router {
         },
         relations: {
           threads: true,
+          action: true,
+          data: true
         },
       });
       if (!user) return;
@@ -42,6 +44,8 @@ export class TextRouter extends Router {
         },
         relations: {
           threads: true,
+          action: true,
+          data: true
         },
       });
       if (!user) return;
@@ -67,6 +71,11 @@ export class TextRouter extends Router {
       where: {
         chatId: String(q.from.id),
       },
+      relations: {
+        data: true,
+        action: true,
+        threads: true
+      }
     });
     if (!u) return;
     if (q.data!.startsWith("a-")) {
@@ -277,6 +286,8 @@ export class TextRouter extends Router {
       },
       relations: {
         threads: true,
+        action: true,
+        data: true
       },
     });
     if (!user) return;
@@ -295,6 +306,8 @@ export class TextRouter extends Router {
       },
       relations: {
         threads: true,
+        data: true,
+        action: true
       },
     });
     if (!user) return;
@@ -313,6 +326,8 @@ export class TextRouter extends Router {
       },
       relations: {
         threads: true,
+        action: true,
+        data: true
       },
     });
     if (!user) return;
