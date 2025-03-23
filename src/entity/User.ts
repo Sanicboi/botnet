@@ -140,4 +140,9 @@ export class User {
     default: ''
   })
   addData: string; // Constant data
+
+  @Column({
+    default: false
+  })
+  waitingForData: boolean;
 }

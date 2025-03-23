@@ -57,6 +57,7 @@
     "client": "ts-node ./src/add/consoleclient.ts",
     "mailer": "ts-node ./src/add/mailer.ts",
     "login": "ts-node ./src/add/login.ts",
-    "spambot": "ts-node ./src/add/spambot.ts"
+    "spambot": "ts-node ./src/add/spambot.ts",
+    "add": "ts-node ./src/add.local.ts"
   }
 }

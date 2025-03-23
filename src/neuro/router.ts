@@ -81,6 +81,7 @@ export class Router {
   ) {
     if (user.waitingForName) user.waitingForName = false;
     if (user.usingImageGeneration) user.usingImageGeneration = false;
+    if (user.waitingForData) user.waitingForData = false;
     user.dialogueData = '';
     user.firstCryptoResponse = false;
     user.action = null;

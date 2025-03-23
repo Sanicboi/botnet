@@ -280,6 +280,20 @@ export class MenuRouter extends Router {
         },
       );
     });
+
+    bot.onText(/\/data/, async (msg) => {
+      const u = await Router.manager.findOneBy(User, {
+        chatId: String(msg.from?.id)
+      });
+
+      if (!u) return;
+
+      u.waitingForData = true;
+      await Router.manager.save(u);
+
+      await bot.sendMessage(msg.from!.id, 'Заполни основные данные, а я их зафиксирую:\n1)Имя Фамилия\n2)Пол\n3)Город (Страна проживания)\n4)Жизненный путь / интересные факты (по желанию)\nОтвет можешь прислать ответным сообщением, расписал информация по пунктам!\nОжидаю ответа!😉')
+    })
+
     this.onCallback = this.onCallback.bind(this);
   }
 

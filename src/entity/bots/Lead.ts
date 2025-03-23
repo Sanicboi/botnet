@@ -1,6 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
 import { UserBot } from "./UserBot";
-import { User } from "../User";
 
 @Entity()
 export class Lead {

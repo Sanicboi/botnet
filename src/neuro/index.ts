@@ -44,6 +44,10 @@ bot.setMyCommands([
     description: "💳Баланс & подписка",
   },
   {
+    command: "data",
+    description: "🧠Данные о себе"
+  },
+  {
     command: "ref",
     description: "🏅Реферальная программа",
   },
@@ -165,6 +169,13 @@ bot.onText(/./, async (msg) => {
         }
 
         await manager.save(u);
+        return;
+      }
+
+      if (u.waitingForData) {
+        u.addData = msg.text!;
+        await Router.manager.save(u);
+        await bot.sendMessage(msg.from!.id, 'Данные успешно добавлены 💫');
         return;
       }
 
