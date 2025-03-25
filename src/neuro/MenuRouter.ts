@@ -200,7 +200,7 @@ export class MenuRouter extends Router {
   - Когда новый пользователь запустит бота, вы получите бесплатные токены на свой баланс;
   - Всего вы можете пригласить 30-x пользователей (вы использовали ${u.inviteCount}/30 приглашений);
   - Пользователь должен впервые воспользоваться ботом по вашей персональной ссылке.
-  
+
   Для приглашения, можете отправить следующее сообщение:
   `,
         );
@@ -473,6 +473,52 @@ export class MenuRouter extends Router {
 
         await bot.sendMessage(q.from.id, asst.dataToFill);
         
+      }
+
+      if (q.data === "balance") {
+        const user = await Router.manager.findOne(User, {
+          where: {
+            chatId: String(q.from!.id),
+          },
+          relations: {
+            threads: true,
+          },
+        });
+        if (!user) return;
+        const now = dayjs();
+        await Router.resetSub(user);
+        await Router.resetWaiters(user);
+        await bot.sendMessage(
+          q.from.id,
+          `Баланс и подписка\n\n🟣 Формат доступа:\n⤷ ${user.subscription === "exclusive" ? "Exclusive" : user.subscription === "premium" ? "Premium" : user.subscription === "pro" ? "PRO+" : user.subscription === "lite" ? "Lite" : "Бесплатный доступ"}
+           ⤷ Сегодня осталось: ${Math.round((user.leftForToday / 3.4) * 10000)} / ${
+             user.subscription === "exclusive"
+               ? 135000
+               : user.subscription === "premium"
+                 ? 45000
+                 : user.subscription === "pro"
+                   ? 30000
+                   : user.subscription === "lite"
+                     ? 5000
+                     : 0
+           } токенов
+           ⤷ Новое пополнение через: ${user.subscription === "none" ? "Нет" : `${24 - now.hour()}:${59 - now.minute()}`}
+           ⤷ Следующий платеж: ${user.nextPayment == null ? "Нет" : user.nextPayment.toUTCString()}
+        
+        🟣 Ваш комплект токенов:
+           ⤷ ${Math.round((user.addBalance / 3.4) * 10000)}
+        
+        📦 Если вам не хватает ежедневных токенов по подписке – вы можете купить комплект токенов. Комплект токенов можно использовать в любое время без лимитов. Полезно, когда вам требуется много токенов за раз.\n\nПеред покупкой комплекта токенов или подписки, настоятельно рекомендуем ознакомиться со [справкой о тарифах](https://docs.google.com/document/d/1CbyIi8h7e51B2OUEcXe85PS9FhLw8Mli7iw4o0RRCDM/edit)`,
+          {
+            reply_markup: {
+              inline_keyboard: [
+                Btn("Купить подписку", "b-sub"),
+                Btn("Купить токены", "b-tokens"),
+              ],
+            },
+            parse_mode: "Markdown",
+          },
+        );
       }
     } catch (err) {
       Router.logger.fatal(err);
