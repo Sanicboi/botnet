@@ -37,9 +37,10 @@ export class User {
   thread: Thread | null;
 
   @Column({
+    type: 'text',
     nullable: true
   })
-  threadId: string;
+  threadId: string | null;
   
   @Column({
     default: false

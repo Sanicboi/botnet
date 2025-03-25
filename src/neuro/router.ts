@@ -86,7 +86,7 @@ export class Router {
     user.dialogueData = '';
     user.firstCryptoResponse = false;
     user.thread = null;
-    user.threadId = "";
+    user.threadId = null;
     
     await Router.manager.save(user);
     // if (user.files) {
