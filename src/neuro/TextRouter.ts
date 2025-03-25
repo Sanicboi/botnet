@@ -192,7 +192,7 @@ export class TextRouter extends Router {
         return;
       }
 
-      if (q.data!.endsWith(")) {
+      if (q.data!.endsWith("-voice")) {
         await bot.sendMessage(
           q.from!.id,
           "Пришлите мне голосовое сообщение, и я переведу его в текст",
