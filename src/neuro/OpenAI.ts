@@ -327,7 +327,7 @@ export class OpenAI {
           type: "image_url",
         },
         {
-          text: msg.text ?? "Входные данные в виде картинки",
+          text: msg.text ?? u.thread?.actionId === "asst_ll21CQHhbyffqq63W2IXRzln" ? 'Реши задачу с картинки' : "Входные данные в виде картинки",
           type: "text",
         },
       ],
