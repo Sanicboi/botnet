@@ -29,8 +29,9 @@ export class TextRouter extends Router {
           chatId: String(msg.chat.id),
         },
         relations: {
-          threads: true,
-          action: true,
+          thread: {
+            action: true
+          },
           data: true
         },
       });
@@ -43,13 +44,14 @@ export class TextRouter extends Router {
           chatId: String(msg.chat.id),
         },
         relations: {
-          threads: true,
-          action: true,
+          thread: {
+            action: true
+          },
           data: true
         },
       });
       if (!user) return;
-      await OpenAI.runVoice(msg, user, user.actionId !== "voice", true);
+      await OpenAI.runVoice(msg, user, user.usingVoice, true);
     })
     bot.on("voice", async (msg) => {
       await this.onVoice(msg);
@@ -73,7 +75,6 @@ export class TextRouter extends Router {
       },
       relations: {
         data: true,
-        action: true,
         threads: true
       }
     });
@@ -191,12 +192,12 @@ export class TextRouter extends Router {
         return;
       }
 
-      if (q.data!.endsWith("-voice")) {
+      if (q.data!.endsWith(")) {
         await bot.sendMessage(
           q.from!.id,
           "Пришлите мне голосовое сообщение, и я переведу его в текст",
         );
-        u.actionId = "voice";
+        u.usingVoice = true;
         await Router.manager.save(u);
         return;
       }
@@ -208,7 +209,7 @@ export class TextRouter extends Router {
       const id = q.data?.substring(11);
       const f = new AudioInput(id);
       const result = await f.transcribe(u);
-      if (u.action?.id === "voice") {
+      if (u.usingVoice) {
           const data = await OpenAI.setupRunCQ(q, u);
           if (!data) return;
           await OpenAI.run(q, u, data, {
@@ -285,8 +286,9 @@ export class TextRouter extends Router {
         chatId: String(msg.chat.id),
       },
       relations: {
-        threads: true,
-        action: true,
+        thread: {
+          action: true
+        },
         data: true
       },
     });
@@ -305,9 +307,10 @@ export class TextRouter extends Router {
         chatId: String(msg.chat.id),
       },
       relations: {
-        threads: true,
+        thread: {
+          action: true
+        },
         data: true,
-        action: true
       },
     });
     if (!user) return;
@@ -325,13 +328,14 @@ export class TextRouter extends Router {
         chatId: String(msg.from!.id),
       },
       relations: {
-        threads: true,
-        action: true,
+        thread: {
+          action: true
+        },
         data: true
       },
     });
     if (!user) return;
-    if (user.actionId === "voice") {
+    if (user.usingVoice) {
       await OpenAI.runVoice(msg, user, false);
       return;
     }

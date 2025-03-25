@@ -81,11 +81,12 @@ export class Router {
   ) {
     if (user.waitingForName) user.waitingForName = false;
     if (user.usingImageGeneration) user.usingImageGeneration = false;
-    if (user.waitingForData) user.waitingForData = false;
+    if (user.waitingForData) user.waitingForData = "";
+    user.usingVoice = false;
     user.dialogueData = '';
     user.firstCryptoResponse = false;
-    user.action = null;
-    user.actionId = null;
+    user.thread = null;
+    user.threadId = "";
     
     await Router.manager.save(user);
     // if (user.files) {

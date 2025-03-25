@@ -1,5 +1,5 @@
 import TelegramBot, { InlineKeyboardButton } from "node-telegram-bot-api";
-import { bot } from ".";
+import { bot, openai } from ".";
 import { Assistant } from "../entity/assistants/Assistant";
 import { Router } from "./router";
 import { User } from "../entity/User";
@@ -28,9 +28,7 @@ export class MenuRouter extends Router {
             chatId: String(msg.from!.id),
           },
           relations: {
-            action: {
-              threads: true,
-            },
+            thread: true
           },
         });
         if (!u) {
@@ -97,32 +95,22 @@ export class MenuRouter extends Router {
       try {
         const threads = await Router.manager.find(Thread, {
           relations: {
-            action: {
-              assistant: true
-            }
+            action: true
           },
           where: {
             userId: String(msg.from!.id)
           }
         });
-        let assistants = threads.map(t => t.action.assistant);
         let btns: InlineKeyboardButton[][] = [];
-        {
-          const set = new Set<string>();
-          for (const asst of assistants) {
-            if (!set.has(asst.id)) {
-              set.add(asst.id);
-              btns.push(Btn(asst.name, `dela-${asst.id}`));
-            }
-          } 
+        for (const t of threads) {
+          btns.push(Btn(`${t.action.name} ${t.id.substring(7)}`.substring(15) + '...', `thread-${t.id}`));
         }
 
-        await bot.sendMessage(msg.from!.id, "Контекст и знания сотрудника!\n\nЧто это и зачем?\nНаши нейро-сотрудники самообучаемые. Чем дольше вы взаимодействуете с конкретной функцией сотрудника он запоминает какие ответы лучше выдавать, тем самым создавая уникальные и персонализированные ответы и рекомендаци.\n\nЕсли вы хотите удалить весь контекст и сделать память нейро-сотрудника в виде изначально поставленных настроек, то вы можете это сделать это ниже! 👇");
-        await bot.sendMessage(msg.from!.id, "Для удаления контекста выберите сферу и функцию сотрудника:", {
+        await bot.sendMessage(msg.from!.id, 'Ваши диалоги', {
           reply_markup: {
             inline_keyboard: btns
           }
-        });
+        })
       } catch (err) {
         Router.logger.fatal(err);
       }
@@ -427,32 +415,45 @@ export class MenuRouter extends Router {
         });
       }
 
-      if (q.data?.startsWith("dela-")) {
-        const threads = await Router.manager.find(Thread, {
+      if (q.data?.startsWith("thread-")) {
+        const tId = q.data.substring(7);
+        const thread = await Router.manager.findOne(Thread, {
+          where: {
+            id: tId
+          },
           relations: {
             action: {
               assistant: true
             }
-          },
-          where: {
-            userId: String(q.from.id),
-            action: {
-              assistantId: q.data.substring(5)
-            }
           }
         });
 
-        const btns: InlineKeyboardButton[][] = threads.map(el => Btn(el.action.name, `del-${el.id}`));
+        if (!thread) return;
 
-        await bot.sendMessage(q.from.id, "Выберите ассистента", {
+        const gptData = await openai.beta.threads.messages.list(thread.id);
+
+        
+        await bot.sendMessage(q.from.id, `Диалог #${thread.id.substring(7)}\nБольше информации:\n\n⤷Всего сообщений:${gptData.data.length}\n⤷Ассистент: ${thread.action.assistant.name} - ${thread.action.name}\n`, {
           reply_markup: {
-            inline_keyboard: btns
+            inline_keyboard: [
+              Btn('Продолжить диалог', `continue-${thread.id}`),
+              Btn('Удалить диалог', `del-${thread.id}`)
+            ]
           }
-        });
+        })
       }
 
       if (q.data?.startsWith("del-")) {
         await OpenAI.deleteThread(q);
+      }
+
+      if (q.data?.startsWith('continue-')) {
+        const thread = q.data.substring(9);
+        const u = await Router.manager.findOneBy(User, {
+          chatId: String(q.from.id)
+        });
+        if (!u) return;
+         
       }
 
       if (q.data?.startsWith("data-")) {

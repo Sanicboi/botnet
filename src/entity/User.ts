@@ -28,16 +28,24 @@ export class User {
   @OneToMany(() => Thread, (thread) => thread.user)
   threads: Thread[];
 
-  @ManyToOne(() => Action)
-  @JoinColumn({
-    name: "actionId",
+  @OneToOne(() => Thread, {
+    nullable: true
   })
-  action: Action | null;
+  @JoinColumn({
+    name: 'threadId',  
+  })
+  thread: Thread | null;
 
   @Column({
-    nullable: true,
+    nullable: true
   })
-  actionId: string | null;
+  threadId: string;
+  
+  @Column({
+    default: false
+  })
+  usingVoice: boolean;
+
 
   @Column({
     default: false,

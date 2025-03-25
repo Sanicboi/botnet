@@ -21,18 +21,8 @@ import { AudioInput } from "./AudioInput";
 
 interface IRunData {
   prompt: string;
-  thread?: Thread;
+  thread: Thread | null;
 }
-
-let agreementsMap = new Map<string, string>();
-agreementsMap.set("Договор о создании юридического лица\n", "offers-1");
-agreementsMap.set("Договор о совместной деятельности\n", "offers-2");
-agreementsMap.set("Договор займа\n", "offers-3");
-agreementsMap.set("Договор авторского заказа\n", "offers-4");
-agreementsMap.set("Договор купли продажи\n", "offers-5");
-agreementsMap.set("Договор оказания услуг\n", "offers-7");
-agreementsMap.set("Трудовой договор\n", "offers-6");
-agreementsMap.set("Договор оферты\n", "offers-8");
 
 
 /**
@@ -48,35 +38,19 @@ export class OpenAI {
    * @returns Nothing
    */
   public static async createThread(q: CallbackQuery, u: User, actId: string) {
-    u.actionId = actId;
+    
     const act = await Router.manager.findOneBy(Action, {
       id: actId,
     });
     await Router.manager.save(u);
-    let thread: Thread | null = await Router.manager.findOneBy(Thread, {
-      userId: u.chatId,
-      actionId: actId,
-    });
-    if (!thread) {
-      const t = await openai.beta.threads.create();
-      thread = new Thread();
-      thread.id = t.id;
-      thread.actionId = u.actionId;
-      thread.userId = u.chatId;
-      await Router.manager.save(thread);
-      if (
-        u.actionId === "asst_Yi7ajro25YJRPccS4hqePcvb" ||
-        u.actionId === "asst_naVdwMABoWcDLD2vs9W2hnD9" ||
-        u.actionId === "asst_y6WZIorpOfNMMWhFkhWzNhEf"
-      ) {
-        u.firstCryptoResponse = true;
-        await Router.manager.save(u);
-      }
+    const t = await openai.beta.threads.create();
+    const thread = new Thread();
+    thread.id = t.id;
+    thread.actionId = actId;
+    thread.userId = u.chatId;
+    await Router.manager.save(thread);
 
-      
-    }
-
-    switch (u.actionId) {
+    switch (actId) {
       case "asst_14B08GDgJphVClkmmtQYo0aq":
         await bot.sendMessage(
           +thread.userId,
@@ -137,16 +111,18 @@ export class OpenAI {
   /**
    * Internal method to get the necessary data for the run
    * @param msg Message object
-   * @param u User (expecting a user with Threads, Action and Data fetched)
+   * @param u User (expecting a user with Thread fetched)
+   * @param send Whether to send the generating message or not
+   * @param isVoice Whether the action is "voice"
    * @returns false if can't run, otherwise data of the run
    */
   public static async setupRun(
     msg: Message,
     u: User,
-    send: boolean = true
+    send: boolean = true,
   ): Promise<false | IRunData> {
-    const t = u.threads.find((t) => t.actionId === u.actionId);
-    if (!t && u.actionId !== "voice") return false;
+    const t = u.thread
+    if (!t && !u.usingVoice) return false;
     const data = u.data.find(el => el.assistantId === t?.action.assistantId);
     const res =
       (msg.text ?? "") +
@@ -203,10 +179,11 @@ export class OpenAI {
   public static async setupRunCQ(
     msg: CallbackQuery,
     u: User,
-    send: boolean = true
+    send: boolean = true,
+    isVoice: boolean = false
   ): Promise<Pick<IRunData, "thread"> | false> {
-    const t = u.threads.find((t) => t.actionId === u.actionId);
-    if (!t && u.actionId !== "voice") return false;
+    const t = u.thread;
+    if (!t && !isVoice) return false;
     if (u.addBalance === 0 && u.leftForToday === 0) {
       await bot.sendMessage(
         msg.from!.id,
@@ -252,7 +229,7 @@ export class OpenAI {
   /**
    * This method runs the model on a text message
    * @param msg Message object
-   * @param u User (Threads, Data and Action fetched)
+   * @param u User (Thread.Action fetched)
    * @returns Nothing
    */
   public static async runText(msg: Message, u: User) {
@@ -269,7 +246,7 @@ export class OpenAI {
   /**
    * This method handles voice messages
    * @param msg Message object
-   * @param u User (Threads, Data and Action fetched)
+   * @param u User (Thread.Action and Data)
    * @param generate Whether text should be generated after the transcription
    * @param asFile Whether the document attached is consideered a voice message
    * @returns Nothing
@@ -289,18 +266,7 @@ export class OpenAI {
     url = await bot.getFileLink(
       asFile ? msg.audio!.file_id : msg.voice!.file_id
     );
-    // const res = await axios.get(url, {
-    //   responseType: "arraybuffer",
-    // });
-    // const name = v4() + path.extname(url);
-    // fs.writeFileSync(path.join(process.cwd(), "voice", name), res.data);
-    // const transcription = await openai.audio.transcriptions.create({
-    //   file: fs.createReadStream(path.join(process.cwd(), "voice", name)),
-    //   model: "whisper-1",
-    // });
-    // console.log(transcription.text);
 
-    // fs.rmSync(path.join(process.cwd(), "voice", name));
     let audioFile = new AudioInput(url);
     await audioFile.initFromUrl(u);
     console.log(audioFile);
@@ -428,9 +394,6 @@ export class OpenAI {
         chatId: String(q.from.id),
       },
       relations: {
-        action: {
-          threads: true,
-        },
         files: true,
       },
     });
@@ -457,7 +420,7 @@ export class OpenAI {
   /**
    * Run the model
    * @param msg Message object
-   * @param u User object
+   * @param u User object (thread.action fetched)
    * @param data Run data
    * @param params Message content params
    */
@@ -470,7 +433,7 @@ export class OpenAI {
     if (!data.thread) return;
     await openai.beta.threads.messages.create(data.thread.id, params);
     const str = openai.beta.threads.runs.stream(data.thread.id, {
-      assistant_id: u.actionId!,
+      assistant_id: u.thread?.actionId!,
       model: u.model,
     });
 
@@ -490,7 +453,7 @@ export class OpenAI {
   /**
    * This method sends the result of the generation to the user
    * @param msg Message Object
-   * @param u User object (Threads fetched)
+   * @param u User object (Thread.Action fetched)
    * @param messages Messages to send
    * @param tokenCount Token count
    */
@@ -514,7 +477,7 @@ export class OpenAI {
     await Router.manager.save(u);
 
     const action = await Router.manager.findOneBy(Action, {
-      id: u.actionId!,
+      id: u.thread?.actionId!,
     });
     if (!action) return;
 
