@@ -66,7 +66,6 @@ export class MenuRouter extends Router {
         const refId = msg.text!.split(" ")[1];
         user = new User();
         user.chatId = String(msg.from!.id);
-        // user.addBalance = Math.round((10000 * 3.4) / 10000);
         if (refId) {
           const creator = await Router.manager.findOneBy(User, {
             chatId: refId,
@@ -76,7 +75,6 @@ export class MenuRouter extends Router {
               creator.addBalance += Math.round((1000 * 3.4) / 10000);
               creator.inviteCount++;
               await Router.manager.save(creator);
-              // user.addBalance += Math.round((5000 * 3.4) / 10000);
             }
           }
         }
@@ -197,7 +195,7 @@ export class MenuRouter extends Router {
       if (u.inviteCount < 30) {
         await bot.sendMessage(
           msg.from!.id,
-          `💌 Вы можете пригласить других пользователей и получить Х токенов за каждого пользователя на свой баланс!
+          `💌 Вы можете пригласить других пользователей и получить 1000 токенов за каждого пользователя на свой баланс!
   
   - Когда новый пользователь запустит бота, вы получите бесплатные токены на свой баланс;
   - Всего вы можете пригласить 30-x пользователей (вы использовали ${u.inviteCount}/30 приглашений);
