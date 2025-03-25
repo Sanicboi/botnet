@@ -293,7 +293,11 @@ export class OpenAI {
           role: "user",
         });
       } else {
-        await bot.sendMessage(msg.from!.id, result);
+        const buf = Buffer.from(result, 'utf-8');
+        await bot.sendDocument(msg.from!.id, buf, {}, {
+          contentType: 'text/plain',
+          filename: 'result.txt'
+        });
       }
     }
   }
