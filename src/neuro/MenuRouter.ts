@@ -101,7 +101,7 @@ export class MenuRouter extends Router {
         });
         let btns: InlineKeyboardButton[][] = [];
         for (const t of threads) {
-          btns.push(Btn(`${t.action.name} ${t.id.substring(7)}`.substring(0, 25) + '...', `thread-${t.id}`));
+          btns.push(Btn(`${t.action.name} ${t.id.substring(7)}`.substring(0, 35) + '...', `thread-${t.id}`));
         }
 
         await bot.sendMessage(msg.from!.id, 'Ваши диалоги', {
