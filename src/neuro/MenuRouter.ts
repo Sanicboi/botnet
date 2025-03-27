@@ -28,7 +28,6 @@ export class MenuRouter extends Router {
             chatId: String(msg.from!.id),
           },
           relations: {
-            thread: true
           },
         });
         if (!u) {
@@ -457,7 +456,8 @@ export class MenuRouter extends Router {
           chatId: String(q.from.id)
         });
         if (!u) return;
-         
+        u.threadId = thread!.id;
+        await Router.manager.save(u);
       }
 
       if (q.data?.startsWith("data-")) {
