@@ -87,7 +87,6 @@ bot.on("callback_query", async (q) => {
         chatId: String(q.from.id),
       },
       relations: {
-        thread: true
       },
     });
     if (!user) return;
@@ -114,7 +113,6 @@ bot.onText(/./, async (msg) => {
           chatId: String(msg.from!.id),
         },
         relations: {
-          thread: true,
           threads: true,
           data: true
         },
