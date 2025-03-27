@@ -49,6 +49,9 @@ export class OpenAI {
     thread.actionId = actId;
     thread.userId = u.chatId;
     await Router.manager.save(thread);
+    u.threadId = thread.id;
+    u.thread = thread;
+    await Router.manager.save(u);
 
     switch (actId) {
       case "asst_14B08GDgJphVClkmmtQYo0aq":
