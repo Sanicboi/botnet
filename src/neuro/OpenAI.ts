@@ -133,7 +133,7 @@ export class OpenAI {
           assistant: true
         }
       }
-      );
+    });
     if (!t && !u.usingVoice) return false;
     const data = u.data.find(el => el.assistantId === t?.action.assistantId);
     const res =
@@ -207,7 +207,7 @@ export class OpenAI {
         action: {
           assistant: true
         }
-      }
+      }}
       );
     if (!t && !isVoice) return false;
     if (u.addBalance === 0 && u.leftForToday === 0) {
