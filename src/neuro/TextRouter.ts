@@ -29,9 +29,6 @@ export class TextRouter extends Router {
           chatId: String(msg.chat.id),
         },
         relations: {
-          thread: {
-            action: true
-          },
           data: true
         },
       });
@@ -44,9 +41,6 @@ export class TextRouter extends Router {
           chatId: String(msg.chat.id),
         },
         relations: {
-          thread: {
-            action: true
-          },
           data: true
         },
       });
@@ -337,9 +331,6 @@ export class TextRouter extends Router {
         chatId: String(msg.chat.id),
       },
       relations: {
-        thread: {
-          action: true
-        },
         data: true
       },
     });
@@ -358,9 +349,6 @@ export class TextRouter extends Router {
         chatId: String(msg.chat.id),
       },
       relations: {
-        thread: {
-          action: true
-        },
         data: true,
       },
     });
@@ -379,9 +367,6 @@ export class TextRouter extends Router {
         chatId: String(msg.from!.id),
       },
       relations: {
-        thread: {
-          action: true
-        },
         data: true
       },
     });
