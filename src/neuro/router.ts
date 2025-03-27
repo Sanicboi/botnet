@@ -85,7 +85,6 @@ export class Router {
     user.usingVoice = false;
     user.dialogueData = '';
     user.firstCryptoResponse = false;
-    user.thread = null;
     user.threadId = null;
     
     await Router.manager.save(user);
