@@ -438,6 +438,10 @@ export class OpenAI {
     params: MessageCreateParams
   ) {
     if (!data.thread) return;
+    if (data.thread.firstMsg == '') {
+      data.thread.firstMsg = params.content;
+      await Router.manager.save(data.thread);
+    }
     await openai.beta.threads.messages.create(data.thread.id, params);
     const str = openai.beta.threads.runs.stream(data.thread.id, {
       assistant_id: u.thread?.actionId!,
