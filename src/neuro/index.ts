@@ -45,10 +45,6 @@ bot.setMyCommands([
     description: "💳Баланс & подписка",
   },
   {
-    command: "data",
-    description: "🧠Данные о себе"
-  },
-  {
     command: "ref",
     description: "🏅Реферальная программа",
   },
