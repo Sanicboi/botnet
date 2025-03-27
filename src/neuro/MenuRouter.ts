@@ -456,7 +456,7 @@ export class MenuRouter extends Router {
           chatId: String(q.from.id)
         });
         if (!u) return;
-        u.threadId = thread!.id;
+        u.threadId = thread;
         await Router.manager.save(u);
       }
 
