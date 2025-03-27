@@ -57,10 +57,6 @@ bot.setMyCommands([
     description: "🎁Бесплатные токены",
   },
   {
-    command: "deletecontext",
-    description: "🔁Контекст и знания AI-сотрудника",
-  },
-  {
     command: "settings",
     description: "⚙️Настройки",
   },
