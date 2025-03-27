@@ -30,6 +30,9 @@ export class Thread {
   })
   actionId: string;
 
+  @Column({ default: '' })
+  firstMsg: string;
+
   @OneToMany(() => FileUpload, (file) => file.thread)
   files: FileUpload[];
 }
