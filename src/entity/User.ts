@@ -28,13 +28,6 @@ export class User {
   @OneToMany(() => Thread, (thread) => thread.user)
   threads: Thread[];
 
-  @OneToOne(() => Thread, {
-    nullable: true
-  })
-  @JoinColumn({
-    name: 'threadId',  
-  })
-  thread: Thread | null;
 
   @Column({
     type: 'text',
