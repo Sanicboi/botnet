@@ -48,6 +48,7 @@ export class OpenAI {
     thread.id = t.id;
     thread.actionId = actId;
     thread.userId = u.chatId;
+    thread.user = u;
     await Router.manager.save(thread);
     u.threadId = thread.id;
     u.thread = thread;
