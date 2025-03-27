@@ -508,11 +508,12 @@ export class OpenAI {
 
     const thread = await Router.manager.findOne(Thread, {
       where: {
-        id: user.threadId!
+        id: u.threadId!
       },
       relations: {
         action: true,
       }});
+    if (!thread) return;
 
     const action = thread.action;
     if (!action) return;
