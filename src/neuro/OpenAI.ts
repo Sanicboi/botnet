@@ -463,7 +463,7 @@ export class OpenAI {
     if (!data.thread) return;
     await openai.beta.threads.messages.create(data.thread.id, params);
     const str = openai.beta.threads.runs.stream(data.thread.id, {
-      assistant_id: u.thread?.actionId!,
+      assistant_id: data.thread!.actionId!,
       model: u.model,
     });
 
@@ -506,9 +506,15 @@ export class OpenAI {
     }
     await Router.manager.save(u);
 
-    const action = await Router.manager.findOneBy(Action, {
-      id: u.thread?.actionId!,
-    });
+    const thread = await Router.manager.findOne(Thread, {
+      where: {
+        id: user.threadId!
+      },
+      relations: {
+        action: true,
+      }});
+
+    const action = thread.action;
     if (!action) return;
 
     for (const m of messages) {
