@@ -101,7 +101,12 @@ export class MenuRouter extends Router {
         });
         let btns: InlineKeyboardButton[][] = [];
         for (const t of threads) {
-          btns.push(Btn(`${t.action.name} ${t.id.substring(7)}`.substring(0, 35) + '...', `thread-${t.id}`));
+          btns.push(Btn(`${t.action.name} ${t.firstMsg}`.substring(0, 40) + '...', `thread-${t.id}`));
+        }
+
+        if (btns.length == 0) {
+          await bot.sendMessage(msg.from!.id, "У вас нет диалогов");
+          return;
         }
 
         await bot.sendMessage(msg.from!.id, 'Ваши диалоги', {
