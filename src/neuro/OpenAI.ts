@@ -126,7 +126,7 @@ export class OpenAI {
   ): Promise<false | IRunData> {
     const t = await Router.manager.findOne(Thread, {
       where: {
-        id: u.threadId
+        id: u.threadId!
       },
       relations: {
         action: {
@@ -201,7 +201,7 @@ export class OpenAI {
   ): Promise<Pick<IRunData, "thread"> | false> {
     const t = await Router.manager.findOne(Thread, {
       where: {
-        id: u.threadId
+        id: u.threadId!
       },
       relations: {
         action: {
