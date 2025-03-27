@@ -51,7 +51,6 @@ export class OpenAI {
     thread.user = u;
     await Router.manager.save(thread);
     u.threadId = thread.id;
-    u.thread = thread;
     await Router.manager.save(u);
 
     switch (actId) {
@@ -125,7 +124,16 @@ export class OpenAI {
     u: User,
     send: boolean = true,
   ): Promise<false | IRunData> {
-    const t = u.thread
+    const t = await Router.manager.findOne(Thread, {
+      where: {
+        id: u.threadId
+      },
+      relations: {
+        action: {
+          assistant: true
+        }
+      }
+      );
     if (!t && !u.usingVoice) return false;
     const data = u.data.find(el => el.assistantId === t?.action.assistantId);
     const res =
@@ -191,7 +199,16 @@ export class OpenAI {
     send: boolean = true,
     isVoice: boolean = false
   ): Promise<Pick<IRunData, "thread"> | false> {
-    const t = u.thread;
+    const t = await Router.manager.findOne(Thread, {
+      where: {
+        id: u.threadId
+      },
+      relations: {
+        action: {
+          assistant: true
+        }
+      }
+      );
     if (!t && !isVoice) return false;
     if (u.addBalance === 0 && u.leftForToday === 0) {
       await bot.sendMessage(
@@ -336,7 +353,7 @@ export class OpenAI {
           type: "image_url",
         },
         {
-          text: msg.text ?? u.thread?.actionId === "asst_ll21CQHhbyffqq63W2IXRzln" ? 'Реши задачу с картинки' : "Входные данные в виде картинки",
+          text: msg.text ?? data.thread!.actionId === "asst_ll21CQHhbyffqq63W2IXRzln" ? 'Реши задачу с картинки' : "Входные данные в виде картинки",
           type: "text",
         },
       ],
