@@ -51,6 +51,7 @@ export class OpenAI {
     thread.user = u;
     await Router.manager.save(thread);
     u.threadId = thread.id;
+    u.threads.push(thread);
     await Router.manager.save(u);
 
     switch (actId) {
