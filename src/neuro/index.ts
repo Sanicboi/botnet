@@ -37,6 +37,10 @@ bot.setMyCommands([
     description: "🤖О боте (справка)",
   },
   {
+    command: "deletecontext",
+    description: "Диалоги"
+  },
+  {
     command: "neuro",
     description: "🧠Нейро-сотрудники",
   },
