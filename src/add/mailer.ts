@@ -192,15 +192,15 @@ export class Mailer {
       }
 
       if (lead.handled) return;
-      /*
-      //await wait(2)
-      //await client.invoke(new Api.messages.ReadHistory({
-       // peer: lead.username
-     // }));
-      //await client.invoke(new Api.messages.SetTyping({
-        //peer: lead.username,
-        //action: new Api.SendMessageTypingAction()
-      //}))
+      
+      await wait(2)
+      await client.invoke(new Api.messages.ReadHistory({
+       peer: lead.username
+     }));
+      await client.invoke(new Api.messages.SetTyping({
+        peer: lead.username,
+        action: new Api.SendMessageTypingAction()
+      }))
       await openai.beta.threads.messages.create(lead.threadId, {
         content: e.message.text,
         role: 'user'
@@ -224,8 +224,8 @@ export class Mailer {
         }
       
       }
-      */
-    }
+      
+      }
   }
 
 
