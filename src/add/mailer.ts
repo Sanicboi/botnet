@@ -234,7 +234,7 @@ export class Mailer {
       .getRepository(Lead)
       .createQueryBuilder("lead")
       .select()
-      .where("lead.answered = true")
+      .where("lead.responded = true")
       .andWhere("lead.handled = false")
       .leftJoin("lead.bot", "bot")
       .orderBy("lead.sentAt", "ASC")

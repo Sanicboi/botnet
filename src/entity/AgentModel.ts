@@ -17,7 +17,7 @@ export class AgentModel {
     firstMessage: string;
 
     @Column()
-    responseFormat: "text" | "html" | "voice" | "json";
+    responseFormat: "text" | "html" | "voice";
 
     @Column("float")
     temperature: number;
