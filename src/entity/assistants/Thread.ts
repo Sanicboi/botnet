@@ -1,4 +1,11 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryColumn,
+} from "typeorm";
 import { User } from "../User";
 import { Action } from "./Action";
 import { FileUpload } from "./FileUpload";
@@ -30,7 +37,7 @@ export class Thread {
   })
   actionId: string;
 
-  @Column({ default: '' })
+  @Column({ default: "" })
   firstMsg: string;
 
   @OneToMany(() => FileUpload, (file) => file.thread)

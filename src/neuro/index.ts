@@ -38,7 +38,7 @@ bot.setMyCommands([
   },
   {
     command: "dialogs",
-    description: "✉️Диалоги"
+    description: "✉️Диалоги",
   },
   {
     command: "neuro",
@@ -82,8 +82,7 @@ bot.on("callback_query", async (q) => {
       where: {
         chatId: String(q.from.id),
       },
-      relations: {
-      },
+      relations: {},
     });
     if (!user) return;
     const reset = await imagesRouter.onQuery(q, user);
@@ -110,7 +109,7 @@ bot.onText(/./, async (msg) => {
         },
         relations: {
           threads: true,
-          data: true
+          data: true,
         },
       });
       if (!u) return;
@@ -126,7 +125,10 @@ bot.onText(/./, async (msg) => {
         });
 
         if (!promo) {
-          await bot.sendMessage(msg.from!.id, "❌Упс! Что-то пошло не так. Убедитесь, что промокод введен правильно и попробуйте еще раз. ❗️Важно: один и тот же промокод нельзя активировать несколько раз");
+          await bot.sendMessage(
+            msg.from!.id,
+            "❌Упс! Что-то пошло не так. Убедитесь, что промокод введен правильно и попробуйте еще раз. ❗️Важно: один и тот же промокод нельзя активировать несколько раз",
+          );
         } else {
           if (promo.expiresAt < new Date()) {
             await bot.sendMessage(
@@ -166,11 +168,13 @@ bot.onText(/./, async (msg) => {
         return;
       }
 
-      if (u.waitingForData != '') {
-        const idx = u.data.findIndex(el => el.assistantId === u.waitingForData);
+      if (u.waitingForData != "") {
+        const idx = u.data.findIndex(
+          (el) => el.assistantId === u.waitingForData,
+        );
         if (idx !== -1) {
           // Edit the current
-          u.waitingForData = '';
+          u.waitingForData = "";
           await Router.manager.save(u);
           u.data[idx].text = msg.text!;
           await Router.manager.save(u.data[idx]);
@@ -179,12 +183,12 @@ bot.onText(/./, async (msg) => {
           info.userId = u.chatId;
           info.assistantId = u.waitingForData;
           info.text = msg.text!;
-          u.waitingForData = '';
+          u.waitingForData = "";
           await Router.manager.save(u);
           await Router.manager.save(info);
         }
-        
-        await bot.sendMessage(msg.from!.id, 'Данные успешно добавлены 💫');
+
+        await bot.sendMessage(msg.from!.id, "Данные успешно добавлены 💫");
         return;
       }
 
@@ -204,7 +208,7 @@ bot.on("photo", async (msg) => {
 });
 
 bot.onText(/\/free/, async (msg) => {
-  const u =  await manager.findOne(User, {
+  const u = await manager.findOne(User, {
     where: {
       chatId: String(msg.from!.id),
     },

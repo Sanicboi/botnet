@@ -1,27 +1,25 @@
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
-
 @Entity()
 export class AgentModel {
-    
-    @PrimaryGeneratedColumn()
-    id: number;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @Column() 
-    name: string;
-    
-    @Column("text")
-    prompt: string;
+  @Column()
+  name: string;
 
-    @Column("text")
-    firstMessage: string;
+  @Column("text")
+  prompt: string;
 
-    @Column()
-    responseFormat: "text" | "html" | "voice";
+  @Column("text")
+  firstMessage: string;
 
-    @Column("float")
-    temperature: number;
+  @Column()
+  responseFormat: "text" | "html" | "voice";
 
-    @Column("float")
-    topP: number;
+  @Column("float")
+  temperature: number;
+
+  @Column("float")
+  topP: number;
 }

@@ -22,7 +22,7 @@ export class UserBot {
   @OneToMany(() => Lead, (lead) => lead.bot)
   leads: Lead[];
 
-  @Column({default: false})
+  @Column({ default: false })
   floodErr: boolean;
 
   // @ManyToOne(() => User, (user) => user.bots)

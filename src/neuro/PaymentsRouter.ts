@@ -76,7 +76,10 @@ export class PaymentsRouter extends Router {
             Btn("Lite |5.000 токенов/день| (490₽/мес)", "sub-lite"),
             Btn("Pro+ |30.000 токенов/день| (790₽/мес)", "sub-pro"),
             Btn("Premium |45.000 токенов/день| (1490₽/мес)", "sub-premium"),
-            Btn("Exclusive |135.000 токенов/день| (3490₽/мес)", "sub-exclusive"),
+            Btn(
+              "Exclusive |135.000 токенов/день| (3490₽/мес)",
+              "sub-exclusive",
+            ),
             Btn("Назад", "balance"),
           ],
         },
@@ -93,7 +96,7 @@ export class PaymentsRouter extends Router {
             Btn("200.000 токенов - 1490₽ (26% выгоды)", "tokens-4"),
             Btn("500.000 токенов - 3525₽ (30% выгоды)", "tokens-5"),
             Btn("1.000.000 токенов - 4990₽ (50% выгоды)", "tokens-6"),
-            Btn('Назад', 'balance')
+            Btn("Назад", "balance"),
           ],
         },
       });
@@ -234,7 +237,10 @@ export class PaymentsRouter extends Router {
               subMapReverse.get(parseInt(res.amount.value)) ?? "none";
             u.leftForToday = subsMap.get(u.subscription) ?? 0;
             await Router.manager.save(u);
-            await bot.sendMessage(+u.chatId, "Оплата успешно прошла 🚀\nПодписка обновлена, подробнее: /balance\nПриятного пользования😉")
+            await bot.sendMessage(
+              +u.chatId,
+              "Оплата успешно прошла 🚀\nПодписка обновлена, подробнее: /balance\nПриятного пользования😉",
+            );
           }
         } catch (error) {}
       }

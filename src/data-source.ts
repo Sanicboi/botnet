@@ -38,7 +38,7 @@ export const AppDataSource = new DataSource({
     Lead,
     UserBot,
     AudioFile,
-    AdditionalInfo
+    AdditionalInfo,
   ],
   migrations: [],
   subscribers: [],

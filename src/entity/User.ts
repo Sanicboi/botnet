@@ -28,18 +28,16 @@ export class User {
   @OneToMany(() => Thread, (thread) => thread.user)
   threads: Thread[];
 
-
   @Column({
-    type: 'text',
-    nullable: true
+    type: "text",
+    nullable: true,
   })
   threadId: string | null;
-  
+
   @Column({
-    default: false
+    default: false,
   })
   usingVoice: boolean;
-
 
   @Column({
     default: false,
@@ -94,8 +92,6 @@ export class User {
   @OneToMany(() => FileUpload, (f) => f.user)
   files: FileUpload[];
 
-
-
   @Column({
     default: 0,
   })
@@ -130,18 +126,16 @@ export class User {
   })
   paymentMethod: string;
 
-
   @OneToMany(() => AudioFile, (audio) => audio.user)
   audios: AudioFile[];
 
   @Column({
-    default: ''
+    default: "",
   })
   dialogueData: string; // Per-Dialogue initial data
 
-
   @Column({
-    default: ''
+    default: "",
   })
   waitingForData: string;
 

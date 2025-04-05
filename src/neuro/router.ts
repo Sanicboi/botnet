@@ -73,20 +73,18 @@ export class Router {
 
   /**
    * Resets all the waiters on the user and current dependant values
-   * @param user User object 
+   * @param user User object
    * @returns Nothing
    */
-  public static async resetWaiters(
-    user: User,
-  ) {
+  public static async resetWaiters(user: User) {
     if (user.waitingForName) user.waitingForName = false;
     if (user.usingImageGeneration) user.usingImageGeneration = false;
     if (user.waitingForData) user.waitingForData = "";
     user.usingVoice = false;
-    user.dialogueData = '';
+    user.dialogueData = "";
     user.firstCryptoResponse = false;
     user.threadId = null;
-    
+
     await Router.manager.save(user);
     // if (user.files) {
     //   for (const file of user.files) {

@@ -1,36 +1,38 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from "typeorm";
 import { User } from "../User";
 import { Assistant } from "./Assistant";
 
-
 @Entity()
 export class AdditionalInfo {
+  @PrimaryGeneratedColumn()
+  id: string;
 
+  @ManyToOne(() => User, (user) => user.data)
+  @JoinColumn({
+    name: "userId",
+  })
+  user: User;
 
-    @PrimaryGeneratedColumn()
-    id: string;
+  @Column()
+  userId: string;
 
+  @ManyToOne(() => Assistant, (assistant) => assistant.data)
+  @JoinColumn({
+    name: "assistantId",
+  })
+  assistant: Assistant;
 
-    @ManyToOne(() => User, (user) => user.data)
-    @JoinColumn({
-        name: 'userId'
-    })
-    user: User;
+  @Column()
+  assistantId: string;
 
-    @Column()
-    userId: string;
-
-    @ManyToOne(() => Assistant, (assistant) => assistant.data)
-    @JoinColumn({
-        name: 'assistantId'
-    })
-    assistant: Assistant;
-
-    @Column()
-    assistantId: string;
-
-    @Column({
-        default: ''
-    })
-    text: string;
+  @Column({
+    default: "",
+  })
+  text: string;
 }

@@ -17,7 +17,7 @@ export class Assistant {
   data: AdditionalInfo[];
 
   @Column({
-    default: ''
+    default: "",
   })
   dataToFill: string;
 }

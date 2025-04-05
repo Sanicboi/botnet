@@ -27,8 +27,7 @@ export class MenuRouter extends Router {
           where: {
             chatId: String(msg.from!.id),
           },
-          relations: {
-          },
+          relations: {},
         });
         if (!u) {
           u = new User();
@@ -92,15 +91,20 @@ export class MenuRouter extends Router {
       try {
         const threads = await Router.manager.find(Thread, {
           relations: {
-            action: true
+            action: true,
           },
           where: {
-            userId: String(msg.from!.id)
-          }
+            userId: String(msg.from!.id),
+          },
         });
         let btns: InlineKeyboardButton[][] = [];
         for (const t of threads) {
-          btns.push(Btn(`${t.action.name} ${t.firstMsg}`.substring(0, 40) + '...', `thread-${t.id}`));
+          btns.push(
+            Btn(
+              `${t.action.name} ${t.firstMsg}`.substring(0, 40) + "...",
+              `thread-${t.id}`,
+            ),
+          );
         }
 
         if (btns.length == 0) {
@@ -108,11 +112,11 @@ export class MenuRouter extends Router {
           return;
         }
 
-        await bot.sendMessage(msg.from!.id, 'Ваши диалоги', {
+        await bot.sendMessage(msg.from!.id, "Ваши диалоги", {
           reply_markup: {
-            inline_keyboard: btns
-          }
-        })
+            inline_keyboard: btns,
+          },
+        });
       } catch (err) {
         Router.logger.fatal(err);
       }
@@ -244,9 +248,9 @@ export class MenuRouter extends Router {
               [
                 {
                   text: "Бесплатные полезные материалы",
-                  url: "https://t.me/SC_NewsBot"
-                }
-              ]
+                  url: "https://t.me/SC_NewsBot",
+                },
+              ],
             ],
           },
         },
@@ -273,21 +277,20 @@ export class MenuRouter extends Router {
     });
 
     bot.onText(/\/data/, async (msg) => {
-      
       const assistants = await Router.manager.find(Assistant);
 
-      let kb: InlineKeyboardButton[][] = []; 
-      
+      let kb: InlineKeyboardButton[][] = [];
+
       for (const assistant of assistants) {
         kb.push(Btn(assistant.name, `data-${assistant.id}`));
       }
 
       await bot.sendMessage(msg.from!.id, "Выберите раздел", {
         reply_markup: {
-          inline_keyboard: kb
-        }
+          inline_keyboard: kb,
+        },
       });
-    })
+    });
 
     this.onCallback = this.onCallback.bind(this);
   }
@@ -422,38 +425,41 @@ export class MenuRouter extends Router {
         const tId = q.data.substring(7);
         const thread = await Router.manager.findOne(Thread, {
           where: {
-            id: tId
+            id: tId,
           },
           relations: {
             action: {
-              assistant: true
-            }
-          }
+              assistant: true,
+            },
+          },
         });
 
         if (!thread) return;
 
         const gptData = await openai.beta.threads.messages.list(thread.id);
 
-        
-        await bot.sendMessage(q.from.id, `Диалог #${thread.id.substring(7)}\nБольше информации:\n\n⤷Всего сообщений:${gptData.data.length}\n⤷Ассистент: ${thread.action.assistant.name} - ${thread.action.name}\n`, {
-          reply_markup: {
-            inline_keyboard: [
-              Btn('Продолжить диалог', `continue-${thread.id}`),
-              Btn('Удалить диалог', `del-${thread.id}`)
-            ]
-          }
-        })
+        await bot.sendMessage(
+          q.from.id,
+          `Диалог #${thread.id.substring(7)}\nБольше информации:\n\n⤷Всего сообщений:${gptData.data.length}\n⤷Ассистент: ${thread.action.assistant.name} - ${thread.action.name}\n`,
+          {
+            reply_markup: {
+              inline_keyboard: [
+                Btn("Продолжить диалог", `continue-${thread.id}`),
+                Btn("Удалить диалог", `del-${thread.id}`),
+              ],
+            },
+          },
+        );
       }
 
       if (q.data?.startsWith("del-")) {
         await OpenAI.deleteThread(q);
       }
 
-      if (q.data?.startsWith('continue-')) {
+      if (q.data?.startsWith("continue-")) {
         const thread = q.data.substring(9);
         const u = await Router.manager.findOneBy(User, {
-          chatId: String(q.from.id)
+          chatId: String(q.from.id),
         });
         if (!u) return;
         u.threadId = thread;
@@ -462,7 +468,7 @@ export class MenuRouter extends Router {
 
       if (q.data?.startsWith("data-")) {
         const user = await Router.manager.findOneBy(User, {
-          chatId: String(q.from.id)
+          chatId: String(q.from.id),
         });
 
         if (!user) return;
@@ -471,13 +477,12 @@ export class MenuRouter extends Router {
         await Router.manager.save(user);
 
         const asst = await Router.manager.findOneBy(Assistant, {
-          id: user.waitingForData
+          id: user.waitingForData,
         });
 
         if (!asst) return;
 
         await bot.sendMessage(q.from.id, asst.dataToFill);
-        
       }
 
       if (q.data === "balance") {

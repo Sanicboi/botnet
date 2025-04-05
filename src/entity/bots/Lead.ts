@@ -12,35 +12,35 @@ export class Lead {
   threadId: string;
 
   @ManyToOne(() => UserBot, (bot) => bot.leads, {
-    nullable: true
+    nullable: true,
   })
   @JoinColumn({
-    name: "botId"
+    name: "botId",
   })
   bot: UserBot;
 
   @Column({
-    nullable: true
+    nullable: true,
   })
   botId: string;
 
   @Column({
-    default: false
+    default: false,
   })
   responded: boolean;
 
   @Column({
-    default: false
+    default: false,
   })
-  handled: boolean
+  handled: boolean;
 
   @Column({
-    nullable: true
+    nullable: true,
   })
   sentAt: Date;
 
   @Column({
-    nullable: true
+    nullable: true,
   })
   name: string;
 

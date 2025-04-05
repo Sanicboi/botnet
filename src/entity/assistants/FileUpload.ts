@@ -1,4 +1,4 @@
-import {  Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
 import { User } from "../User";
 import { Thread } from "./Thread";
 
@@ -17,14 +17,13 @@ export class FileUpload {
   userId: string;
 
   @ManyToOne(() => Thread, (thread) => thread.files, {
-    onDelete: 'CASCADE'
+    onDelete: "CASCADE",
   })
   @JoinColumn({
-    name: 'threadId'
+    name: "threadId",
   })
   thread: Thread;
 
   @Column()
   threadId: string;
-
 }

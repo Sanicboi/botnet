@@ -1,36 +1,38 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from "typeorm";
 import { User } from "../User";
 
-
-
-@Entity() 
+@Entity()
 export class AudioFile {
+  @PrimaryGeneratedColumn()
+  id: string;
 
-    @PrimaryGeneratedColumn()
-    id: string;
+  @ManyToOne(() => User, (user) => user.audios)
+  @JoinColumn({
+    name: "userId",
+  })
+  user: User;
 
-    @ManyToOne(() => User, (user) => user.audios) 
-    @JoinColumn({
-        name: "userId"
-    })
-    user: User;
+  @Column()
+  userId: string;
 
-    @Column()
-    userId: string;
+  @Column()
+  large: boolean;
 
-    @Column()
-    large: boolean;
+  @Column("real")
+  duration: number;
 
-    @Column('real')
-    duration: number;
+  @Column()
+  extension: string;
 
-    @Column()
-    extension: string;
+  @Column()
+  size: number;
 
-    @Column()
-    size: number;
-
-    @Column('real')
-    cost: number;
-    
+  @Column("real")
+  cost: number;
 }

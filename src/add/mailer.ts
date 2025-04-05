@@ -11,8 +11,8 @@ import { NewMessage, NewMessageEvent } from "telegram/events";
 import TelegramBot, { Message } from "node-telegram-bot-api";
 import OpenAI from "openai";
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_KEY
-})
+  apiKey: process.env.OPENAI_KEY,
+});
 export class Mailer {
   private clients: Map<string, TelegramClient> = new Map<
     string,
@@ -25,7 +25,7 @@ export class Mailer {
 
   constructor() {
     this.reporter = new TelegramBot(process.env.REPORTER_TG_TOKEN!, {
-      polling: true
+      polling: true,
     });
     this.setup();
   }
@@ -40,29 +40,31 @@ export class Mailer {
         process.env.TG_API_HASH!,
         {
           useWSS: true,
-        }
+        },
       );
       client.setLogLevel(LogLevel.ERROR);
       await client.connect();
-      client.addEventHandler(async (e) => this.respond.call(this, client, e), new NewMessage({
-        incoming: true,
-      }));
+      client.addEventHandler(
+        async (e) => this.respond.call(this, client, e),
+        new NewMessage({
+          incoming: true,
+        }),
+      );
       this.clients.set(b.token, client);
     }
-    this.reporter.onText(/\/mail/, this.mail.bind(this))
-    this.reporter.onText(/\/leads/, this.getAllAnswered.bind(this))
-
+    this.reporter.onText(/\/mail/, this.mail.bind(this));
+    this.reporter.onText(/\/leads/, this.getAllAnswered.bind(this));
   }
 
   private async mail() {
-    console.log("on mail")
+    console.log("on mail");
     const leads = await this.manager
       .getRepository(Lead)
       .createQueryBuilder("lead")
       .select()
       .where("lead.threadId IS NULL")
       .getMany();
-    console.log(leads)
+    console.log(leads);
     const bots = await this.manager
       .getRepository(UserBot)
       .createQueryBuilder("bot")
@@ -76,7 +78,7 @@ export class Mailer {
     let msgs: string[] = [];
     let rounds = Math.ceil(left / 5);
     let currentLead = 0;
-    console.log(left, rounds)
+    console.log(left, rounds);
     for (let i = 0; i < rounds; i++) {
       let promises: Promise<string[]>[] = [];
       for (let j = 0; j < Math.min(left, 5); j++) {
@@ -99,7 +101,7 @@ export class Mailer {
       for (const b of bots) {
         if (left > 0) {
           promises.push(
-            this.send.call(this, b, leads[currentLead], msgs[currentLead])
+            this.send.call(this, b, leads[currentLead], msgs[currentLead]),
           );
           currentLead++;
           left--;
@@ -111,7 +113,7 @@ export class Mailer {
   }
 
   private async generate(lead: Lead): Promise<string[]> {
-    console.log("started generating")
+    console.log("started generating");
     const thread = await openai.beta.threads.create({
       messages: [
         {
@@ -137,14 +139,18 @@ export class Mailer {
         console.log("text");
         return el.content[0].text.value;
       }
-      console.log("no text")
+      console.log("no text");
       return "";
     });
   }
 
-  private async send(bot: UserBot, lead: Lead, msg: string): Promise<[boolean, boolean]> {
+  private async send(
+    bot: UserBot,
+    lead: Lead,
+    msg: string,
+  ): Promise<[boolean, boolean]> {
     try {
-      console.log("trying sending")
+      console.log("trying sending");
       if (bot.floodErr) return [false, true];
       const client = this.clients.get(bot.token)!;
       await client.sendMessage(lead.username, {
@@ -154,10 +160,13 @@ export class Mailer {
       lead.bot = bot;
       lead.botId = bot.token;
       await this.manager.save(lead);
-      await this.reporter.sendMessage(this.reportChatId, `Отправлено сообщение ${lead.username}`);
+      await this.reporter.sendMessage(
+        this.reportChatId,
+        `Отправлено сообщение ${lead.username}`,
+      );
       return [true, false];
     } catch (err) {
-      console.error(err)
+      console.error(err);
       if (err instanceof FloodWaitError) {
         bot.floodErr = true;
         await this.manager.save(bot);
@@ -172,62 +181,72 @@ export class Mailer {
   private async respond(client: TelegramClient, e: NewMessageEvent) {
     if (e.isPrivate) {
       const dialogs = await client.getDialogs();
-      const d = dialogs.find(el => el.isUser === true && el.id?.toJSON() === e.message.senderId?.toJSON());
+      const d = dialogs.find(
+        (el) =>
+          el.isUser === true &&
+          el.id?.toJSON() === e.message.senderId?.toJSON(),
+      );
       if (!d) return;
       const entity = d.entity as Api.User;
       const lead = await this.manager.findOne(Lead, {
         where: {
-          username: entity.username
+          username: entity.username,
         },
         relations: {
-          bot: true
-        }
+          bot: true,
+        },
       });
       if (!lead) return;
       if (!lead.responded) {
         lead.responded = true;
         await this.manager.save(lead);
         const me = await client.getMe();
-        await this.reporter.sendMessage(this.reportChatId, `Ответ на сообщение от лида ${lead.username}. Бот ${me.username} ${me.phone}`);
+        await this.reporter.sendMessage(
+          this.reportChatId,
+          `Ответ на сообщение от лида ${lead.username}. Бот ${me.username} ${me.phone}`,
+        );
       }
 
       if (lead.handled) return;
-      
-      await wait(2)
-      await client.invoke(new Api.messages.ReadHistory({
-       peer: lead.username
-     }));
-      await client.invoke(new Api.messages.SetTyping({
-        peer: lead.username,
-        action: new Api.SendMessageTypingAction()
-      }))
+
+      await wait(2);
+      await client.invoke(
+        new Api.messages.ReadHistory({
+          peer: lead.username,
+        }),
+      );
+      await client.invoke(
+        new Api.messages.SetTyping({
+          peer: lead.username,
+          action: new Api.SendMessageTypingAction(),
+        }),
+      );
       await openai.beta.threads.messages.create(lead.threadId, {
         content: e.message.text,
-        role: 'user'
+        role: "user",
       });
 
-      const msgs = await openai.beta.threads.runs.stream(lead.threadId, {
-        assistant_id: this.asst
-      }).finalMessages();
+      const msgs = await openai.beta.threads.runs
+        .stream(lead.threadId, {
+          assistant_id: this.asst,
+        })
+        .finalMessages();
 
       for (const msg of msgs) {
-        if (msg.content[0].type === 'text') {
+        if (msg.content[0].type === "text") {
           for (const ann of msg.content[0].text.annotations) {
             msg.content[0].text.value.replace(ann.text, "");
           }
 
           if (!lead.bot.floodErr) {
             await client.sendMessage(lead.username, {
-              message: msg.content[0].text.value
+              message: msg.content[0].text.value,
             });
           }
         }
-      
       }
-      
-      }
+    }
   }
-
 
   private async getAllAnswered(msg: Message) {
     const leads = await this.manager
@@ -247,12 +266,11 @@ export class Mailer {
       botMap.set(token, me.username!);
     }
     for (const lead of leads) {
-      result += `${lead.username}, Bot connected to it: ${botMap.get(lead.bot.token)}\n`
+      result += `${lead.username}, Bot connected to it: ${botMap.get(lead.bot.token)}\n`;
     }
 
     await this.reporter.sendMessage(msg.from!.id, result);
   }
 }
-
 
 const m = new Mailer();
