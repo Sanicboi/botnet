@@ -75,6 +75,18 @@ export class Agent {
     }
   }
 
+  public static async createImage(input: string, size: "256x256" | "512x512" | "1024x1024" | "1792x1024" | "1024x1792" = "1024x1024", model: 'dall-e-3' | 'dall-e-2' = 'dall-e-3'): Promise<string> {
+    const res = await openai.images.generate({
+      prompt: input,
+      model,
+      n: 1,
+      quality: 'standard',
+      size
+    });
+    return res.data[0].url!;
+  }
+
+
   public async run(
     input: IInputData,
     model: ResponsesModel = "gpt-4o",
