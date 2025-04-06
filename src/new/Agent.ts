@@ -2,7 +2,7 @@
  *
  * AI Agents class
  * - This class represents an abstraction of an AI agent. It is not constructed, it is "Built" on top of an AgentModel - the record in the database.
- *
+ * - After creation,
  *
  *
  *
@@ -20,7 +20,7 @@ import axios, { AxiosResponse } from "axios";
 import path from "path";
 import ffmpeg from "fluent-ffmpeg";
 import { Readable, Writable } from "typeorm/platform/PlatformTools";
-import { buffer } from "stream/consumers";
+import { Transcription } from "./Transcription";
 
 const manager = AppDataSource.manager;
 interface IInputData {
@@ -75,22 +75,31 @@ export class Agent {
     }
   }
 
-  public static async createImage(input: string, size: "256x256" | "512x512" | "1024x1024" | "1792x1024" | "1024x1792" = "1024x1024", model: 'dall-e-3' | 'dall-e-2' = 'dall-e-3'): Promise<string> {
+  public static async createImage(
+    input: string,
+    size:
+      | "256x256"
+      | "512x512"
+      | "1024x1024"
+      | "1792x1024"
+      | "1024x1792" = "1024x1024",
+    model: "dall-e-3" | "dall-e-2" = "dall-e-3",
+  ): Promise<string> {
     const res = await openai.images.generate({
       prompt: input,
       model,
       n: 1,
-      quality: 'standard',
-      size
+      quality: "standard",
+      size,
     });
     return res.data[0].url!;
   }
-
 
   public async run(
     input: IInputData,
     model: ResponsesModel = "gpt-4o",
   ): Promise<OAI.Responses.Response> {
+    if (!this.initialized) throw new Error("Not initialized");
     let inp: OAI.Responses.ResponseInput = [
       {
         role: "developer",
@@ -152,59 +161,8 @@ export class Agent {
         content,
       });
     } else if (input.type === "audio") {
-      const { data }: AxiosResponse<Buffer> = await axios.get(input.value, {
-        responseType: "arraybuffer",
-      });
-      let result = "";
-      if (data.length > 25 * 1024 * 1024) {
-        const str = new Readable();
-        str.push(data);
-        str.push(null);
-        await new Promise<void>((resolve, reject) => {
-          let i = 0;
-          const outputStream = new Writable({
-            write(chunk: Buffer, encoding, callback) {
-              let f = new File([chunk], `${i}-${path.basename(input.value)}`);
-              openai.audio.transcriptions
-                .create({
-                  file: f,
-                  model: "gpt-4o-transcribe",
-                  prompt: input.caption,
-                })
-                .then((transcription) => {
-                  result += transcription.text;
-                  i++;
-                  callback();
-                })
-                .catch(() => callback(new Error("Error transcribing")));
-            },
-            final() {
-              resolve();
-            },
-          });
-
-          ffmpeg(str)
-            .outputOptions([
-              "-f segment",
-              "-segment-time 600",
-              "-reset_timestamps 1",
-              "-map 0:a",
-            ])
-            .on("end", async () => {})
-            .on("error", reject)
-            .pipe(outputStream, {
-              end: true,
-            });
-        });
-      } else {
-        const f = new File([data], path.basename(input.value));
-        const transcription = await openai.audio.transcriptions.create({
-          file: f,
-          model: "gpt-4o-transcribe",
-          prompt: input.caption,
-        });
-        result = transcription.text;
-      }
+      const transcription = new Transcription(input.value, input.caption);
+      const result = await transcription.transcribe();
       inp.push({
         type: "message",
         role: "user",
