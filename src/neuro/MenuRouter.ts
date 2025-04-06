@@ -87,7 +87,7 @@ export class MenuRouter extends Router {
       );
     });
 
-    bot.onText(/\dialogs/, async (msg) => {
+    bot.onText(/\/dialogs/, async (msg) => {
       try {
         const threads = await Router.manager.find(Thread, {
           relations: {
