@@ -266,7 +266,7 @@ export class Mailer {
       botMap.set(token, me.username!);
     }
     for (const lead of leads) {
-      result += `${lead.username}, Bot connected to it: ${botMap.get(lead.bot.token)}\n`;
+      result += `${lead.username}, Bot connected to it: ${botMap.get(lead.botId)}\n`;
     }
 
     await this.reporter.sendMessage(msg.from!.id, result);
