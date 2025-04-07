@@ -226,6 +226,9 @@ export class Agent {
       model,
       input: inp,
       previous_response_id: input.previousResponseId,
+      store: true,
+      top_p: this._model.topP,
+      temperature: this._model.temperature,
     });
   }
 }

@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { AgentGroup } from "./AgentGroup";
 
 @Entity()
 export class AgentModel {
@@ -14,12 +15,18 @@ export class AgentModel {
   @Column("text")
   firstMessage: string;
 
-  @Column()
-  responseFormat: "text" | "html" | "voice";
-
   @Column("float")
   temperature: number;
 
   @Column("float")
   topP: number;
+
+  @ManyToOne(() => AgentGroup, (group) => group.agents)
+  @JoinColumn({
+    name: "groupId"
+  })
+  group: AgentGroup;
+  
+  @Column()
+  groupId: number;
 }
