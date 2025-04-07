@@ -1,5 +1,3 @@
-
-
 import { ResponsesModel } from "openai/resources/shared";
 import { AppDataSource } from "../data-source";
 import { AgentModel } from "../entity/AgentModel";
@@ -35,7 +33,6 @@ interface IInputData {
    */
   previousResponseId?: string;
 }
-
 
 /**
  * AI Agents class
@@ -76,13 +73,13 @@ export class Agent {
 
   /**
    * Sets the id of the model to later fetch the agent model from the database. Initialized will be set to false.
-   * @param id 
+   * @param id
    */
   constructor(id: number);
 
   /**
    * Builds an agent from a pre-fetched model. Initializzed will be set to true.
-   * @param model 
+   * @param model
    */
   constructor(model: AgentModel);
   constructor(idOrModel: number | AgentModel) {
@@ -111,7 +108,6 @@ export class Agent {
       this._model = res;
     }
   }
-
 
   /**
    * Static method to generate an image using Dall-E

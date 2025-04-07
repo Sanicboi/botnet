@@ -4,12 +4,10 @@ import { Readable, Writable } from "stream";
 import { openai } from "../neuro";
 import ffmpeg from "fluent-ffmpeg";
 
-
 /**
  * Class for transcribing audio
  */
 export class Transcription {
-
   /**
    * Sets up the audio
    * @param url Audio url
@@ -22,7 +20,6 @@ export class Transcription {
 
   private i: number = 0;
   private result: string = "";
-
 
   /**
    * Function that is used in the stream to write data
