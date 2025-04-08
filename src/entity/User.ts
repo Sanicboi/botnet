@@ -8,14 +8,14 @@ import {
   PrimaryColumn,
 } from "typeorm";
 import { Thread } from "./assistants/Thread";
-import { Action } from "./assistants/Action";
 import OpenAI from "openai";
 import { FileUpload } from "./assistants/FileUpload";
 import { UserPromo } from "./assistants/UserPromo";
-import { UserBot } from "./bots/UserBot";
-import { Lead } from "./bots/Lead";
 import { AudioFile } from "./assistants/AudioFile";
-import { AdditionalInfo } from "./assistants/AdditionalInfo";
+
+
+export type UserDataType = 'main' | 'personal' | 'career' | 'business';
+export type UserDataTypeMapped = `${UserDataType}Data`;
 
 @Entity()
 export class User {
@@ -137,8 +137,25 @@ export class User {
   @Column({
     default: "",
   })
-  waitingForData: string;
+  waitingForData: '' | UserDataType;
 
-  @OneToMany(() => AdditionalInfo, (info) => info.user)
-  data: AdditionalInfo[];
+  @Column({
+    default: ''
+  })
+  mainData: string;
+
+  @Column({
+    default: ''
+  })
+  personalData: string;
+
+  @Column({
+    default: ''
+  })
+  businessData: string;
+
+  @Column({
+    default: ''
+  })
+  careerData: string;
 }
