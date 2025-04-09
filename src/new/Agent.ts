@@ -1,16 +1,3 @@
-/**
- *
- * AI Agents class
- * - This class represents an abstraction of an AI agent. It is not constructed, it is "Built" on top of an AgentModel - the record in the database.
- * - After creation,
- *
- *
- *
- *
- *
- *
- */
-
 import { ResponsesModel } from "openai/resources/shared";
 import { AppDataSource } from "../data-source";
 import { AgentModel } from "../entity/AgentModel";
@@ -18,38 +5,82 @@ import { openai } from "../neuro";
 import OAI from "openai/resources";
 import axios, { AxiosResponse } from "axios";
 import path from "path";
-import ffmpeg from "fluent-ffmpeg";
-import { Readable, Writable } from "typeorm/platform/PlatformTools";
 import { Transcription } from "./Transcription";
 
 const manager = AppDataSource.manager;
+
+/**
+ * Interface for any input data
+ */
 interface IInputData {
+  /**
+   * The type of input
+   */
   type: "text" | "audio" | "document" | "image";
+
+  /**
+   * The text or url of file/image/audio
+   */
   value: string;
+
+  /**
+   * The caption of the file
+   */
   caption?: string;
+
+  /**
+   * Previous response id from OpenAI
+   */
   previousResponseId?: string;
 }
 
+/**
+ * AI Agents class
+ * - This class represents an abstraction of an AI agent. It is not constructed, it is "Built" on top of an AgentModel - the record in the database.
+ * - After creation, the instance has to be initialized
+ * - The class has one static method to facilitate image generation
+ * - The agent class IS NOT RESPONSIBLE for managing conversation state, models and token counting - it is the consumer`s responsibility
+ * - As for now, the class is dependent on OpenAI. In near future, it will be rebuilt to account for claude/mixtral
+ * - Handoffs are also in development - possibly even cross-platform
+ */
 export class Agent {
   private _initialized: boolean = false;
 
+  /**
+   * Whether the agent model has been fetched or not. If the agent is built from a pre-fetched model, it is set to true. If not, it is set to true after initialization.
+   */
   public get initialized(): boolean {
     return this._initialized;
   }
 
   private _id: number;
 
+  /**
+   * The id of the model in the database
+   */
   public get id(): number {
     return this._id;
   }
 
   private _model: AgentModel;
 
+  /**
+   * The Agent model instance. If not pre-fetched, it will only be available after initialization.
+   */
   public get model(): AgentModel {
     return this._model;
   }
 
+  /**
+   * Sets the id of the model to later fetch the agent model from the database. Initialized will be set to false.
+   * @param id
+   */
   constructor(id: number);
+
+  /**
+   * Builds an agent from a pre-fetched model. Initializzed will be set to true.
+   * @param model
+   */
   constructor(model: AgentModel);
   constructor(idOrModel: number | AgentModel) {
     if (typeof idOrModel === "number") {
@@ -61,6 +92,9 @@ export class Agent {
     }
   }
 
+  /**
+   * If not initiaized, will fetch the model and build the agent from it. Initialized will change to true.
+   */
   public async initialize(): Promise<void> {
     if (!this.initialized) {
       const res = await manager.findOne(AgentModel, {
@@ -75,6 +109,13 @@ export class Agent {
     }
   }
 
+  /**
+   * Static method to generate an image using Dall-E
+   * @param input Prompt
+   * @param size Size of the output image. For Dall-e 2, it is 256*256, 512*512 or 1024*1024. For Dall-e 3, it is 1024*1024, 1792*1024 or 1024*1792. Default value is 1024*1024
+   * @param model Which model of the two to use. Defaults to dall-e-3
+   * @returns Image url
+   */
   public static async createImage(
     input: string,
     size:
@@ -95,6 +136,12 @@ export class Agent {
     return res.data[0].url!;
   }
 
+  /**
+   * Run the model on input
+   * @param input Input data object
+   * @param model model to use
+   * @returns Response from OpenAI
+   */
   public async run(
     input: IInputData,
     model: ResponsesModel = "gpt-4o",
@@ -179,6 +226,9 @@ export class Agent {
       model,
       input: inp,
       previous_response_id: input.previousResponseId,
+      store: true,
+      top_p: this._model.topP,
+      temperature: this._model.temperature,
     });
   }
 }

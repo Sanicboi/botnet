@@ -4,7 +4,15 @@ import { Readable, Writable } from "stream";
 import { openai } from "../neuro";
 import ffmpeg from "fluent-ffmpeg";
 
+/**
+ * Class for transcribing audio
+ */
 export class Transcription {
+  /**
+   * Sets up the audio
+   * @param url Audio url
+   * @param prompt Prompt, if necessary to summarize, etc
+   */
   constructor(
     private url: string,
     private prompt?: string,
@@ -13,6 +21,12 @@ export class Transcription {
   private i: number = 0;
   private result: string = "";
 
+  /**
+   * Function that is used in the stream to write data
+   * @param chunk Audio chunk
+   * @param encoding Encoding
+   * @param callback Callback
+   */
   private async write(
     chunk: Buffer,
     encoding: string,
@@ -33,6 +47,10 @@ export class Transcription {
       .catch(() => callback(new Error("Error transcribing")));
   }
 
+  /**
+   * Transcribe this audio
+   * @returns transcription result
+   */
   public async transcribe(): Promise<string> {
     const { data }: AxiosResponse<Buffer> = await axios.get(this.url, {
       responseType: "arraybuffer",

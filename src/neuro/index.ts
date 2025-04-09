@@ -25,7 +25,6 @@ export const openai = new OpenAI({
 AppDataSource.initialize();
 
 const manager = AppDataSource.manager;
-
 bot.setMyCommands([
   {
     command: "about",
