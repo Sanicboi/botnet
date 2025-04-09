@@ -2,32 +2,55 @@ import { openai } from "../neuro";
 //@ts-ignore
 import docx from "html-to-docx";
 
-
+/**
+ * Output format type. Currently only these are supported
+ */
 export type OutputFormat = "text" | "html" | "docx" | "audio";
 
-interface IFileData {
+
+/**
+ * This is the general interface for File Data. 
+ * TODO: move it somewhere else
+ */
+export interface IFileData {
     content: Buffer;
     name: string;
     type: string;
 }
 
+/**
+ * General interface for output
+ */
 interface IOutput<T> {
     data: T;
     type: OutputFormat;
 }
 
+
+/**
+ * Text output
+ */
 interface ITextOutput extends IOutput<string> {
     type: "text";
 }
 
+/**
+ * File Output (To be sent as a document)
+ */
 interface IFileOutput extends IOutput<IFileData> {
     type: "docx" | "html";
 }
 
+/**
+ * Audio output (To be sent as a voice message or as an audio)
+ */
 interface IAudioOutput extends IOutput<IFileData> {
     type: "audio";
 }
 
+/**
+ * General type
+ */
 type Output = ITextOutput | IAudioOutput | IFileOutput;
 
 /**
@@ -36,9 +59,16 @@ type Output = ITextOutput | IAudioOutput | IFileOutput;
 export class OutputController {
 
 
-
+    /**
+     * Empty constructor
+     */
     constructor() { }
 
+    /**
+     * Utility method to convert text to HTML Using ChatGPT
+     * @param data text to convert 
+     * @returns Formatted output HTML
+     */
     private async convertToHtml(data: string): Promise<string> {
         const res = await openai.responses.create({
             model: "gpt-4o-mini",
@@ -58,6 +88,12 @@ export class OutputController {
         return res.output_text.replaceAll("```html", "").replaceAll("`", "");
     }
 
+
+    /**
+     * Utility method to read an audio using the OpenAI TTS API
+     * @param text text to read
+     * @returns MP3 Audio Buffer
+     */
     private async createAudio(text: string): Promise<Buffer> {
         const mp3 = await openai.audio.speech.create({
             input: text,
@@ -69,6 +105,13 @@ export class OutputController {
         return Buffer.from(res);
     }
 
+
+    /**
+     * Convert, if necessary, the output of the model to a given format
+     * @param response The model output
+     * @param format The format to convert to
+     * @returns Output object
+     */
     public async convert(response: string, format: OutputFormat): Promise<Output> {
         if (format === "text") return {
             type: "text",
