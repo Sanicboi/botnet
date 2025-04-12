@@ -4,14 +4,14 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
-  OneToOne,
   PrimaryColumn,
 } from "typeorm";
-import { Thread } from "./assistants/Thread";
 import OpenAI from "openai";
 import { FileUpload } from "./assistants/FileUpload";
 import { UserPromo } from "./assistants/UserPromo";
 import { AudioFile } from "./assistants/AudioFile";
+import { AgentModel } from "./AgentModel";
+import { Dialog } from "./assistants/Dialog";
 
 
 export type UserDataType = 'main' | 'personal' | 'career' | 'business';
@@ -24,9 +24,6 @@ export class User {
 
   @Column({ default: "n" })
   qt: "n" | "s" | "l" | "d" | "a" | "o";
-
-  @OneToMany(() => Thread, (thread) => thread.user)
-  threads: Thread[];
 
   @Column({
     type: "text",
@@ -158,4 +155,18 @@ export class User {
     default: ''
   })
   careerData: string;
+
+  @ManyToOne(() => AgentModel, (agent) => agent.users)
+  @JoinColumn({
+    name: 'agentId'
+  })
+  agent: AgentModel;
+
+  @Column()
+  agentId: number;
+
+  @OneToMany(() => Dialog, (dialog) => dialog.user)
+  dialogs: Dialog[];
+
+  
 }
