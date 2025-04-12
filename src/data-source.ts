@@ -2,7 +2,6 @@ import "reflect-metadata";
 import { DataSource } from "typeorm";
 import { User } from "./entity/User";
 import { Assistant } from "./entity/assistants/Assistant";
-import { Thread } from "./entity/assistants/Thread";
 import { Action } from "./entity/assistants/Action";
 import { SupportRequest } from "./entity/SupportRequest";
 import { FileUpload } from "./entity/assistants/FileUpload";
@@ -13,7 +12,6 @@ import { Post } from "./entity/bots/Post";
 import { Lead } from "./entity/bots/Lead";
 import { UserBot } from "./entity/bots/UserBot";
 import { AudioFile } from "./entity/assistants/AudioFile";
-import { AdditionalInfo } from "./entity/assistants/AdditionalInfo";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -27,7 +25,6 @@ export const AppDataSource = new DataSource({
   entities: [
     User,
     Assistant,
-    Thread,
     Action,
     SupportRequest,
     FileUpload,
@@ -38,7 +35,6 @@ export const AppDataSource = new DataSource({
     Lead,
     UserBot,
     AudioFile,
-    AdditionalInfo,
   ],
   migrations: [],
   subscribers: [],
