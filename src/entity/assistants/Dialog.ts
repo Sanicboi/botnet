@@ -1,6 +1,7 @@
-import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { User } from "../User";
 import { AgentModel } from "../AgentModel";
+import { DialogFile } from "./DialogFile";
 
 
 @Entity()
@@ -28,5 +29,8 @@ export class Dialog {
     
     @ManyToOne(() => AgentModel, (agent) => agent.dialogs)
     agent: AgentModel;
+
+    @OneToMany(() => DialogFile, (file) => file.dialog)
+    files: DialogFile[];
 
 }

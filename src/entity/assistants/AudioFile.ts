@@ -22,17 +22,10 @@ export class AudioFile {
   userId: string;
 
   @Column()
-  large: boolean;
-
-  @Column("real")
-  duration: number;
-
-  @Column()
   extension: string;
 
-  @Column()
-  size: number;
-
-  @Column("real")
-  cost: number;
+  @Column('text', {
+    nullable: true
+  })
+  caption: string | null;
 }
