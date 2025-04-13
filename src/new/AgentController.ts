@@ -1,5 +1,5 @@
-import TelegramBot from "node-telegram-bot-api";
 import { AppDataSource } from "../data-source";
+import { Bot } from "./Bot";
 
 
 
@@ -19,11 +19,10 @@ export class AgentController {
      * Sets the listeners for the bot
      * @param bot Telegram Bot
      */
-    constructor(private bot: TelegramBot) {
-
-
-
+    constructor(private bot: Bot) {
 
     }
+
+    private async
 
 }
