@@ -43,6 +43,11 @@ interface IInputData {
    * Previous response id from OpenAI
    */
   previousResponseId?: string;
+
+  /**
+   * Maximum output tokens
+   */
+  maxTokens: number;
 }
 
 /**
@@ -90,7 +95,7 @@ export class Agent {
   constructor(id: number);
 
   /**
-   * Builds an agent from a pre-fetched model. Initializzed will be set to true.
+   * Builds an agent from a pre-fetched model. Initialized will be set to true.
    * @param model
    */
   constructor(model: AgentModel);
@@ -247,6 +252,7 @@ export class Agent {
       store: true,
       top_p: this._model.topP,
       temperature: this._model.temperature,
+      max_output_tokens: input.maxTokens
     });
   }
 }

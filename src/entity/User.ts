@@ -12,6 +12,8 @@ import { AudioFile } from "./assistants/AudioFile";
 import { AgentModel } from "./AgentModel";
 import { Dialog } from "./assistants/Dialog";
 import { DialogFile } from "./assistants/DialogFile";
+import { SupportedModels } from "../utils/Models";
+import { OutputFormat } from "../utils/OutputFormat";
 
 
 export type UserDataType = 'main' | 'personal' | 'career' | 'business';
@@ -49,7 +51,7 @@ export class User {
   @Column({
     default: "gpt-4o-mini",
   })
-  model: OpenAI.ChatModel;
+  model: SupportedModels;
 
   @Column({
     default: "none",
@@ -173,4 +175,8 @@ export class User {
   })
   currentDialogId: number;
 
+  @Column({
+    default: 'text'
+  })
+  outputFormat: OutputFormat;
 }

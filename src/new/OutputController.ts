@@ -1,11 +1,11 @@
 import { openai } from "../neuro";
 //@ts-ignore
 import docx from "html-to-docx";
+import { OutputFormat } from "../utils/OutputFormat";
+import { Bot } from "./Bot";
+import { User } from "../entity/User";
 
-/**
- * Output format type. Currently only these are supported
- */
-export type OutputFormat = "text" | "html" | "docx" | "audio";
+
 
 
 /**
@@ -55,6 +55,7 @@ type Output = ITextOutput | IAudioOutput | IFileOutput;
 
 /**
  * This class is responsible for converting the model´s response in plain text to another format - html, audio, docx or any other
+ * It is also responsible with sending the result
  */
 export class OutputController {
 
@@ -62,7 +63,7 @@ export class OutputController {
     /**
      * Empty constructor
      */
-    constructor() { }
+    constructor(private bot: Bot) { }
 
     /**
      * Utility method to convert text to HTML Using ChatGPT
@@ -159,6 +160,17 @@ export class OutputController {
                 type: "audio/mpeg"
             },
             type: "audio"
+        }
+    }
+
+    public async send(output: Output, user: User) {
+        if (output.type === "text") {
+            await this.bot.bot.sendMessage(+user.chatId, output.data);
+        } else {
+            await this.bot.bot.sendDocument(+user.chatId, output.data.content, {}, {
+                contentType: output.data.type,
+                filename: output.data.name
+            })
         }
     }
 }

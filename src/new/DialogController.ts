@@ -74,4 +74,15 @@ export class DialogController {
         await manager.remove(dialog);
         await this.bot.bot.sendMessage(+user.chatId, 'Диалог удален');
     }
+
+    public getUserCurrentDialog(user: User): Dialog {
+        const result = user.dialogs.find(el => el.id === user.currentDialogId);
+        if (!result) throw new Error("Dialog not found");
+        return result;
+    }
+
+    public async updateDialogLastMsg(dialog: Dialog, msgId: string) {
+        dialog.lastMsgId = msgId;
+        await manager.save(dialog)
+    }
 }
