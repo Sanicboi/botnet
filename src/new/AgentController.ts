@@ -1,3 +1,4 @@
+import axios from "axios";
 import { AppDataSource } from "../data-source";
 import { Dialog } from "../entity/assistants/Dialog";
 import { User } from "../entity/User";
@@ -27,6 +28,8 @@ export class AgentController {
      */
     constructor(private bot: Bot, private balanceController: BalanceController, private dialogController: DialogController, private outputController: OutputController) {
 
+        this.bot.onGenerateImage(this.generateImage.bind(this));
+        this.bot.onTextInput(this.textInput.bind(this));
     }
 
     private async textInput(user: User, text: string) {
@@ -48,4 +51,9 @@ export class AgentController {
         await this.outputController.send(converted, user);
     }
 
+
+    private async generateImage(user: User, text: string) {
+        const result = await Agent.createImage(text, user.imageRes);
+        await this.bot.bot.sendPhoto(+user.chatId, result);
+    }
 }
