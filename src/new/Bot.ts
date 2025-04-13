@@ -1,4 +1,4 @@
-import TelegramBot, { Message } from "node-telegram-bot-api";
+import TelegramBot, { CallbackQuery, Message } from "node-telegram-bot-api";
 import { User } from "../entity/User";
 import { AppDataSource } from "../data-source";
 import { FindOptionsRelations, RelationOptions } from "typeorm";
@@ -6,6 +6,9 @@ import { FindOptionsRelations, RelationOptions } from "typeorm";
 const manager = AppDataSource.manager;
 export class Bot {
   public readonly bot: TelegramBot;
+
+  private cqListeners: ((q: CallbackQuery) => Promise<true | any>)[] = [];
+  private freeTextListeners: ((msg: Message) => Promise<true | any>)[] = [];
 
   constructor() {
     this.bot = new TelegramBot(process.env.NEURO_TOKEN ?? "", {
@@ -92,18 +95,18 @@ export class Bot {
   }
 
   public onCreateDialog(f: (user: User, agentId: number) => Promise<any>) {
-    this.bot.on("callback_query", async (q) => {
+    this.cqListeners.push(async (q) => {
       if (q.data?.startsWith("agent-")) {
         const user = await this.getUser(q);
         if (!user) return;
         const agentId = +q.data.substring(6);
         await f(user, agentId);
       }
-    });
+  });
   }
 
   public onDeleteDialog(f: (user: User, dialogId: number) => Promise<any>) {
-    this.bot.on("callback_query", async (q) => {
+    this.cqListeners.push(async (q) => {
       if (q.data?.startsWith("delete-")) {
         const user = await this.getUser(q, {
           dialogs: true
@@ -111,5 +114,30 @@ export class Bot {
         await f(user, +q.data.substring(7));
       }
     });
+  }
+
+  public onTextInput(f: (user: User, text: string) => Promise<any>) {
+    this.freeTextListeners.push(async (msg) => {
+      const user = await this.getUser(msg);
+      if (!user || !msg.text) return;
+      await f(user, msg.text);
+    })
+  }
+
+  public setListeners() {
+    this.bot.on('callback_query', async (q) => {
+      for (const f of this.cqListeners) {
+        const result = await f(q);
+        if (result === true) break;
+      }
+    });
+    this.bot.onText(/./, async (msg) => {
+      if (msg.text && !msg.text.startsWith('/')) {
+        for (const f of this.freeTextListeners) {
+          const result = await f(msg);
+          if (result === true) break;
+        }
+      }
+    })
   }
 }

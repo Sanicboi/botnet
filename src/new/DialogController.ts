@@ -19,6 +19,7 @@ export class DialogController {
     constructor(private bot: Bot) { 
         bot.onDialogs(this.getDialogs.bind(this));
         bot.onCreateDialog(this.createDialog.bind(this));
+        bot.onDeleteDialog(this.deleteDialog.bind(this));
     }
 
 
