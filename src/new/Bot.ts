@@ -7,8 +7,8 @@ const manager = AppDataSource.manager;
 export class Bot {
   public readonly bot: TelegramBot;
 
-  private cqListeners: ((q: CallbackQuery) => Promise<true | any>)[] = [];
-  private freeTextListeners: ((msg: Message) => Promise<true | any>)[] = [];
+  private cqListeners: ((q: CallbackQuery, user: User) => Promise<true | any>)[] = [];
+  private freeTextListeners: ((msg: Message, user: User) => Promise<true | any>)[] = [];
 
   constructor() {
     this.bot = new TelegramBot(process.env.NEURO_TOKEN ?? "", {
@@ -117,24 +117,32 @@ export class Bot {
   }
 
   public onTextInput(f: (user: User, text: string) => Promise<any>) {
-    this.freeTextListeners.push(async (msg) => {
-      const user = await this.getUser(msg);
-      if (!user || !msg.text) return;
-      await f(user, msg.text);
+    this.freeTextListeners.push(async (msg, user) => {
+      await f(user, msg.text!);
+    })
+  }
+
+  public onGenerateImage(f: (user: User, text: string) => Promise<any>) {
+    this.freeTextListeners.push(async (msg, user) => {
+      if (user.usingImageGeneration) {
+        await f(user, msg.text!);
+      }
     })
   }
 
   public setListeners() {
     this.bot.on('callback_query', async (q) => {
+      const user = await this.getUser(q);
       for (const f of this.cqListeners) {
-        const result = await f(q);
+        const result = await f(q, user);
         if (result === true) break;
       }
     });
     this.bot.onText(/./, async (msg) => {
       if (msg.text && !msg.text.startsWith('/')) {
+        const user = await this.getUser(msg);
         for (const f of this.freeTextListeners) {
-          const result = await f(msg);
+          const result = await f(msg, user);
           if (result === true) break;
         }
       }
