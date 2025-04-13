@@ -7,6 +7,7 @@ import { BalanceController } from "./BalanceController";
 import { Bot } from "./Bot";
 import { DialogController } from "./DialogController";
 import { OutputController } from "./OutputController";
+import { ImageAgent } from "./specialAgents/ImageAgent";
 
 
 
@@ -21,14 +22,14 @@ const manager = AppDataSource.manager;
  */
 export class AgentController {
 
+    private imageAgent: ImageAgent;
 
     /**
      * Sets the listeners for the bot
      * @param bot Telegram Bot
      */
     constructor(private bot: Bot, private balanceController: BalanceController, private dialogController: DialogController, private outputController: OutputController) {
-
-        this.bot.onGenerateImage(this.generateImage.bind(this));
+        this.imageAgent = new ImageAgent(bot);
         this.bot.onTextInput(this.textInput.bind(this));
     }
 
@@ -52,8 +53,6 @@ export class AgentController {
     }
 
 
-    private async generateImage(user: User, text: string) {
-        const result = await Agent.createImage(text, user.imageRes);
-        await this.bot.bot.sendPhoto(+user.chatId, result);
-    }
+
+    
 }

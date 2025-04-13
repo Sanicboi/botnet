@@ -126,6 +126,23 @@ export class Bot {
     this.freeTextListeners.push(async (msg, user) => {
       if (user.usingImageGeneration) {
         await f(user, msg.text!);
+        return true;
+      }
+    })
+  }
+
+  public onEnterImage(f: (user: User) => Promise<any>) {
+    this.cqListeners.push(async (q, user) => {
+      if (q.data === "images") {
+        await f(user);
+      }
+    })
+  }
+
+  public onSetResolution(f: (user: User, res: string) => Promise<any>) {
+    this.cqListeners.push(async (q, user) => {
+      if (q.data?.startsWith('res-')) {
+        await f(user, q.data.substring(4));
       }
     })
   }
