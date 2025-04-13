@@ -7,11 +7,11 @@ import {
   PrimaryColumn,
 } from "typeorm";
 import OpenAI from "openai";
-import { FileUpload } from "./assistants/FileUpload";
 import { UserPromo } from "./assistants/UserPromo";
 import { AudioFile } from "./assistants/AudioFile";
 import { AgentModel } from "./AgentModel";
 import { Dialog } from "./assistants/Dialog";
+import { DialogFile } from "./assistants/DialogFile";
 
 
 export type UserDataType = 'main' | 'personal' | 'career' | 'business';
@@ -86,8 +86,8 @@ export class User {
   })
   waitingForName: boolean;
 
-  @OneToMany(() => FileUpload, (f) => f.user)
-  files: FileUpload[];
+  @OneToMany(() => DialogFile, (file) => file.user)
+  files: DialogFile[];
 
   @Column({
     default: 0,
@@ -168,5 +168,9 @@ export class User {
   @OneToMany(() => Dialog, (dialog) => dialog.user)
   dialogs: Dialog[];
 
-  
+  @Column({
+    nullable: true
+  })
+  currentDialogId: number;
+
 }

@@ -6,6 +6,7 @@ import OAI from "openai/resources";
 import axios, { AxiosResponse } from "axios";
 import path from "path";
 import { Transcription } from "./Transcription";
+import { DialogFile } from "../entity/assistants/DialogFile";
 
 const manager = AppDataSource.manager;
 
@@ -16,10 +17,10 @@ interface IInputData {
   /**
    * The type of input
    */
-  type: "text" | "audio" | "document" | "image";
+  type: "text" | "audio" | "voice" | "document" | "image";
 
   /**
-   * The text or url of file/image/audio
+   * The text or url or the id of file/image/audio
    */
   value: string;
 
@@ -27,6 +28,16 @@ interface IInputData {
    * The caption of the file
    */
   caption?: string;
+
+  /**
+   * User ID (NECESSARY FOR FILE INPUTS ONLY)
+   */
+  userId?: string;
+
+  /**
+   * Dialog ID (NECESSARY FOR FILE INPUTS ONLY)
+   */
+  dialogId?: number;
 
   /**
    * Previous response id from OpenAI
@@ -42,6 +53,7 @@ interface IInputData {
  * - The agent class IS NOT RESPONSIBLE for managing conversation state, models and token counting - it is the consumer`s responsibility
  * - As for now, the class is dependent on OpenAI. In near future, it will be rebuilt to account for claude/mixtral
  * - Handoffs are also in development - possibly even cross-platform
+ * - The class only adds files to dialogs - nothing more
  */
 export class Agent {
   private _initialized: boolean = false;
@@ -188,6 +200,12 @@ export class Agent {
         purpose: "user_data",
       });
 
+      const dFile = new DialogFile();
+      dFile.dialog.id = input.dialogId!;
+      dFile.user.chatId = input.userId!;
+      await manager.save(dFile);
+
+
       let content: OAI.Responses.ResponseInputMessageContentList = [
         {
           type: "input_file",
@@ -207,8 +225,8 @@ export class Agent {
         role: "user",
         content,
       });
-    } else if (input.type === "audio") {
-      const transcription = new Transcription(input.value, input.caption);
+    } else if (input.type === "audio" || input.type === "voice") {
+      const transcription = new Transcription(input.type === "audio", input.value, input.caption);
       const result = await transcription.transcribe();
       inp.push({
         type: "message",
@@ -220,7 +238,7 @@ export class Agent {
           },
         ],
       });
-    }
+    } 
 
     return openai.responses.create({
       model,

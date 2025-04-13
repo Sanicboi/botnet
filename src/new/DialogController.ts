@@ -4,6 +4,8 @@ import { Dialog } from "../entity/assistants/Dialog";
 import { User } from "../entity/User";
 import { Bot } from "./Bot";
 import { Btn } from "../neuro/utils";
+import { AgentModel } from "../entity/AgentModel";
+import { openai } from "../neuro";
 
 const manager = AppDataSource.manager;
 /**
@@ -16,6 +18,7 @@ export class DialogController {
 
     constructor(private bot: Bot) { 
         bot.onDialogs(this.getDialogs.bind(this));
+        bot.onCreateDialog(this.createDialog.bind(this));
     }
 
 
@@ -33,7 +36,41 @@ export class DialogController {
         });
     }
 
-    private async createDialog() {
+    private async createDialog(user: User, agentId: number) {
+        const agent = await manager.findOne(AgentModel, {
+            where: {
+                id: agentId
+            }
+        });
+        if (!agent) return;
+        const dialog = new Dialog();
+        dialog.agent.id = agentId;
+        dialog.user = user;
+        await manager.save(dialog);
+        user.currentDialogId = dialog.id;
+        await manager.save(user);
 
+        await this.bot.bot.sendMessage(+user.chatId, agent.firstMessage);
+    }
+
+    private async deleteDialog(user: User, dialogId: number) {
+        const dialog = await manager.findOne(Dialog, {
+            where: {
+                id: dialogId
+            },
+            relations: {
+                files: true
+            }
+        });
+
+        if (!dialog) return;
+
+        for (const f of dialog.files) {
+            await openai.files.del(f.id);
+            await manager.remove(f);
+        }
+        dialog.files = [];
+        await manager.remove(dialog);
+        await this.bot.bot.sendMessage(+user.chatId, 'Диалог удален');
     }
 }
