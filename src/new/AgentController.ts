@@ -38,6 +38,7 @@ export class AgentController {
         this.bot.onTextInput(this.textInput.bind(this));
         this.bot.onVoiceInput(this.voiceInput.bind(this));
         this.bot.onDocInput(this.docInput.bind(this));
+        this.bot.onImageInput(this.imageInput.bind(this));
     }
 
     private async textInput(user: User, text: string) {
@@ -107,4 +108,23 @@ export class AgentController {
     }
     
 
+    private async imageInput(user: User, url: string, caption?: string) {
+        const result = await this.balanceController.checkBalance(user);
+        if (!result.exists) return;
+        const agent = new Agent(user.agent);
+
+        let dialog: Dialog = this.dialogController.getUserCurrentDialog(user);
+        const response = await agent.run({
+            maxTokens: result.limit,
+            type: 'image',
+            value: url,
+            previousResponseId: dialog.lastMsgId ?? undefined,
+            caption
+        }, user.model);
+
+        await this.balanceController.editBalance(user, response.usage!.total_tokens);
+        await this.dialogController.updateDialogLastMsg(dialog, response.id);
+        const converted = await this.outputController.convert(response.output_text, user.outputFormat);
+        await this.outputController.send(converted, user);
+    }
 }

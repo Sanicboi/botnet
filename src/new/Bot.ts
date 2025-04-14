@@ -192,6 +192,16 @@ export class Bot {
     })
   }
 
+  public onImageInput(f: (user: User, url: string, caption?: string) => Promise<any>) {
+    this.bot.on('photo', async (msg) => {
+      if (!msg.photo) return;
+      const user = await this.getUser(msg);
+      const url = await this.bot.getFileLink(msg.photo.sort((a, b) => b.height*b.width - a.height*a.width)[0]!.file_id);
+      await f(user, url, msg.caption);
+    })
+  }
+
+
 
   public setListeners() {
     this.bot.on('callback_query', async (q) => {
