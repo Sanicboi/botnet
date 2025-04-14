@@ -19,7 +19,7 @@ export class Mailer {
     TelegramClient
   >();
   private manager: EntityManager = AppDataSource.manager;
-  private asst: string = "asst_0yxkzSPNtPwwpFerJFhUMW8m";
+  private asst: string = "asst_J6fU8mm9z6uMPoJB9gbsKRp7";
   private reporter: TelegramBot;
   private reportChatId: number = 1391491967;
 
@@ -118,7 +118,7 @@ export class Mailer {
       messages: [
         {
           role: "user",
-          content: `Имя: ${lead.name}`,
+          content: `Имя: ${lead.name}. Сфера: ${lead.sphere}`,
         },
       ],
     });
@@ -209,42 +209,42 @@ export class Mailer {
 
       if (lead.handled) return;
 
-      await wait(2);
-      await client.invoke(
-        new Api.messages.ReadHistory({
-          peer: lead.username,
-        }),
-      );
-      await client.invoke(
-        new Api.messages.SetTyping({
-          peer: lead.username,
-          action: new Api.SendMessageTypingAction(),
-        }),
-      );
-      await openai.beta.threads.messages.create(lead.threadId, {
-        content: e.message.text,
-        role: "user",
-      });
+      // await wait(2);
+      // await client.invoke(
+      //   new Api.messages.ReadHistory({
+      //     peer: lead.username,
+      //   }),
+      // );
+      // await client.invoke(
+      //   new Api.messages.SetTyping({
+      //     peer: lead.username,
+      //     action: new Api.SendMessageTypingAction(),
+      //   }),
+      // );
+      // await openai.beta.threads.messages.create(lead.threadId, {
+      //   content: e.message.text,
+      //   role: "user",
+      // });
 
-      const msgs = await openai.beta.threads.runs
-        .stream(lead.threadId, {
-          assistant_id: this.asst,
-        })
-        .finalMessages();
+      // const msgs = await openai.beta.threads.runs
+      //   .stream(lead.threadId, {
+      //     assistant_id: this.asst,
+      //   })
+      //   .finalMessages();
 
-      for (const msg of msgs) {
-        if (msg.content[0].type === "text") {
-          for (const ann of msg.content[0].text.annotations) {
-            msg.content[0].text.value.replace(ann.text, "");
-          }
+      // for (const msg of msgs) {
+      //   if (msg.content[0].type === "text") {
+      //     for (const ann of msg.content[0].text.annotations) {
+      //       msg.content[0].text.value.replace(ann.text, "");
+      //     }
 
-          if (!lead.bot.floodErr) {
-            await client.sendMessage(lead.username, {
-              message: msg.content[0].text.value,
-            });
-          }
-        }
-      }
+      //     if (!lead.bot.floodErr) {
+      //       await client.sendMessage(lead.username, {
+      //         message: msg.content[0].text.value,
+      //       });
+      //     }
+      //   }
+      // }
     }
   }
 

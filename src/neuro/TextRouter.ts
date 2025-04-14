@@ -28,7 +28,6 @@ export class TextRouter extends Router {
           chatId: String(msg.chat.id),
         },
         relations: {
-          data: true,
         },
       });
       if (!user) return;
@@ -40,7 +39,6 @@ export class TextRouter extends Router {
           chatId: String(msg.chat.id),
         },
         relations: {
-          data: true,
         },
       });
       if (!user) return;
@@ -67,7 +65,6 @@ export class TextRouter extends Router {
         chatId: String(q.from.id),
       },
       relations: {
-        data: true,
         threads: true,
       },
     });
@@ -413,7 +410,6 @@ export class TextRouter extends Router {
         chatId: String(msg.chat.id),
       },
       relations: {
-        data: true,
       },
     });
     if (!user) return;
@@ -431,7 +427,6 @@ export class TextRouter extends Router {
         chatId: String(msg.chat.id),
       },
       relations: {
-        data: true,
       },
     });
     if (!user) return;
@@ -449,7 +444,6 @@ export class TextRouter extends Router {
         chatId: String(msg.from!.id),
       },
       relations: {
-        data: true,
       },
     });
     if (!user) return;

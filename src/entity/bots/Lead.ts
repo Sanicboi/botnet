@@ -40,6 +40,11 @@ export class Lead {
   sentAt: Date;
 
   @Column({
+    nullable: true
+  })
+  sphere: string;
+
+  @Column({
     nullable: true,
   })
   name: string;
