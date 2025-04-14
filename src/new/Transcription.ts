@@ -7,6 +7,7 @@ import ffmpeg from "fluent-ffmpeg";
 import { User } from "../entity/User";
 import { AudioFile } from "../entity/assistants/AudioFile";
 import { AppDataSource } from "../data-source";
+import { Converter } from "./Converter";
 
 
 
@@ -123,7 +124,7 @@ export class Transcription {
 
   /**
    * Get the cost of the transcription (non-fs only)
-   * @returns Cost IN USD 
+   * @returns Cost IN SMT
    */
   public async getCost(): Promise<number> {
 
@@ -143,7 +144,7 @@ export class Transcription {
       });   
     })
 
-    return dur / 60 * 0.06;
+    return Converter.USDSMT(dur / 60 * 0.06);
   }
 
   /**

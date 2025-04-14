@@ -8,6 +8,7 @@ import { Bot } from "./Bot";
 import { DialogController } from "./DialogController";
 import { OutputController } from "./OutputController";
 import { ImageAgent } from "./specialAgents/ImageAgent";
+import { AudioAgent } from "./specialAgents/AudioAgent";
 
 
 
@@ -18,11 +19,12 @@ const manager = AppDataSource.manager;
  * This class is responsible for all agent-specific controls of the telegram bot.
  * - This class DOES work with the database and IS RESPONSIBLE for handling models and the user`s interaction with them
  * - This class DOES NOT HANDLE user balance and token conversion, but it does count tokens from responses
- * - This class DOES NOT HANDLE conversations, onlz consumes the classes that handle it
+ * - This class DOES NOT HANDLE conversations, only consumes the classes that handle it
  */
 export class AgentController {
 
     private imageAgent: ImageAgent;
+    private audioAgent: AudioAgent;
 
     /**
      * Sets the listeners for the bot
@@ -30,6 +32,7 @@ export class AgentController {
      */
     constructor(private bot: Bot, private balanceController: BalanceController, private dialogController: DialogController, private outputController: OutputController) {
         this.imageAgent = new ImageAgent(bot);
+        this.audioAgent = new AudioAgent(bot);
         this.bot.onTextInput(this.textInput.bind(this));
     }
 

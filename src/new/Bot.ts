@@ -147,6 +147,15 @@ export class Bot {
     })
   }
 
+  public onCalculateCosts(f: (user: User, url: string) => Promise<any>) {
+    this.bot.on("audio", async (msg) => {
+      if (!msg.audio) return;
+      const user = await this.getUser(msg);
+      const url = await this.bot.getFileLink(msg.audio.file_id);
+      await f(user, url);
+    })
+  }
+
   public setListeners() {
     this.bot.on('callback_query', async (q) => {
       const user = await this.getUser(q);
