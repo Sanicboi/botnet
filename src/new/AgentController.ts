@@ -84,7 +84,7 @@ export class AgentController {
         await this.outputController.send(converted, user);
     }
 
-    private async docInput(user: User, url: string) {
+    private async docInput(user: User, url: string, caption?: string) {
         const result = await this.balanceController.checkBalance(user);
         if (!result.exists) return;
         const agent = new Agent(user.agent);
@@ -96,7 +96,8 @@ export class AgentController {
             value: url,
             dialogId: dialog.id,
             previousResponseId: dialog.lastMsgId ?? undefined,
-            userId: user.chatId
+            userId: user.chatId,
+            caption
         }, user.model);
 
         await this.balanceController.editBalance(user, response.usage!.total_tokens);
@@ -105,4 +106,5 @@ export class AgentController {
         await this.outputController.send(converted, user);
     }
     
+
 }

@@ -183,12 +183,12 @@ export class Bot {
     })
   }
 
-  public onDocInput(f: (user: User, url: string) => Promise<any>) {
+  public onDocInput(f: (user: User, url: string, caption?: string) => Promise<any>) {
     this.bot.on('document', async (msg) => {
       if (!msg.document) return;
       const user = await this.getUser(msg);
       const url = await this.bot.getFileLink(msg.document.file_id);
-      await f(user, url);
+      await f(user, url, msg.caption);
     })
   }
 
