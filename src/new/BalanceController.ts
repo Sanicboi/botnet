@@ -15,14 +15,15 @@ export class BalanceController {
 
   /**
    * Checks the balance and sends the message if not sufficient funds are given
-   * @param user
+   * @param user User
+   * @param threshold Threshold in RUB
    */
-  public async checkBalance(user: User): Promise<{
+  public async checkBalance(user: User, threshold: number = 0): Promise<{
     exists: boolean;
     limit: number;
   }> {
     const sum = user.addBalance + user.leftForToday;
-    if (sum === 0) {
+    if (sum <= threshold) {
       await this.bot.bot.sendMessage(+user.chatId, "❌Упс! У вас закончились токены.\nЧтобы продолжить пользоваться ботом, вам нужно оформить подписку или купить отдельный комплект токенов…");
       return {
         exists: false,

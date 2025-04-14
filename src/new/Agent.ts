@@ -17,7 +17,7 @@ interface IInputData {
   /**
    * The type of input
    */
-  type: "text" | "audio" | "voice" | "document" | "image";
+  type: "text" | "voice" | "document" | "image";
 
   /**
    * The text or url or the id of file/image/audio
@@ -48,6 +48,11 @@ interface IInputData {
    * Maximum output tokens
    */
   maxTokens: number;
+
+  /**
+   * Transcription of the voice
+   */
+  transcription?: Transcription;
 }
 
 /**
@@ -230,9 +235,9 @@ export class Agent {
         role: "user",
         content,
       });
-    } else if (input.type === "audio" || input.type === "voice") {
-      const transcription = new Transcription(input.type === "audio", input.value, input.caption);
-      const result = await transcription.transcribe();
+    } else if (input.type === "voice") {
+      if (!input.transcription) throw new Error("Transcription not provided");
+      const result = await input.transcription.transcribe();
       inp.push({
         type: "message",
         role: "user",

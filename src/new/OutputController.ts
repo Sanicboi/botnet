@@ -114,14 +114,14 @@ export class OutputController {
      * @returns Output object
      */
     public async convert(response: string, format: OutputFormat): Promise<Output> {
-        if (format === "text") return {
+        if (format === "text" && response.length < 4000) return {
             type: "text",
             data: response
         };
 
-        if (format === "html" || format === "docx") {
+        if (format === "html" || format === "docx" || (format === "text" && response.length >= 4000)) {
             const converted = await this.convertToHtml(response);
-            if (format === "html") return {
+            if (format === "html" || format === "text") return {
                 data: {
                     content: Buffer.from(converted, "utf-8"),
                     name: "report.html",

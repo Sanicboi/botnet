@@ -9,6 +9,7 @@ export class Bot {
 
   private cqListeners: ((q: CallbackQuery, user: User) => Promise<true | any>)[] = [];
   private freeTextListeners: ((msg: Message, user: User) => Promise<true | any>)[] = [];
+  private voiceListeners: ((msg: Message, user: User) => Promise<true | any>)[] = [];
 
   constructor() {
     this.bot = new TelegramBot(process.env.NEURO_TOKEN ?? "", {
@@ -156,6 +157,42 @@ export class Bot {
     })
   }
 
+  public onTranscribeSaved(f: (user: User, id: string) => Promise<any>) {
+    this.cqListeners.push(async (q, user) => {
+      if (q.data?.startsWith("transcription-")) {
+        await f(user, q.data.substring(14));
+      }
+    })
+  }
+
+  public onTranscribeNonSaved(f: (user: User, url: string) => Promise<any>) {
+    this.voiceListeners.push(async (msg, user) => {
+      if (user.agentId === 0) {
+        const url = await this.bot.getFileLink(msg.voice!.file_id);
+        await f(user, url);
+      }
+    })
+  }
+
+  public onVoiceInput(f: (user: User, url: string) => Promise<any>) {
+    this.voiceListeners.push(async (msg, user) => {
+      if (user.agentId !== 0) {
+        const url = await this.bot.getFileLink(msg.voice!.file_id);
+        await f(user, url);
+      }
+    })
+  }
+
+  public onDocInput(f: (user: User, url: string) => Promise<any>) {
+    this.bot.on('document', async (msg) => {
+      if (!msg.document) return;
+      const user = await this.getUser(msg);
+      const url = await this.bot.getFileLink(msg.document.file_id);
+      await f(user, url);
+    })
+  }
+
+
   public setListeners() {
     this.bot.on('callback_query', async (q) => {
       const user = await this.getUser(q);
@@ -171,6 +208,14 @@ export class Bot {
           const result = await f(msg, user);
           if (result === true) break;
         }
+      }
+    });
+    this.bot.on('voice', async (msg) => {
+      if (!msg.voice) return;
+      const user = await this.getUser(msg);
+      for (const f of this.voiceListeners) {
+        const result = await f(msg, user);
+        if (result === true) break;
       }
     })
   }

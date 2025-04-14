@@ -29,8 +29,25 @@ export class Transcription {
    */
   constructor(private exists: boolean, private urlOrId: string, private prompt?: string) {}
 
+  /**
+   * Internal chunk number
+   */
   private i: number = 0;
+
+  /**
+   * Transcription result
+   */
   private result: string = "";
+
+  /**
+   * Instance in the database
+   */
+  private inDB: AudioFile | null = null;
+
+  /**
+   * Audio data buffer
+   */
+  private buffer: Buffer | null = null;
 
   /**
    * Function that is used in the stream to write data
@@ -59,29 +76,14 @@ export class Transcription {
   }
 
   /**
-   * Transcribe this audio, and delete it
+   * Transcribe this audio
    * @returns transcription result
    */
   public async transcribe(): Promise<string> {
-    let data: Buffer;
-    let inDb: AudioFile | null = null;
-    if (!this.exists) {
-      data = (await axios.get(this.urlOrId, {
-        responseType: "arraybuffer",
-      })).data;
-    } else {
-      inDb = await manager.findOneBy(AudioFile, {
-        id: this.urlOrId
-      });
-      if (!inDb) throw new Error("File not found");
-      this.urlOrId = inDb.id + inDb.extension;
-      data = fs.readFileSync(path.join('audio', this.urlOrId));
-
-    }
-
-    if (data.length > 25 * 1024 * 1024) {
+    if (!this.buffer) throw new Error("Buffer is null");
+    if (this.buffer.length > 25 * 1024 * 1024) {
       const str = new Readable();
-      str.push(data);
+      str.push(this.buffer);
       str.push(null);
       await new Promise<void>((resolve, reject) => {
         let i = 0;
@@ -106,18 +108,13 @@ export class Transcription {
           });
       });
     } else {
-      const f = new File([data], path.basename(this.urlOrId));
+      const f = new File([this.buffer], path.basename(this.urlOrId));
       const transcription = await openai.audio.transcriptions.create({
         file: f,
         model: "gpt-4o-transcribe",
         prompt: this.prompt,
       });
       this.result = transcription.text;
-    }
-
-    if (inDb) {
-      fs.rmSync(path.join('audio', this.urlOrId));
-      await manager.remove(inDb);    
     }
     return this.result;
   }
@@ -127,19 +124,16 @@ export class Transcription {
    * @returns Cost IN SMT
    */
   public async getCost(): Promise<number> {
+    if (this.buffer) throw new Error("Buffer is null");
 
-    const { data }: AxiosResponse<Buffer> = await axios.get(this.urlOrId, {
-      responseType: "arraybuffer",
-    });
 
     const stream = new Readable();
-    stream.push(data);
+    stream.push(this.buffer);
     stream.push(null);
     const dur: number = await new Promise((resolve, reject) => {
       ffmpeg(stream)
       .ffprobe( async (err, data) => {
         if (err) reject(err);
-
         resolve(+data.streams[0].duration!)
       });   
     })
@@ -150,18 +144,48 @@ export class Transcription {
   /**
    * Save the audio file to the database and to the file system
    * @param user User
-   * @returns 
+   * @returns File object
    */
   public async save(user: User) {
-    const audio = new AudioFile();
-    audio.extension = path.extname(this.urlOrId);
-    audio.user = user;
-    audio.userId = user.chatId;
-    await manager.save(audio);
-    const { data }: AxiosResponse<Buffer> = await axios.get(this.urlOrId, {
-      responseType: 'arraybuffer'
-    });
-    fs.writeFileSync(path.join('audio', audio.id + audio.extension), data)
-    return audio;
+    if (this.exists || this.inDB) throw new Error("File already exists");
+    if (!this.buffer) throw new Error("Buffer is null");
+    this.inDB = new AudioFile();
+    this.inDB.extension = path.extname(this.urlOrId);
+    this.inDB.user = user;
+    this.inDB.userId = user.chatId;
+    await manager.save(this.inDB);
+
+    fs.writeFileSync(path.join(process.cwd(), 'audio', this.inDB.id + this.inDB.extension), this.buffer);
+    return this.inDB;
+  }
+
+
+  /**
+   * Setup the audio
+   */
+  public async setup() {
+    if (this.exists) {
+      this.inDB = await manager.findOneBy(AudioFile, {
+        id: this.urlOrId
+      });
+      if (!this.inDB) throw new Error("File not found");
+      this.buffer = fs.readFileSync(path.join(process.cwd(), 'audio', this.inDB.id + this.inDB.extension))
+    } else {
+      const res = await axios.get(this.urlOrId, {
+        responseType: 'arraybuffer'
+      });
+      this.buffer = res.data;
+    }
+  }
+
+
+  /**
+   * Delete the file, if saved
+   */
+  public async remove() {
+    if (!this.exists) throw new Error("File not in the database!");
+    if (!this.inDB) throw new Error("File not set up!");
+    fs.rmSync(path.join(process.cwd(), 'audio', this.inDB.id + this.inDB.extension));
+    await manager.remove(this.inDB);
   }
 }
