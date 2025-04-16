@@ -16,7 +16,7 @@ export class AudioAgent {
     private balanceController: BalanceController,
   ) {
     bot.onTranscribeSaved(this.transcribeSaved.bind(this));
-    bot.onTranscribeSaved(this.transcribeSaved.bind(this));
+    bot.onTranscribeNonSaved(this.transcribeNonSaved.bind(this));
     bot.onCalculateCosts(this.calculateCosts.bind(this));
   }
 
