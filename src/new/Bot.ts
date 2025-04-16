@@ -250,6 +250,22 @@ export class Bot {
     });
   }
 
+  public onFreeTokens(f: (user: User) => Promise<any>) {
+    this.bot.onText(/\/free/, async (msg) => {
+      const user = await this.getUser(msg);
+      await f(user);
+    })
+  }
+
+  public onPromoCode(f: (user: User, promo: string) => Promise<any>) {
+    this.freeTextListeners.push(async (msg, user) => {
+      if (user.waitingForPromo) {
+        await f(user, msg.text!);
+        return true;
+      }
+    })
+  }
+
   public setListeners() {
     this.bot.on("callback_query", async (q) => {
       const user = await this.getUser(q);

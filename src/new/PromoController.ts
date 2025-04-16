@@ -7,7 +7,10 @@ import { Bot } from "./Bot";
 const manager = AppDataSource.manager;
 
 export class PromoController {
-  constructor(private bot: Bot) {}
+  constructor(private bot: Bot) {
+    bot.onFreeTokens(this.freeTokens.bind(this));
+    bot.onPromoCode(this.promoCode.bind(this));
+  }
 
   private async freeTokens(user: User) {
     user.waitingForPromo = true;
