@@ -235,19 +235,19 @@ export class Bot {
   public onAbout(f: (id: number) => Promise<any>) {
     this.bot.onText(/\/about/, async (msg) => {
       await f(msg.from!.id);
-    })
+    });
   }
 
   public onHelp(f: (id: number) => Promise<any>) {
     this.bot.onText(/\/help/, async (msg) => {
       await f(msg.from!.id);
-    })
+    });
   }
 
   public onTerms(f: (id: number) => Promise<any>) {
     this.bot.onText(/\/terms/, async (msg) => {
       await f(msg.from!.id);
-    })
+    });
   }
 
   public setListeners() {

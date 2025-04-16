@@ -204,8 +204,8 @@ export class AgentController {
     const groups = await manager.find(AgentGroup, {
       take: 8,
       order: {
-        name: "ASC"
-      }
+        name: "ASC",
+      },
     });
     let result: InlineKeyboardButton[][] = [];
     result.push(Btn("Свободный режим", "agent-1"));
@@ -214,40 +214,48 @@ export class AgentController {
       result.push(Btn(group.name, `group-${group.id}`));
     }
     result.push(Btn("Следующая страница", "groups-2"));
-    await this.bot.bot.sendMessage(+user.chatId, "Выберите категорию сотрудников", {
-      reply_markup:{
-        inline_keyboard: result
-      }
-    })
+    await this.bot.bot.sendMessage(
+      +user.chatId,
+      "Выберите категорию сотрудников",
+      {
+        reply_markup: {
+          inline_keyboard: result,
+        },
+      },
+    );
   }
 
   private async groups2(user: User) {
     const groups = await manager.find(AgentGroup, {
       skip: 8,
       order: {
-        name: "ASC"
-      }
+        name: "ASC",
+      },
     });
     let result: InlineKeyboardButton[][] = [];
     for (const group of groups) {
       result.push(Btn(group.name, `group-${group.id}`));
     }
     result.push(Btn("Предыдущая страница", "groups"));
-    await this.bot.bot.sendMessage(+user.chatId, "Выберите категорию сотрудников", {
-      reply_markup:{
-        inline_keyboard: result
-      }
-    })
+    await this.bot.bot.sendMessage(
+      +user.chatId,
+      "Выберите категорию сотрудников",
+      {
+        reply_markup: {
+          inline_keyboard: result,
+        },
+      },
+    );
   }
 
   private async agents(user: User, group: string) {
     const agents = await manager.find(AgentModel, {
       where: {
-        groupId: +group
+        groupId: +group,
       },
       order: {
-        name: "ASC"
-      }
+        name: "ASC",
+      },
     });
     let result: InlineKeyboardButton[][] = [];
     for (const agent of agents) {
@@ -255,8 +263,8 @@ export class AgentController {
     }
     await this.bot.bot.sendMessage(+user.chatId, "Выберите сотрудника", {
       reply_markup: {
-        inline_keyboard: result
-      }
-    })
+        inline_keyboard: result,
+      },
+    });
   }
 }
