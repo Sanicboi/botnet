@@ -11,6 +11,4 @@ export class Assistant {
 
   @Column()
   name: string;
-
-
 }

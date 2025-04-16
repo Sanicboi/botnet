@@ -1,5 +1,5 @@
 import path from "path";
-import fs from 'fs';
+import fs from "fs";
 import { Readable, Writable } from "stream";
 import axios, { AxiosResponse } from "axios";
 import { openai } from "../neuro";
@@ -9,25 +9,23 @@ import { AudioFile } from "../entity/assistants/AudioFile";
 import { AppDataSource } from "../data-source";
 import { Converter } from "./Converter";
 
-
-
 const manager = AppDataSource.manager;
 
 /**
  * Class for transcribing audio
  */
 export class Transcription {
-
-
-
-
   /**
    * COnstructor
    * @param exists Whether the file exists in the database
    * @param urlOrId File url or id in the db
    * @param prompt prompt to transcribe
    */
-  constructor(private exists: boolean, private urlOrId: string, private prompt?: string) {}
+  constructor(
+    private exists: boolean,
+    private urlOrId: string,
+    private prompt?: string,
+  ) {}
 
   /**
    * Internal chunk number
@@ -126,19 +124,17 @@ export class Transcription {
   public async getCost(): Promise<number> {
     if (this.buffer) throw new Error("Buffer is null");
 
-
     const stream = new Readable();
     stream.push(this.buffer);
     stream.push(null);
     const dur: number = await new Promise((resolve, reject) => {
-      ffmpeg(stream)
-      .ffprobe( async (err, data) => {
+      ffmpeg(stream).ffprobe(async (err, data) => {
         if (err) reject(err);
-        resolve(+data.streams[0].duration!)
-      });   
-    })
+        resolve(+data.streams[0].duration!);
+      });
+    });
 
-    return Converter.USDSMT(dur / 60 * 0.06);
+    return Converter.USDSMT((dur / 60) * 0.06);
   }
 
   /**
@@ -155,10 +151,12 @@ export class Transcription {
     this.inDB.userId = user.chatId;
     await manager.save(this.inDB);
 
-    fs.writeFileSync(path.join(process.cwd(), 'audio', this.inDB.id + this.inDB.extension), this.buffer);
+    fs.writeFileSync(
+      path.join(process.cwd(), "audio", this.inDB.id + this.inDB.extension),
+      this.buffer,
+    );
     return this.inDB;
   }
-
 
   /**
    * Setup the audio
@@ -166,18 +164,19 @@ export class Transcription {
   public async setup() {
     if (this.exists) {
       this.inDB = await manager.findOneBy(AudioFile, {
-        id: this.urlOrId
+        id: this.urlOrId,
       });
       if (!this.inDB) throw new Error("File not found");
-      this.buffer = fs.readFileSync(path.join(process.cwd(), 'audio', this.inDB.id + this.inDB.extension))
+      this.buffer = fs.readFileSync(
+        path.join(process.cwd(), "audio", this.inDB.id + this.inDB.extension),
+      );
     } else {
       const res = await axios.get(this.urlOrId, {
-        responseType: 'arraybuffer'
+        responseType: "arraybuffer",
       });
       this.buffer = res.data;
     }
   }
-
 
   /**
    * Delete the file, if saved
@@ -185,7 +184,9 @@ export class Transcription {
   public async remove() {
     if (!this.exists) throw new Error("File not in the database!");
     if (!this.inDB) throw new Error("File not set up!");
-    fs.rmSync(path.join(process.cwd(), 'audio', this.inDB.id + this.inDB.extension));
+    fs.rmSync(
+      path.join(process.cwd(), "audio", this.inDB.id + this.inDB.extension),
+    );
     await manager.remove(this.inDB);
   }
 }

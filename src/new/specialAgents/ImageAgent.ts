@@ -32,11 +32,14 @@ export class ImageAgent {
   }
 
   private async setResolution(user: User, res: string) {
-    if (res !=="1024x1024" && res !== "1024x1792" && res !== "1792x1024") throw new Error("Wrong resolution");
+    if (res !== "1024x1024" && res !== "1024x1792" && res !== "1792x1024")
+      throw new Error("Wrong resolution");
     user.imageRes = res;
     user.usingImageGeneration = true;
     await manager.save(user);
-    await this.bot.bot.sendMessage(+user.chatId, "Напишите, что вы хотите увидеть, и я сгенерирую изображение 😉");
-
+    await this.bot.bot.sendMessage(
+      +user.chatId,
+      "Напишите, что вы хотите увидеть, и я сгенерирую изображение 😉",
+    );
   }
 }

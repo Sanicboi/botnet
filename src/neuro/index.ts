@@ -166,7 +166,8 @@ bot.onText(/./, async (msg) => {
       }
 
       if (u.waitingForData != "") {
-        const s: UserDataTypeMapped = (u.waitingForData + "Data") as UserDataTypeMapped;
+        const s: UserDataTypeMapped = (u.waitingForData +
+          "Data") as UserDataTypeMapped;
         u[s] = msg.text!;
         await Router.manager.save(u);
         await bot.sendMessage(msg.from!.id, "Данные успешно добавлены 💫");

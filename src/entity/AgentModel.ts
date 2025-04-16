@@ -1,4 +1,11 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from "typeorm";
 import { AgentGroup } from "./AgentGroup";
 import { User } from "./User";
 import { Dialog } from "./assistants/Dialog";
@@ -25,7 +32,7 @@ export class AgentModel {
 
   @ManyToOne(() => AgentGroup, (group) => group.agents)
   @JoinColumn({
-    name: "groupId"
+    name: "groupId",
   })
   group: AgentGroup;
 
@@ -34,7 +41,7 @@ export class AgentModel {
 
   @OneToMany(() => Dialog, (dialog) => dialog.agent)
   dialogs: Dialog[];
-  
+
   @Column()
   groupId: number;
 }

@@ -215,7 +215,6 @@ export class Agent {
       dFile.user.chatId = input.userId!;
       await manager.save(dFile);
 
-
       let content: OAI.Responses.ResponseInputMessageContentList = [
         {
           type: "input_file",
@@ -248,7 +247,7 @@ export class Agent {
           },
         ],
       });
-    } 
+    }
 
     return openai.responses.create({
       model,
@@ -257,7 +256,7 @@ export class Agent {
       store: true,
       top_p: this._model.topP,
       temperature: this._model.temperature,
-      max_output_tokens: input.maxTokens
+      max_output_tokens: input.maxTokens,
     });
   }
 }

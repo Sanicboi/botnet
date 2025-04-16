@@ -1,36 +1,39 @@
-import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from "typeorm";
 import { User } from "../User";
 import { AgentModel } from "../AgentModel";
 import { DialogFile } from "./DialogFile";
 
-
 @Entity()
 export class Dialog {
+  @PrimaryGeneratedColumn()
+  id: number;
 
+  @Column({
+    default: "",
+  })
+  lastMsgId: string;
 
-    @PrimaryGeneratedColumn()
-    id: number;
+  @Column({
+    default: "",
+  })
+  summarizedData: string;
 
-    @Column({
-        default: ''
-    })
-    lastMsgId: string;
+  @CreateDateColumn()
+  createdAt: Date;
 
-    @Column({
-        default: ''
-    })
-    summarizedData: string;
+  @ManyToOne(() => User, (user) => user.dialogs)
+  user: User;
 
-    @CreateDateColumn()
-    createdAt: Date;
+  @ManyToOne(() => AgentModel, (agent) => agent.dialogs)
+  agent: AgentModel;
 
-    @ManyToOne(() => User, (user) => user.dialogs)
-    user: User;
-    
-    @ManyToOne(() => AgentModel, (agent) => agent.dialogs)
-    agent: AgentModel;
-
-    @OneToMany(() => DialogFile, (file) => file.dialog)
-    files: DialogFile[];
-
+  @OneToMany(() => DialogFile, (file) => file.dialog)
+  files: DialogFile[];
 }

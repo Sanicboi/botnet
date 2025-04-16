@@ -24,8 +24,8 @@ export class AudioFile {
   @Column()
   extension: string;
 
-  @Column('text', {
-    nullable: true
+  @Column("text", {
+    nullable: true,
   })
   caption: string | null;
 }

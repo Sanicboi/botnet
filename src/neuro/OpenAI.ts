@@ -140,11 +140,7 @@ export class OpenAI {
       },
     });
     if (!t && !u.usingVoice) return false;
-    const res =
-      (msg.text ?? "") +
-      "\n" +
-      u.dialogueData +
-      "\n";
+    const res = (msg.text ?? "") + "\n" + u.dialogueData + "\n";
 
     u.dialogueData = "";
     await Router.manager.save(u);

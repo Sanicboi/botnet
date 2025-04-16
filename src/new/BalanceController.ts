@@ -4,7 +4,6 @@ import { SupportedModels } from "../utils/Models";
 import { Bot } from "./Bot";
 import { Converter } from "./Converter";
 
-
 const manager = AppDataSource.manager;
 
 /**
@@ -18,13 +17,19 @@ export class BalanceController {
    * @param user User
    * @param threshold Threshold in RUB
    */
-  public async checkBalance(user: User, threshold: number = 0): Promise<{
+  public async checkBalance(
+    user: User,
+    threshold: number = 0,
+  ): Promise<{
     exists: boolean;
     limit: number;
   }> {
     const sum = user.addBalance + user.leftForToday;
     if (sum <= threshold) {
-      await this.bot.bot.sendMessage(+user.chatId, "❌Упс! У вас закончились токены.\nЧтобы продолжить пользоваться ботом, вам нужно оформить подписку или купить отдельный комплект токенов…");
+      await this.bot.bot.sendMessage(
+        +user.chatId,
+        "❌Упс! У вас закончились токены.\nЧтобы продолжить пользоваться ботом, вам нужно оформить подписку или купить отдельный комплект токенов…",
+      );
       return {
         exists: false,
         limit: 0,

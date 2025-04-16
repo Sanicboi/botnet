@@ -27,8 +27,7 @@ export class TextRouter extends Router {
         where: {
           chatId: String(msg.chat.id),
         },
-        relations: {
-        },
+        relations: {},
       });
       if (!user) return;
       await OpenAI.runDocument(msg, user);
@@ -38,8 +37,7 @@ export class TextRouter extends Router {
         where: {
           chatId: String(msg.chat.id),
         },
-        relations: {
-        },
+        relations: {},
       });
       if (!user) return;
       await OpenAI.runVoice(msg, user, user.usingVoice, true);
@@ -409,8 +407,7 @@ export class TextRouter extends Router {
       where: {
         chatId: String(msg.chat.id),
       },
-      relations: {
-      },
+      relations: {},
     });
     if (!user) return;
     await OpenAI.runText(msg, user);
@@ -426,8 +423,7 @@ export class TextRouter extends Router {
       where: {
         chatId: String(msg.chat.id),
       },
-      relations: {
-      },
+      relations: {},
     });
     if (!user) return;
     await OpenAI.runPhoto(msg, user);
@@ -443,8 +439,7 @@ export class TextRouter extends Router {
       where: {
         chatId: String(msg.from!.id),
       },
-      relations: {
-      },
+      relations: {},
     });
     if (!user) return;
     if (user.usingVoice) {

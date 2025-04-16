@@ -7,9 +7,18 @@ const manager = AppDataSource.manager;
 export class Bot {
   public readonly bot: TelegramBot;
 
-  private cqListeners: ((q: CallbackQuery, user: User) => Promise<true | any>)[] = [];
-  private freeTextListeners: ((msg: Message, user: User) => Promise<true | any>)[] = [];
-  private voiceListeners: ((msg: Message, user: User) => Promise<true | any>)[] = [];
+  private cqListeners: ((
+    q: CallbackQuery,
+    user: User,
+  ) => Promise<true | any>)[] = [];
+  private freeTextListeners: ((
+    msg: Message,
+    user: User,
+  ) => Promise<true | any>)[] = [];
+  private voiceListeners: ((
+    msg: Message,
+    user: User,
+  ) => Promise<true | any>)[] = [];
 
   constructor() {
     this.bot = new TelegramBot(process.env.NEURO_TOKEN ?? "", {
@@ -61,7 +70,7 @@ export class Bot {
         id: number;
       };
     },
-    relations: FindOptionsRelations<User> = {}
+    relations: FindOptionsRelations<User> = {},
   ): Promise<User> {
     const user = await manager.findOne(User, {
       where: {
@@ -71,14 +80,6 @@ export class Bot {
     });
     if (!user) throw new Error("User not found");
     return user;
-  }
-
-  public onAbout(f: (msg: Message) => Promise<any>) {
-    this.bot.onText(/\/about/, f);
-  }
-
-  public onHelp(f: (msg: Message) => Promise<any>) {
-    this.bot.onText(/\/help/, f);
   }
 
   public onDialogs(f: (user: User) => Promise<any>) {
@@ -103,14 +104,14 @@ export class Bot {
         const agentId = +q.data.substring(6);
         await f(user, agentId);
       }
-  });
+    });
   }
 
   public onDeleteDialog(f: (user: User, dialogId: number) => Promise<any>) {
     this.cqListeners.push(async (q) => {
       if (q.data?.startsWith("delete-")) {
         const user = await this.getUser(q, {
-          dialogs: true
+          dialogs: true,
         });
         await f(user, +q.data.substring(7));
       }
@@ -120,7 +121,7 @@ export class Bot {
   public onTextInput(f: (user: User, text: string) => Promise<any>) {
     this.freeTextListeners.push(async (msg, user) => {
       await f(user, msg.text!);
-    })
+    });
   }
 
   public onGenerateImage(f: (user: User, text: string) => Promise<any>) {
@@ -129,7 +130,7 @@ export class Bot {
         await f(user, msg.text!);
         return true;
       }
-    })
+    });
   }
 
   public onEnterImage(f: (user: User) => Promise<any>) {
@@ -137,15 +138,15 @@ export class Bot {
       if (q.data === "images") {
         await f(user);
       }
-    })
+    });
   }
 
   public onSetResolution(f: (user: User, res: string) => Promise<any>) {
     this.cqListeners.push(async (q, user) => {
-      if (q.data?.startsWith('res-')) {
+      if (q.data?.startsWith("res-")) {
         await f(user, q.data.substring(4));
       }
-    })
+    });
   }
 
   public onCalculateCosts(f: (user: User, url: string) => Promise<any>) {
@@ -154,7 +155,7 @@ export class Bot {
       const user = await this.getUser(msg);
       const url = await this.bot.getFileLink(msg.audio.file_id);
       await f(user, url);
-    })
+    });
   }
 
   public onTranscribeSaved(f: (user: User, id: string) => Promise<any>) {
@@ -162,7 +163,7 @@ export class Bot {
       if (q.data?.startsWith("transcription-")) {
         await f(user, q.data.substring(14));
       }
-    })
+    });
   }
 
   public onTranscribeNonSaved(f: (user: User, url: string) => Promise<any>) {
@@ -171,7 +172,7 @@ export class Bot {
         const url = await this.bot.getFileLink(msg.voice!.file_id);
         await f(user, url);
       }
-    })
+    });
   }
 
   public onVoiceInput(f: (user: User, url: string) => Promise<any>) {
@@ -180,31 +181,38 @@ export class Bot {
         const url = await this.bot.getFileLink(msg.voice!.file_id);
         await f(user, url);
       }
-    })
+    });
   }
 
-  public onDocInput(f: (user: User, url: string, caption?: string) => Promise<any>) {
-    this.bot.on('document', async (msg) => {
+  public onDocInput(
+    f: (user: User, url: string, caption?: string) => Promise<any>,
+  ) {
+    this.bot.on("document", async (msg) => {
       if (!msg.document) return;
       const user = await this.getUser(msg);
       const url = await this.bot.getFileLink(msg.document.file_id);
       await f(user, url, msg.caption);
-    })
+    });
   }
 
-  public onImageInput(f: (user: User, url: string, caption?: string) => Promise<any>) {
-    this.bot.on('photo', async (msg) => {
+  public onImageInput(
+    f: (user: User, url: string, caption?: string) => Promise<any>,
+  ) {
+    this.bot.on("photo", async (msg) => {
       if (!msg.photo) return;
       const user = await this.getUser(msg);
-      const url = await this.bot.getFileLink(msg.photo.sort((a, b) => b.height*b.width - a.height*a.width)[0]!.file_id);
+      const url = await this.bot.getFileLink(
+        msg.photo.sort((a, b) => b.height * b.width - a.height * a.width)[0]!
+          .file_id,
+      );
       await f(user, url, msg.caption);
-    })
+    });
   }
 
   public onMyData(f: (user: User) => Promise<any>) {
     this.bot.onText(/\/data/, async (msg) => {
       const user = await this.getUser(msg);
-    })
+    });
   }
 
   public onDataCategory(f: (user: User, category: string) => Promise<any>) {
@@ -212,7 +220,7 @@ export class Bot {
       if (q.data?.startsWith("data-")) {
         await f(user, q.data.substring(5));
       }
-    })
+    });
   }
 
   public onData(f: (user: User, data: string) => Promise<any>) {
@@ -221,12 +229,29 @@ export class Bot {
         await f(user, msg.text!);
         return true;
       }
+    });
+  }
+
+  public onAbout(f: (id: number) => Promise<any>) {
+    this.bot.onText(/\/about/, async (msg) => {
+      await f(msg.from!.id);
     })
   }
 
+  public onHelp(f: (id: number) => Promise<any>) {
+    this.bot.onText(/\/help/, async (msg) => {
+      await f(msg.from!.id);
+    })
+  }
+
+  public onTerms(f: (id: number) => Promise<any>) {
+    this.bot.onText(/\/terms/, async (msg) => {
+      await f(msg.from!.id);
+    })
+  }
 
   public setListeners() {
-    this.bot.on('callback_query', async (q) => {
+    this.bot.on("callback_query", async (q) => {
       const user = await this.getUser(q);
       for (const f of this.cqListeners) {
         const result = await f(q, user);
@@ -234,7 +259,7 @@ export class Bot {
       }
     });
     this.bot.onText(/./, async (msg) => {
-      if (msg.text && !msg.text.startsWith('/')) {
+      if (msg.text && !msg.text.startsWith("/")) {
         const user = await this.getUser(msg);
         for (const f of this.freeTextListeners) {
           const result = await f(msg, user);
@@ -242,13 +267,13 @@ export class Bot {
         }
       }
     });
-    this.bot.on('voice', async (msg) => {
+    this.bot.on("voice", async (msg) => {
       if (!msg.voice) return;
       const user = await this.getUser(msg);
       for (const f of this.voiceListeners) {
         const result = await f(msg, user);
         if (result === true) break;
       }
-    })
+    });
   }
 }

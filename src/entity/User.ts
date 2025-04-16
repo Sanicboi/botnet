@@ -15,8 +15,7 @@ import { DialogFile } from "./assistants/DialogFile";
 import { SupportedModels } from "../utils/Models";
 import { OutputFormat } from "../utils/OutputFormat";
 
-
-export type UserDataType = 'main' | 'personal' | 'career' | 'business';
+export type UserDataType = "main" | "personal" | "career" | "business";
 export type UserDataTypeMapped = `${UserDataType}Data`;
 
 @Entity()
@@ -136,31 +135,31 @@ export class User {
   @Column({
     default: "",
   })
-  waitingForData: '' | UserDataType;
+  waitingForData: "" | UserDataType;
 
   @Column({
-    default: ''
+    default: "",
   })
   mainData: string;
 
   @Column({
-    default: ''
+    default: "",
   })
   personalData: string;
 
   @Column({
-    default: ''
+    default: "",
   })
   businessData: string;
 
   @Column({
-    default: ''
+    default: "",
   })
   careerData: string;
 
   @ManyToOne(() => AgentModel, (agent) => agent.users)
   @JoinColumn({
-    name: 'agentId'
+    name: "agentId",
   })
   agent: AgentModel;
 
@@ -171,12 +170,12 @@ export class User {
   dialogs: Dialog[];
 
   @Column({
-    nullable: true
+    nullable: true,
   })
   currentDialogId: number;
 
   @Column({
-    default: 'text'
+    default: "text",
   })
   outputFormat: OutputFormat;
 }

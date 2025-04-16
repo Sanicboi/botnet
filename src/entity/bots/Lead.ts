@@ -40,7 +40,7 @@ export class Lead {
   sentAt: Date;
 
   @Column({
-    nullable: true
+    nullable: true,
   })
   sphere: string;
 
