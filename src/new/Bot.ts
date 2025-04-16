@@ -201,6 +201,28 @@ export class Bot {
     })
   }
 
+  public onMyData(f: (user: User) => Promise<any>) {
+    this.bot.onText(/\/data/, async (msg) => {
+      const user = await this.getUser(msg);
+    })
+  }
+
+  public onDataCategory(f: (user: User, category: string) => Promise<any>) {
+    this.cqListeners.push(async (q, user) => {
+      if (q.data?.startsWith("data-")) {
+        await f(user, q.data.substring(5));
+      }
+    })
+  }
+
+  public onData(f: (user: User, data: string) => Promise<any>) {
+    this.freeTextListeners.push(async (msg, user) => {
+      if (user.waitingForData !== "") {
+        await f(user, msg.text!);
+        return true;
+      }
+    })
+  }
 
 
   public setListeners() {

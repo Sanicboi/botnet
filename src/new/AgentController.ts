@@ -1,7 +1,7 @@
 import axios from "axios";
 import { AppDataSource } from "../data-source";
 import { Dialog } from "../entity/assistants/Dialog";
-import { User } from "../entity/User";
+import { User, UserDataTypeMapped } from "../entity/User";
 import { Agent } from "./Agent";
 import { BalanceController } from "./BalanceController";
 import { Bot } from "./Bot";
@@ -79,6 +79,7 @@ export class AgentController {
             caption: '',
             previousResponseId: dialog.lastMsgId ?? undefined
         }, user.model);
+        await this.dialogController.updateDialogLastMsg(dialog, response.id);
         
         await this.balanceController.editBalance(user, response.usage!.total_tokens);
         const converted = await this.outputController.convert(response.output_text, user.outputFormat);
@@ -120,6 +121,25 @@ export class AgentController {
             value: url,
             previousResponseId: dialog.lastMsgId ?? undefined,
             caption
+        }, user.model);
+
+        await this.balanceController.editBalance(user, response.usage!.total_tokens);
+        await this.dialogController.updateDialogLastMsg(dialog, response.id);
+        const converted = await this.outputController.convert(response.output_text, user.outputFormat);
+        await this.outputController.send(converted, user);
+    }
+
+    private async dataInput(user: User, type: string) {
+        const key: UserDataTypeMapped = (type + "data") as UserDataTypeMapped; 
+        const result = await this.balanceController.checkBalance(user);
+        if (!result.exists) return;
+        const agent = new Agent(user.agent);
+
+        let dialog: Dialog = this.dialogController.getUserCurrentDialog(user);
+        const response = await agent.run({
+            maxTokens: result.limit,
+            type: 'text',
+            value: user[key],
         }, user.model);
 
         await this.balanceController.editBalance(user, response.usage!.total_tokens);
