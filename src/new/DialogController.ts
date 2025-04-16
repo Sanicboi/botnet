@@ -16,12 +16,12 @@ const manager = AppDataSource.manager;
  */
 export class DialogController {
   constructor(private bot: Bot) {
-    bot.onDialogs(this.getDialogs.bind(this));
+    bot.onDialogs(this.dialogs.bind(this));
     bot.onCreateDialog(this.createDialog.bind(this));
     bot.onDeleteDialog(this.deleteDialog.bind(this));
   }
 
-  private async getDialogs(user: User) {
+  private async dialogs(user: User) {
     let result: InlineKeyboardButton[][] = [];
     for (const dialog of user.dialogs) {
       result.push(

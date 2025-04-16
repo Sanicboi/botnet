@@ -11,6 +11,10 @@ import { ImageAgent } from "./specialAgents/ImageAgent";
 import { AudioAgent } from "./specialAgents/AudioAgent";
 import { Transcription } from "./Transcription";
 import { Converter } from "./Converter";
+import { AgentGroup } from "../entity/AgentGroup";
+import { InlineKeyboardButton } from "node-telegram-bot-api";
+import { Btn } from "../neuro/utils";
+import { AgentModel } from "../entity/AgentModel";
 
 const manager = AppDataSource.manager;
 
@@ -194,5 +198,65 @@ export class AgentController {
       user.outputFormat,
     );
     await this.outputController.send(converted, user);
+  }
+
+  private async groups(user: User) {
+    const groups = await manager.find(AgentGroup, {
+      take: 8,
+      order: {
+        name: "ASC"
+      }
+    });
+    let result: InlineKeyboardButton[][] = [];
+    result.push(Btn("Свободный режим", "agent-1"));
+    result.push(Btn("Дизайн и генерация картинок", "images"));
+    for (const group of groups) {
+      result.push(Btn(group.name, `group-${group.id}`));
+    }
+    result.push(Btn("Следующая страница", "groups-2"));
+    await this.bot.bot.sendMessage(+user.chatId, "Выберите категорию сотрудников", {
+      reply_markup:{
+        inline_keyboard: result
+      }
+    })
+  }
+
+  private async groups2(user: User) {
+    const groups = await manager.find(AgentGroup, {
+      skip: 8,
+      order: {
+        name: "ASC"
+      }
+    });
+    let result: InlineKeyboardButton[][] = [];
+    for (const group of groups) {
+      result.push(Btn(group.name, `group-${group.id}`));
+    }
+    result.push(Btn("Предыдущая страница", "groups"));
+    await this.bot.bot.sendMessage(+user.chatId, "Выберите категорию сотрудников", {
+      reply_markup:{
+        inline_keyboard: result
+      }
+    })
+  }
+
+  private async agents(user: User, group: string) {
+    const agents = await manager.find(AgentModel, {
+      where: {
+        groupId: +group
+      },
+      order: {
+        name: "ASC"
+      }
+    });
+    let result: InlineKeyboardButton[][] = [];
+    for (const agent of agents) {
+      result.push(Btn(agent.name, `agent-${agent.id}`));
+    }
+    await this.bot.bot.sendMessage(+user.chatId, "Выберите сотрудника", {
+      reply_markup: {
+        inline_keyboard: result
+      }
+    })
   }
 }
