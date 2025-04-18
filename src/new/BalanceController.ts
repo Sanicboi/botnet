@@ -6,6 +6,7 @@ import { Bot } from "./Bot";
 import { Converter } from "./Converter";
 import { Btn } from "../neuro/utils";
 import { ICreatePayment, YooCheckout } from "@a2seven/yoo-checkout";
+import { InlineKeyboardButton } from "node-telegram-bot-api";
 
 const manager = AppDataSource.manager;
 
@@ -101,15 +102,21 @@ export class BalanceController {
 
   private async balance(user: User) {
     const now = dayjs();
+    let keyboard: InlineKeyboardButton[][] = [
+      Btn("Купить токены", "b-tokens")
+    ];
+    if (user.subscription === 'none') {
+      keyboard.push(Btn("Купить подписку", "b-sub"))
+    } else {
+      keyboard.push(Btn("Отменить подписку", "cancel-sub"))
+    }
+    
     await this.bot.bot.sendMessage(
       +user.chatId,
       `Баланс и подписка\n\n🟣 Формат доступа:\n⤷ ${user.subscription === "exclusive" ? "Exclusive" : user.subscription === "premium" ? "Premium" : user.subscription === "pro" ? "PRO+" : user.subscription === "lite" ? "Lite" : "Бесплатный доступ"}\n\n⤷ Сегодня осталось: ${Converter.RUBSMT(user.leftForToday).toFixed(0)} / ${subToTokensMap.get(user.subscription)} токенов\n⤷ Новое пополнение через: ${user.subscription === "none" ? "Нет" : `${24 - now.hour()}:${59 - now.minute()}`}\n⤷ Следующий платеж: ${user.nextPayment == null ? "Нет" : user.nextPayment.toUTCString()}\n\n🟣 Ваш комплект токенов:\n⤷ ${Converter.RUBSMT(user.addBalance).toFixed(0)}\n\n\n📦 Если вам не хватает ежедневных токенов по подписке – вы можете купить комплект токенов. Комплект токенов можно использовать в любое время без лимитов. Полезно, когда вам требуется много токенов за раз.\n\nПеред покупкой комплекта токенов или подписки, настоятельно рекомендуем ознакомиться со [справкой о тарифах](https://docs.google.com/document/d/1CbyIi8h7e51B2OUEcXe85PS9FhLw8Mli7iw4o0RRCDM/edit)`,
       {
         reply_markup: {
-          inline_keyboard: [
-            Btn("Купить подписку", "b-sub"),
-            Btn("Купить токены", "b-tokens"),
-          ],
+          inline_keyboard: keyboard,
         },
         parse_mode: "Markdown",
       },
