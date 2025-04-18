@@ -102,15 +102,13 @@ export class BalanceController {
 
   private async balance(user: User) {
     const now = dayjs();
-    let keyboard: InlineKeyboardButton[][] = [
-      Btn("Купить токены", "b-tokens")
-    ];
-    if (user.subscription === 'none') {
-      keyboard.push(Btn("Купить подписку", "b-sub"))
+    let keyboard: InlineKeyboardButton[][] = [Btn("Купить токены", "b-tokens")];
+    if (user.subscription === "none") {
+      keyboard.push(Btn("Купить подписку", "b-sub"));
     } else {
-      keyboard.push(Btn("Отменить подписку", "cancel-sub"))
+      keyboard.push(Btn("Отменить подписку", "cancel-sub"));
     }
-    
+
     await this.bot.bot.sendMessage(
       +user.chatId,
       `Баланс и подписка\n\n🟣 Формат доступа:\n⤷ ${user.subscription === "exclusive" ? "Exclusive" : user.subscription === "premium" ? "Premium" : user.subscription === "pro" ? "PRO+" : user.subscription === "lite" ? "Lite" : "Бесплатный доступ"}\n\n⤷ Сегодня осталось: ${Converter.RUBSMT(user.leftForToday).toFixed(0)} / ${subToTokensMap.get(user.subscription)} токенов\n⤷ Новое пополнение через: ${user.subscription === "none" ? "Нет" : `${24 - now.hour()}:${59 - now.minute()}`}\n⤷ Следующий платеж: ${user.nextPayment == null ? "Нет" : user.nextPayment.toUTCString()}\n\n🟣 Ваш комплект токенов:\n⤷ ${Converter.RUBSMT(user.addBalance).toFixed(0)}\n\n\n📦 Если вам не хватает ежедневных токенов по подписке – вы можете купить комплект токенов. Комплект токенов можно использовать в любое время без лимитов. Полезно, когда вам требуется много токенов за раз.\n\nПеред покупкой комплекта токенов или подписки, настоятельно рекомендуем ознакомиться со [справкой о тарифах](https://docs.google.com/document/d/1CbyIi8h7e51B2OUEcXe85PS9FhLw8Mli7iw4o0RRCDM/edit)`,
@@ -269,11 +267,13 @@ export class BalanceController {
       } else {
         const id = data.substring(14);
         const res = await checkout.getPayment(id);
-        if (res.status === 'succeeded') {
+        if (res.status === "succeeded") {
           if (res.merchant_customer_id === user.chatId) {
             user.subscription = priceToSubMap.get(parseInt(res.amount.value))!;
-            user.leftForToday = Converter.SMTRUB(subToTokensMap.get(user.subscription)!);
-            user.nextPayment = dayjs().add(30, 'days').toDate();
+            user.leftForToday = Converter.SMTRUB(
+              subToTokensMap.get(user.subscription)!,
+            );
+            user.nextPayment = dayjs().add(30, "days").toDate();
             if (res.payment_method_id) {
               user.paymentMethod = res.payment_method_id;
             }
@@ -306,7 +306,10 @@ export class BalanceController {
     user.leftForToday = 0;
     user.nextPayment = null;
     await manager.save(user);
-    await this.bot.bot.sendMessage(+user.chatId, "Ваша подписка закончилась. Вы всегда можете ее продлить в меню 'баланс и подписка'");
+    await this.bot.bot.sendMessage(
+      +user.chatId,
+      "Ваша подписка закончилась. Вы всегда можете ее продлить в меню 'баланс и подписка'",
+    );
   }
 
   private async updateSub(user: User) {
@@ -330,8 +333,8 @@ export class BalanceController {
 
         const res = await checkout.createPayment(invoice);
 
-        if (res.status === 'succeeded') {
-          user.nextPayment = dayjs().add(30, 'days').toDate();
+        if (res.status === "succeeded") {
+          user.nextPayment = dayjs().add(30, "days").toDate();
           await manager.save(user);
         } else {
           await this.resetSub(user);
@@ -342,16 +345,25 @@ export class BalanceController {
 
   private async updateTokens(user: User) {
     await this.updateSub(user);
-    if (user.subscription !== 'none') {
-      user.leftForToday = Converter.SMTRUB(subToTokensMap.get(user.subscription)!);
+    if (user.subscription !== "none") {
+      user.leftForToday = Converter.SMTRUB(
+        subToTokensMap.get(user.subscription)!,
+      );
       await manager.save(user);
-      await this.bot.bot.sendMessage(+user.chatId, 'Ваш ежедневный запас токенов пополнен!', {});
+      await this.bot.bot.sendMessage(
+        +user.chatId,
+        "Ваш ежедневный запас токенов пополнен!",
+        {},
+      );
     }
   }
 
   private async cancelSub(user: User) {
-    user.paymentMethod = '';
+    user.paymentMethod = "";
     await manager.save(user);
-    await this.bot.bot.sendMessage(+user.chatId, "Дальнешая оплата подписки будет приостановлена. Подписка продолжит действие до конца оплаченного периода");
+    await this.bot.bot.sendMessage(
+      +user.chatId,
+      "Дальнешая оплата подписки будет приостановлена. Подписка продолжит действие до конца оплаченного периода",
+    );
   }
 }

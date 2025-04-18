@@ -58,7 +58,7 @@ export class User {
   })
   subscription: SubType;
 
-  @Column('timestamp', {
+  @Column("timestamp", {
     nullable: true,
   })
   nextPayment: Date | null;
@@ -120,7 +120,7 @@ export class User {
   })
   perMailing: number;
 
-  @Column('text', {
+  @Column("text", {
     nullable: true,
   })
   paymentMethod: string | null;
