@@ -65,7 +65,27 @@ export class DialogController {
     await this.bot.bot.sendMessage(
       +user.chatId,
       welcomeMessage ?? agent.firstMessage,
+      {
+        reply_markup: {
+          inline_keyboard: [
+            Btn('Взять из данных', 'from-data')
+          ]
+        }
+      }
     );
+    await this.bot.bot.sendMessage(
+      +user.chatId, 
+      'Модель для генерации:',
+      {
+        reply_markup: {
+          inline_keyboard: [
+            Btn(`GPT 4 Omni mini ${user.model === 'gpt-4o-mini' ? '✅' : '❌'}`, "model-gpt-4o-mini"),
+            Btn(`GPT 4 Omni ${user.model === 'gpt-4o' ? '✅' : '❌'}`, "model-gpt-4o"),
+            Btn(`GPT 4 Turbo ${user.model === 'gpt-4-turbo' ? '✅' : '❌'}`, "model-gpt-4-turbo"),
+          ]
+        }
+      }
+    )
   }
 
   private async deleteDialog(user: User, dialogId: number) {

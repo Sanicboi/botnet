@@ -92,4 +92,29 @@ export class DataController {
     await manager.save(user);
     await this.bot.bot.sendMessage(+user.chatId, "Данные успешно заполнены");
   }
+
+  public async resetData(user: User) {
+    user.dialogueData = '';
+    user.waitingForData = '';
+    user.waitingForPromo = false;
+
+    user.agentId = null;
+    user.agent = null;
+    user.currentDialogId = null;
+
+    await manager.save(user);
+  }
+
+  private async takeFromData(user: User) {
+    await this.bot.bot.sendMessage(+user.chatId, 'Выберите раздел данных:', {
+      reply_markup: {
+        inline_keyboard: [
+          Btn('Основные', 'take-main'),
+          Btn('Личностные', 'take-personal'),
+          Btn('Бизнес', 'take-business'),
+          Btn('Карьера', 'take-career')
+        ]
+      }
+    })
+  }
 }

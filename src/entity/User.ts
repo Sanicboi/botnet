@@ -83,11 +83,6 @@ export class User {
   })
   countTokens: boolean;
 
-  @Column({
-    default: false,
-  })
-  waitingForName: boolean;
-
   @OneToMany(() => DialogFile, (file) => file.user)
   files: DialogFile[];
 
@@ -162,18 +157,20 @@ export class User {
   @JoinColumn({
     name: "agentId",
   })
-  agent: AgentModel;
+  agent: AgentModel | null;
 
-  @Column()
-  agentId: number;
+  @Column('int', {
+    nullable: true
+  })
+  agentId: number | null;
 
   @OneToMany(() => Dialog, (dialog) => dialog.user)
   dialogs: Dialog[];
 
-  @Column({
+  @Column('int', {
     nullable: true,
   })
-  currentDialogId: number;
+  currentDialogId: number | null;
 
   @Column({
     default: "text",
