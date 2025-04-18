@@ -180,7 +180,10 @@ export class OutputController {
 
   public async sendTokenCount(user: User, tokens: number) {
     if (user.countTokens) {
-      await this.bot.bot.sendMessage(+user.chatId, `Использовано токенов: ${Converter.TKSMT(tokens, user.model)}`);
+      await this.bot.bot.sendMessage(
+        +user.chatId,
+        `Использовано токенов: ${Converter.TKSMT(tokens, user.model)}`,
+      );
     }
   }
 }

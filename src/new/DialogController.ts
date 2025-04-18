@@ -44,7 +44,7 @@ export class DialogController {
     });
   }
 
-  private async createDialog(user: User, agentId: number) {
+  public async createDialog(user: User, agentId: number, welcomeMessage?: string) {
     const agent = await manager.findOne(AgentModel, {
       where: {
         id: agentId,
@@ -58,7 +58,7 @@ export class DialogController {
     user.currentDialogId = dialog.id;
     await manager.save(user);
 
-    await this.bot.bot.sendMessage(+user.chatId, agent.firstMessage);
+    await this.bot.bot.sendMessage(+user.chatId, welcomeMessage ?? agent.firstMessage);
   }
 
   private async deleteDialog(user: User, dialogId: number) {

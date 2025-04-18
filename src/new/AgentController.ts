@@ -72,7 +72,10 @@ export class AgentController {
       user.outputFormat,
     );
     await this.outputController.send(converted, user);
-    await this.outputController.sendTokenCount(user, response.usage!.total_tokens)
+    await this.outputController.sendTokenCount(
+      user,
+      response.usage!.total_tokens,
+    );
   }
 
   private async voiceInput(user: User, url: string) {
@@ -111,7 +114,10 @@ export class AgentController {
       user.outputFormat,
     );
     await this.outputController.send(converted, user);
-    await this.outputController.sendTokenCount(user, response.usage!.total_tokens)
+    await this.outputController.sendTokenCount(
+      user,
+      response.usage!.total_tokens,
+    );
   }
 
   private async docInput(user: User, url: string, caption?: string) {
@@ -143,7 +149,10 @@ export class AgentController {
       user.outputFormat,
     );
     await this.outputController.send(converted, user);
-    await this.outputController.sendTokenCount(user, response.usage!.total_tokens)
+    await this.outputController.sendTokenCount(
+      user,
+      response.usage!.total_tokens,
+    );
   }
 
   private async imageInput(user: User, url: string, caption?: string) {
@@ -173,7 +182,10 @@ export class AgentController {
       user.outputFormat,
     );
     await this.outputController.send(converted, user);
-    await this.outputController.sendTokenCount(user, response.usage!.total_tokens)
+    await this.outputController.sendTokenCount(
+      user,
+      response.usage!.total_tokens,
+    );
   }
 
   private async dataInput(user: User, type: string) {
@@ -202,7 +214,10 @@ export class AgentController {
       user.outputFormat,
     );
     await this.outputController.send(converted, user);
-    await this.outputController.sendTokenCount(user, response.usage!.total_tokens)
+    await this.outputController.sendTokenCount(
+      user,
+      response.usage!.total_tokens,
+    );
   }
 
   private async groups(user: User) {
