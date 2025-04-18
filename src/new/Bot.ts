@@ -254,7 +254,7 @@ export class Bot {
     this.bot.onText(/\/free/, async (msg) => {
       const user = await this.getUser(msg);
       await f(user);
-    })
+    });
   }
 
   public onPromoCode(f: (user: User, promo: string) => Promise<any>) {
@@ -263,7 +263,19 @@ export class Bot {
         await f(user, msg.text!);
         return true;
       }
-    })
+    });
+  }
+
+  public onBalance(f: (user: User) => Promise<any>) {
+    this.bot.onText(/\/balance/, async (msg) => {
+      const user = await this.getUser(msg);
+      await f(user);
+    });
+    this.cqListeners.push(async (q, user) => {
+      if (q.data === "balance") {
+        await f(user);
+      }
+    });
   }
 
   public setListeners() {

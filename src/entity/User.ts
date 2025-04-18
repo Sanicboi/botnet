@@ -17,6 +17,7 @@ import { OutputFormat } from "../utils/OutputFormat";
 
 export type UserDataType = "main" | "personal" | "career" | "business";
 export type UserDataTypeMapped = `${UserDataType}Data`;
+export type SubType = "none" | "lite" | "pro" | "premium" | "exclusive";
 
 @Entity()
 export class User {
@@ -55,7 +56,7 @@ export class User {
   @Column({
     default: "none",
   })
-  subscription: "none" | "lite" | "pro" | "premium" | "exclusive";
+  subscription: SubType;
 
   @Column({
     nullable: true,
