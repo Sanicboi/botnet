@@ -14,6 +14,20 @@ const checkout = new YooCheckout({
   shopId: process.env.YOOKASSA_SHOP_ID ?? "",
 });
 
+const tokensToPriceMap: Map<number, number> = new Map();
+tokensToPriceMap.set(10000, 99);
+tokensToPriceMap.set(30000, 255);
+tokensToPriceMap.set(10000, 690);
+tokensToPriceMap.set(200000, 1490);
+tokensToPriceMap.set(500000, 3525);
+tokensToPriceMap.set(1000000, 4990);
+
+const priceToTokensMap: Map<number, number> = new Map();
+
+for (const [k, v] of tokensToPriceMap) {
+  priceToTokensMap.set(v, k);
+}
+
 const subToTokensMap: Map<string, number> = new Map();
 subToTokensMap.set("none", 0);
 subToTokensMap.set("lite", 5000);
@@ -21,11 +35,17 @@ subToTokensMap.set("pro", 30000);
 subToTokensMap.set("premium", 45000);
 subToTokensMap.set("exclusive", 135000);
 
-const subToPriceMap = new Map<string, number>();
+const subToPriceMap = new Map<SubType, number>();
 subToPriceMap.set("lite", 490);
 subToPriceMap.set("pro", 790);
 subToPriceMap.set("premium", 1490);
 subToPriceMap.set("exclusive", 3490);
+
+const priceToSubMap: Map<number, SubType> = new Map();
+
+for (const [k, v] of subToPriceMap) {
+  priceToSubMap.set(v, k);
+}
 
 /**
  * This class is made to handle the balance of the user
@@ -117,9 +137,29 @@ export class BalanceController {
     );
   }
 
+  private async buyTokens(user: User) {
+    await this.bot.bot.sendMessage(
+      +user.chatId,
+      "👇Выберите комплект токенов:",
+      {
+        reply_markup: {
+          inline_keyboard: [
+            Btn("10.000 токенов - 99₽", "tokens-10000"),
+            Btn("30.000 токенов - 255₽ (15% выгоды)", "tokens-30000"),
+            Btn("100.000 токенов - 690₽ (21% выгоды)", "tokens-100000"),
+            Btn("200.000 токенов - 1490₽ (26% выгоды)", "tokens-200000"),
+            Btn("500.000 токенов - 3525₽ (30% выгоды)", "tokens-500000"),
+            Btn("1.000.000 токенов - 4990₽ (50% выгоды)", "tokens-1000000"),
+            Btn("Назад", "balance"),
+          ],
+        },
+      },
+    );
+  }
+
   private async subType(user: User, t: string) {
     const type = t as SubType;
-    const price = subToPriceMap.get(t)!;
+    const price = subToPriceMap.get(type)!;
 
     const invoice: ICreatePayment = {
       amount: {
@@ -154,5 +194,98 @@ export class BalanceController {
         },
       },
     );
+  }
+
+  private async tokensType(user: User, n: number) {
+    const price = tokensToPriceMap.get(n)!;
+
+    const invoice: ICreatePayment = {
+      amount: {
+        currency: "RUB",
+        value: `${price}.00`,
+      },
+      capture: true,
+      confirmation: {
+        type: "redirect",
+        return_url: "https://t.me/NComrades_bot",
+      },
+      description: `Оплата пакета токенов: ${n} токенов`,
+      merchant_customer_id: user.chatId,
+    };
+
+    const result = await checkout.createPayment(invoice);
+    await this.bot.bot.sendMessage(
+      +user.chatId,
+      'Пожалуйста, оплатите счет. После оплаты нажмите "Я оплатил"',
+      {
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: "Оплатить",
+                url: result.confirmation.confirmation_url,
+              },
+            ],
+            Btn("Я оплатил", `ihavepaid-tokens-${result.id}`),
+          ],
+        },
+      },
+    );
+  }
+
+  private async IHavePaid(user: User, data: string, msgId: number) {
+    try {
+      if (data.startsWith("ihavepaid-tokens-")) {
+        const id = data.substring(17);
+        const res = await checkout.getPayment(id);
+        if (res.status === "succeeded") {
+          if (res.merchant_customer_id === user.chatId) {
+            const amount = parseInt(res.amount.value);
+            const tokens = priceToTokensMap.get(amount)!;
+            user.addBalance += Converter.SMTRUB(tokens);
+            await manager.save(user);
+            await this.bot.bot.sendMessage(
+              +user.chatId,
+              "Оплата успешно прошла 🚀\nБаланс токенов пополнен, подробнее: /balance\nПриятного пользования😉",
+            );
+            await this.bot.bot.deleteMessage(+user.chatId, msgId);
+          }
+        } else if (res.status === "canceled") {
+          await this.bot.bot.sendMessage(
+            +user.chatId,
+            "Платеж отменен. Попробуйте снова",
+          );
+          await this.bot.bot.deleteMessage(+user.chatId, msgId);
+        } else {
+          await this.bot.bot.sendMessage(+user.chatId, "Завершите платеж");
+        }
+      } else {
+        const id = data.substring(14);
+        const res = await checkout.getPayment(id);
+        if (res.status === 'succeeded') {
+          if (res.merchant_customer_id === user.chatId) {
+            user.subscription = priceToSubMap.get(parseInt(res.amount.value))!;
+            user.leftForToday = Converter.SMTRUB(subToTokensMap.get(user.subscription)!);
+            await manager.save(user);
+            await this.bot.bot.sendMessage(
+              +user.chatId,
+              "Оплата успешно прошла 🚀\nБаланс токенов пополнен, подробнее: /balance\nПриятного пользования😉",
+            );
+            await this.bot.bot.deleteMessage(+user.chatId, msgId);
+          }
+        } else if (res.status === "canceled") {
+          await this.bot.bot.sendMessage(
+            +user.chatId,
+            "Платеж отменен. Попробуйте снова",
+          );
+          await this.bot.bot.deleteMessage(+user.chatId, msgId);
+        } else {
+          await this.bot.bot.sendMessage(+user.chatId, "Завершите платеж");
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      await this.bot.bot.deleteMessage(+user.chatId, msgId);
+    }
   }
 }
