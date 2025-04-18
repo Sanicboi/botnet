@@ -4,6 +4,7 @@ import docx from "html-to-docx";
 import { OutputFormat } from "../utils/OutputFormat";
 import { Bot } from "./Bot";
 import { User } from "../entity/User";
+import { Converter } from "./Converter";
 
 /**
  * This is the general interface for File Data.
@@ -174,6 +175,12 @@ export class OutputController {
           filename: output.data.name,
         },
       );
+    }
+  }
+
+  public async sendTokenCount(user: User, tokens: number) {
+    if (user.countTokens) {
+      await this.bot.bot.sendMessage(+user.chatId, `Использовано токенов: ${Converter.TKSMT(tokens, user.model)}`);
     }
   }
 }
