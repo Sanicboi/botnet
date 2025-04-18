@@ -106,6 +106,16 @@ export class DialogController {
     })
   }
 
+  private async continueDialog(user: User, dialogId: number) {
+    const dialog = user.dialogs.find(el => el.id === dialogId)!;
+    user.currentDialogId = dialog.id;
+    user.agentId = dialog.agent.id;
+    user.agent = dialog.agent;
+    await manager.save(user);
+    await this.bot.bot.sendMessage(+user.chatId, "Диалог успешно продолжен! Можете продолжать общение с ассистентом.");
+
+  }
+
   public getUserCurrentDialog(user: User): Dialog {
     const result = user.dialogs.find((el) => el.id === user.currentDialogId);
     if (!result) throw new Error("Dialog not found");
