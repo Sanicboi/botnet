@@ -49,7 +49,7 @@ export class AgentController {
   private async textInput(user: User, text: string) {
     const result = await this.balanceController.checkBalance(user);
     if (!result.exists) return;
-    const agent = new Agent(user.agent);
+    const agent = new Agent(user.agent!);
 
     let dialog: Dialog = this.dialogController.getUserCurrentDialog(user);
     const response = await agent.run(
@@ -90,7 +90,7 @@ export class AgentController {
       Converter.SMTTK(costs, user.model),
     );
     check = await this.balanceController.checkBalance(user);
-    const agent = new Agent(user.agent);
+    const agent = new Agent(user.agent!);
     let dialog: Dialog = this.dialogController.getUserCurrentDialog(user);
     const response = await agent.run(
       {
@@ -123,7 +123,7 @@ export class AgentController {
   private async docInput(user: User, url: string, caption?: string) {
     const result = await this.balanceController.checkBalance(user);
     if (!result.exists) return;
-    const agent = new Agent(user.agent);
+    const agent = new Agent(user.agent!);
 
     let dialog: Dialog = this.dialogController.getUserCurrentDialog(user);
     const response = await agent.run(
@@ -158,7 +158,7 @@ export class AgentController {
   private async imageInput(user: User, url: string, caption?: string) {
     const result = await this.balanceController.checkBalance(user);
     if (!result.exists) return;
-    const agent = new Agent(user.agent);
+    const agent = new Agent(user.agent!);
 
     let dialog: Dialog = this.dialogController.getUserCurrentDialog(user);
     const response = await agent.run(
@@ -192,7 +192,7 @@ export class AgentController {
     const key: UserDataTypeMapped = (type + "data") as UserDataTypeMapped;
     const result = await this.balanceController.checkBalance(user);
     if (!result.exists) return;
-    const agent = new Agent(user.agent);
+    const agent = new Agent(user.agent!);
 
     let dialog: Dialog = this.dialogController.getUserCurrentDialog(user);
     const response = await agent.run(

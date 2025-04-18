@@ -3,6 +3,8 @@ import { User } from "../entity/User";
 import { AppDataSource } from "../data-source";
 import { FindOptionsRelations, RelationOptions } from "typeorm";
 
+const specialIds: number[] = [1, 2, 3];
+
 const manager = AppDataSource.manager;
 export class Bot {
   public readonly bot: TelegramBot;
@@ -102,6 +104,7 @@ export class Bot {
         const user = await this.getUser(q);
         if (!user) return;
         const agentId = +q.data.substring(6);
+        if (!specialIds.includes(agentId)) return;
         await f(user, agentId);
       }
     });

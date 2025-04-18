@@ -15,7 +15,7 @@ export class CopyWriterAgent {
 
   public async styles(user: User) {
     const agent = await manager.findOneBy(AgentModel, {
-      id: user.agentId,
+      id: user.agentId!,
     });
     if (!agent) throw new Error("Agent not found");
     await this.bot.bot.sendMessage(+user.chatId, agent.firstMessage, {
