@@ -26,7 +26,7 @@ export class DialogController {
     for (const dialog of user.dialogs) {
       result.push(
         Btn(
-          `${dialog.agent.group.name} - ${dialog.agent.name}: ${dialog.summarizedData}`.substring(
+          `#${dialog.id}: ${dialog.agent.group.name} - ${dialog.agent.name}`.substring(
             0,
             50,
           ) + "...",
@@ -80,6 +80,30 @@ export class DialogController {
     dialog.files = [];
     await manager.remove(dialog);
     await this.bot.bot.sendMessage(+user.chatId, "Диалог удален");
+  }
+
+  private async dialog(user: User, dialogId: number) {
+    const dialog = user.dialogs.find(el => el.id === dialogId)!;
+    let data: string = 'Нет данных';
+    if (dialog.lastMsgId) {
+      const summarized = await openai.responses.create({
+        instructions: "Ты - профессиональный суммаризатор",
+        input: 'Определи тему диалога. В ответе напиши только тему.',
+        model: 'gpt-4o-mini',
+        previous_response_id: dialog.lastMsgId,
+        store: false
+      });
+      data = summarized.output_text;
+    }
+
+    await this.bot.bot.sendMessage(+user.chatId, `Диалог #${dialog.id}:\n\nТема диалога: ${data}\nДата создания: ${dialog.createdAt}`, {
+      reply_markup: {
+        inline_keyboard: [
+          Btn(`Продолжить диалог`, `continue-${dialog.id}`),
+          Btn(`Удалить диалог`, `delete-${dialog.id}`)
+        ]
+      }
+    })
   }
 
   public getUserCurrentDialog(user: User): Dialog {
