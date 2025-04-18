@@ -83,37 +83,43 @@ export class DialogController {
   }
 
   private async dialog(user: User, dialogId: number) {
-    const dialog = user.dialogs.find(el => el.id === dialogId)!;
-    let data: string = 'Нет данных';
+    const dialog = user.dialogs.find((el) => el.id === dialogId)!;
+    let data: string = "Нет данных";
     if (dialog.lastMsgId) {
       const summarized = await openai.responses.create({
         instructions: "Ты - профессиональный суммаризатор",
-        input: 'Определи тему диалога. В ответе напиши только тему.',
-        model: 'gpt-4o-mini',
+        input: "Определи тему диалога. В ответе напиши только тему.",
+        model: "gpt-4o-mini",
         previous_response_id: dialog.lastMsgId,
-        store: false
+        store: false,
       });
       data = summarized.output_text;
     }
 
-    await this.bot.bot.sendMessage(+user.chatId, `Диалог #${dialog.id}:\n\nТема диалога: ${data}\nДата создания: ${dialog.createdAt}`, {
-      reply_markup: {
-        inline_keyboard: [
-          Btn(`Продолжить диалог`, `continue-${dialog.id}`),
-          Btn(`Удалить диалог`, `delete-${dialog.id}`)
-        ]
-      }
-    })
+    await this.bot.bot.sendMessage(
+      +user.chatId,
+      `Диалог #${dialog.id}:\n\nТема диалога: ${data}\nДата создания: ${dialog.createdAt}`,
+      {
+        reply_markup: {
+          inline_keyboard: [
+            Btn(`Продолжить диалог`, `continue-${dialog.id}`),
+            Btn(`Удалить диалог`, `delete-${dialog.id}`),
+          ],
+        },
+      },
+    );
   }
 
   private async continueDialog(user: User, dialogId: number) {
-    const dialog = user.dialogs.find(el => el.id === dialogId)!;
+    const dialog = user.dialogs.find((el) => el.id === dialogId)!;
     user.currentDialogId = dialog.id;
     user.agentId = dialog.agent.id;
     user.agent = dialog.agent;
     await manager.save(user);
-    await this.bot.bot.sendMessage(+user.chatId, "Диалог успешно продолжен! Можете продолжать общение с ассистентом.");
-
+    await this.bot.bot.sendMessage(
+      +user.chatId,
+      "Диалог успешно продолжен! Можете продолжать общение с ассистентом.",
+    );
   }
 
   public getUserCurrentDialog(user: User): Dialog {
