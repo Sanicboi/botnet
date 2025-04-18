@@ -58,10 +58,10 @@ export class User {
   })
   subscription: SubType;
 
-  @Column({
+  @Column('timestamp', {
     nullable: true,
   })
-  nextPayment?: Date;
+  nextPayment: Date | null;
 
   @Column("float", {
     default: 0,
@@ -120,10 +120,10 @@ export class User {
   })
   perMailing: number;
 
-  @Column({
+  @Column('text', {
     nullable: true,
   })
-  paymentMethod: string;
+  paymentMethod: string | null;
 
   @OneToMany(() => AudioFile, (audio) => audio.user)
   audios: AudioFile[];
