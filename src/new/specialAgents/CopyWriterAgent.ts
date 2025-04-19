@@ -11,9 +11,15 @@ export class CopyWriterAgent {
   constructor(
     private bot: Bot,
     private dialogController: DialogController,
-  ) {}
+  ) {
+    this.bot.onCopyWriterStyles(this.styles.bind(this));
+    this.bot.onCopyWriterStyle(this.style.bind(this));
+    this.bot.onCopyWriterTone(this.tone.bind(this));
+  }
 
-  public async styles(user: User) {
+  private async styles(user: User) {
+    user.agentId = 1;
+    await manager.save(user);
     const agent = await manager.findOneBy(AgentModel, {
       id: user.agentId!,
     });
@@ -60,7 +66,7 @@ export class CopyWriterAgent {
     await manager.save(user);
     await this.dialogController.createDialog(
       user,
-      3,
+      1,
       `${user.dialogueData}\nОтлично, со стилем и тоном определились! 😉\n\nТеперь для создания текста мне необходимо получить от тебя вводную информацию:\n1)Тема\n2)Для кого создается текст  (студенты, инвесторы…)\n3)Размер текста по времени (5 мин; 10 мин; 30 мин)\n\nОтвет пришли мне в ответном сообщении!\nОжидаю информацию)😉`,
     ); // TODO: set agent id
   }

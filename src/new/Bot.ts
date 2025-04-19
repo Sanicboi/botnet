@@ -305,6 +305,30 @@ export class Bot {
     });
   }
 
+  public onCopyWriterStyles(f: (user: User) => Promise<any>) {
+    this.cqListeners.push(async (q, user) => {
+      if (q.data?.startsWith("agent-") && +q.data.substring(6) === 1) {
+        await f(user);
+      }
+    })
+  }
+
+  public onCopyWriterStyle(f: (user: User, style: string) => Promise<any>) {
+    this.cqListeners.push(async (q, user) => {
+      if (q.data?.startsWith("textstyle-")) {
+        await f(user, q.data.substring(10));
+      }
+    })
+  }
+
+  public onCopyWriterTone(f: (user: User, tone: string) => Promise<any>) {
+    this.cqListeners.push(async (q, user) => {
+      if (q.data?.startsWith("texttone-")) {
+        await f(user, q.data.substring(9));
+      }
+    })
+  }
+
   public setListeners() {
     this.bot.on("callback_query", async (q) => {
       const user = await this.getUser(q);
