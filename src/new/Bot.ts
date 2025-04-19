@@ -72,7 +72,9 @@ export class Bot {
         id: number;
       };
     },
-    relations: FindOptionsRelations<User> = {},
+    relations: FindOptionsRelations<User> = {
+      agent: true
+    },
   ): Promise<User> {
     const user = await manager.findOne(User, {
       where: {
@@ -108,6 +110,50 @@ export class Bot {
         await f(user, agentId);
       }
     });
+  }
+
+  public onGroups(f: (user: User) => Promise<any>) {
+    this.bot.onText(/\/neuro/, async (msg) => {
+      const user = await this.getUser(msg);
+      await f(user);
+    })
+    this.cqListeners.push(async (q, user) => {
+      if (q.data === "groups-1") {
+        await f(user);
+      }
+    })
+  }
+
+  public onGroups2(f: (user: User) => Promise<any>) {
+    this.cqListeners.push(async (q, user) => {
+      if (q.data === "groups-2") {
+        await f(user);
+      }
+    })
+  }
+
+  public onAgents(f: (user: User, group: string) => Promise<any>) {
+    this.cqListeners.push(async (q, user) => {
+      if (q.data?.startsWith("group-")) {
+        await f(user, q.data.substring(6));
+      }
+    });
+  }
+
+  public onDialog(f: (user: User, dialogId: number) => Promise<any>) {
+    this.cqListeners.push(async (q, user) => {
+      if (q.data?.startsWith("dialog-")) {
+        await f(user, +q.data.substring(7));
+      }
+    })
+  }
+
+  public onContinueDialog(f: (user: User, dialogId: number) => Promise<any>) {
+    this.cqListeners.push(async (q, user) => {
+      if (q.data?.startsWith("continue-")) {
+        await f(user, +q.data.substring(9));
+      }
+    })
   }
 
   public onDeleteDialog(f: (user: User, dialogId: number) => Promise<any>) {

@@ -19,6 +19,8 @@ export class DialogController {
     bot.onDialogs(this.dialogs.bind(this));
     bot.onCreateDialog(this.createDialog.bind(this));
     bot.onDeleteDialog(this.deleteDialog.bind(this));
+    bot.onDialog(this.dialog.bind(this));
+    bot.onContinueDialog(this.continueDialog.bind(this));
   }
 
   private async dialogs(user: User) {
