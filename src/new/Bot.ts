@@ -2,6 +2,7 @@ import TelegramBot, { CallbackQuery, Message } from "node-telegram-bot-api";
 import { User } from "../entity/User";
 import { AppDataSource } from "../data-source";
 import { FindOptionsRelations, RelationOptions } from "typeorm";
+import cron from 'node-cron';
 
 const specialIds: number[] = [1, 2, 3];
 
@@ -187,6 +188,64 @@ export class Bot {
         await f(user);
       }
     });
+  }
+
+  public onBuySubscription(f: (user: User) => Promise<any>) {
+    this.cqListeners.push(async (q, user) => {
+      if (q.data === "b-sub") {
+        await f(user);
+      }
+    })
+  }
+
+  public onBuyTokens(f: (user: User) => Promise<any>) {
+    this.cqListeners.push(async (q, user) => {
+      if (q.data === "b-tokens") {
+        await f(user);
+      }
+    })
+  }
+
+  public onSubType(f: (user: User, type: string) => Promise<any>) {
+    this.cqListeners.push(async (q, user) => {
+      if (q.data?.startsWith("sub-")) {
+        await f(user, q.data.substring(4));
+      }
+    })
+  }
+
+  public onTokensType(f: (user: User, amount: number) => Promise<any>) {
+    this.cqListeners.push(async (q, user) => {
+      if (q.data?.startsWith("tokens-")) {
+        await f(user, +q.data.substring(7));
+      }
+    })
+  }
+
+  public onIHavePaid(f: (user: User, data: string, msgId: number) => Promise<any>) {
+    this.cqListeners.push(async (q, user) => {
+      if (q.data?.startsWith("ihavepaid-")) {
+        await f(user, q.data.substring(10), q.message!.message_id);
+      }
+    })
+  }
+
+  public onUpdateTokens(f: (user: User) => Promise<any>) {
+    cron.schedule('0 0 * * *', async () => {
+      const users = await manager.find(User);
+
+      for (const user of users) {
+        await f(user);
+      }
+    })
+  }
+
+  public onCancelSub(f: (user: User) => Promise<any>) {
+    this.cqListeners.push(async (q, user) => {
+      if (q.data === "cancel") {
+        await f(user);
+      }
+    })
   }
 
   public onGenerateImage(f: (user: User, text: string) => Promise<any>) {

@@ -54,6 +54,13 @@ for (const [k, v] of subToPriceMap) {
 export class BalanceController {
   constructor(private bot: Bot) {
     bot.onBalance(this.balance.bind(this));
+    bot.onBuySubscription(this.buySubscription.bind(this));
+    bot.onBuyTokens(this.buyTokens.bind(this));
+    bot.onSubType(this.subType.bind(this));
+    bot.onTokensType(this.tokensType.bind(this));
+    bot.onIHavePaid(this.IHavePaid.bind(this));
+    bot.onCancelSub(this.cancelSub.bind(this));
+    bot.onUpdateTokens(this.updateTokens.bind(this));
   }
 
   /**
