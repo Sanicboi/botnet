@@ -353,6 +353,46 @@ export class Bot {
     })
   }
 
+  public onPostTypes(f: (user: User) => Promise<any>) {
+    this.cqListeners.push(async (q, user) => {
+      if (q.data === "agent-2") {
+        await f(user);
+      }
+    })
+  }
+
+  public onPostType(f: (user: User, type: string) => Promise<any>) {
+    this.cqListeners.push(async (q, user) => {
+      if (q.data?.startsWith("posttype-")) {
+        await f(user, q.data.substring(9));
+      }
+    })
+  }
+
+  public onPostStyle(f: (user: User, style: string, msgId: number) => Promise<any>) {
+    this.cqListeners.push(async (q, user) => {
+      if (q.data?.startsWith("poststyle-")) {
+        await f(user, q.data.substring(10), q.message!.message_id);
+      }
+    })
+  }
+
+  public onPostStylesConfirm(f: (user: User) => Promise<any>) {
+    this.cqListeners.push(async (q, user) => {
+      if (q.data === "poststyles-confirm") {
+        await f(user);
+      }
+    })
+  }
+
+  public onPostStylesReject(f: (user: User) => Promise<any>) {
+    this.cqListeners.push(async (q, user) => {
+      if (q.data === "poststyles-reject") {
+        await f(user);
+      }
+    })
+  }
+
   public setListeners() {
     this.bot.on("callback_query", async (q) => {
       const user = await this.getUser(q);
