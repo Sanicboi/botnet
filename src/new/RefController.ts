@@ -6,7 +6,9 @@ import { Bot } from "./Bot";
 const manager = AppDataSource.manager;
 
 export class RefController {
-  constructor(private bot: Bot) {}
+  constructor(private bot: Bot) {
+    this.bot.onRef(this.ref.bind(this));
+  }
 
   private async ref(user: User) {
     if (user.inviteCount >= 30)

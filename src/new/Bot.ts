@@ -242,9 +242,16 @@ export class Bot {
 
   public onCancelSub(f: (user: User) => Promise<any>) {
     this.cqListeners.push(async (q, user) => {
-      if (q.data === "cancel") {
+      if (q.data === "cancel-sub") {
         await f(user);
       }
+    })
+  }
+
+  public onRef(f: (user: User) => Promise<any>) {
+    this.bot.onText(/\/ref/, async (msg) => {
+      const user = await this.getUser(msg);
+      await f(user);
     })
   }
 
