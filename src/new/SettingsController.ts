@@ -7,7 +7,10 @@ import { Bot } from "./Bot";
 const manager = AppDataSource.manager;
 
 export class SettingsController {
-  constructor(private bot: Bot) {}
+  constructor(private bot: Bot) {
+    this.bot.onSettings(this.settings.bind(this));
+    this.bot.onSetting(this.setting.bind(this));
+  }
 
   private async settings(user: User) {
     await this.bot.bot.sendMessage(+user.chatId, "Настройки ⚙️", {

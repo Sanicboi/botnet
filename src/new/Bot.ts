@@ -255,6 +255,21 @@ export class Bot {
     })
   }
 
+  public onSettings(f: (user: User) => Promise<any>) {
+    this.bot.onText(/\/settings/, async (msg) => {
+      const user = await this.getUser(msg);
+      await f(user);
+    })
+  }
+
+  public onSetting(f: (user: User, setting: string) => Promise<any>) {
+    this.cqListeners.push(async (q, user) => {
+      if (q.data?.startsWith("settings-")) {
+        await f(user, q.data.substring(9));
+      }
+    })
+  }
+
   public onGenerateImage(f: (user: User, text: string) => Promise<any>) {
     this.freeTextListeners.push(async (msg, user) => {
       if (user.usingImageGeneration) {
