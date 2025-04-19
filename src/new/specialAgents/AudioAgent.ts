@@ -76,7 +76,11 @@ export class AudioAgent {
   }
 
   private async summarizeSaved(user: User, id: string) {
-    const transcription = new Transcription(true, id, "Суммаризируй данное тебе аудио");
+    const transcription = new Transcription(
+      true,
+      id,
+      "Суммаризируй данное тебе аудио",
+    );
     await transcription.setup();
     const result = await transcription.transcribe();
     const costs = await transcription.getCost();
@@ -93,13 +97,13 @@ export class AudioAgent {
   }
 
   private async transcriber(user: User) {
-    user.currentAudioAgent = 'transcriber';
+    user.currentAudioAgent = "transcriber";
     await manager.save(user);
     await this.bot.bot.sendMessage(+user.chatId, this.transcriberMessage);
   }
 
   private async summarizer(user: User) {
-    user.currentAudioAgent = 'summarizer';
+    user.currentAudioAgent = "summarizer";
     await manager.save(user);
     await this.bot.bot.sendMessage(+user.chatId, this.summarizerMessage);
   }

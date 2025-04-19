@@ -8,6 +8,7 @@ import { AgentModel } from "../entity/AgentModel";
 import { openai } from "../neuro";
 
 const manager = AppDataSource.manager;
+
 /**
  * This class is responsible for managing conversations
  * - This class DOES give the conversations ans helps store their IDs
@@ -69,25 +70,33 @@ export class DialogController {
       welcomeMessage ?? agent.firstMessage,
       {
         reply_markup: {
-          inline_keyboard: [
-            Btn('Взять из данных', 'from-data')
-          ]
-        }
-      }
+          inline_keyboard:
+            user.currentAudioAgent == null &&
+            ![1, 2, 3].includes(user.agentId!) &&
+            !user.usingImageGeneration
+              ? [Btn("Взять из данных", "from-data")]
+              : [],
+        },
+      },
     );
-    await this.bot.bot.sendMessage(
-      +user.chatId, 
-      'Модель для генерации:',
-      {
-        reply_markup: {
-          inline_keyboard: [
-            Btn(`GPT 4 Omni mini ${user.model === 'gpt-4o-mini' ? '✅' : '❌'}`, "model-gpt-4o-mini"),
-            Btn(`GPT 4 Omni ${user.model === 'gpt-4o' ? '✅' : '❌'}`, "model-gpt-4o"),
-            Btn(`GPT 4 Turbo ${user.model === 'gpt-4-turbo' ? '✅' : '❌'}`, "model-gpt-4-turbo"),
-          ]
-        }
-      }
-    )
+    await this.bot.bot.sendMessage(+user.chatId, "Модель для генерации:", {
+      reply_markup: {
+        inline_keyboard: [
+          Btn(
+            `GPT 4 Omni mini ${user.model === "gpt-4o-mini" ? "✅" : "❌"}`,
+            "model-gpt-4o-mini",
+          ),
+          Btn(
+            `GPT 4 Omni ${user.model === "gpt-4o" ? "✅" : "❌"}`,
+            "model-gpt-4o",
+          ),
+          Btn(
+            `GPT 4 Turbo ${user.model === "gpt-4-turbo" ? "✅" : "❌"}`,
+            "model-gpt-4-turbo",
+          ),
+        ],
+      },
+    });
   }
 
   private async deleteDialog(user: User, dialogId: number) {

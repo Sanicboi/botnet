@@ -43,11 +43,11 @@ export class User {
   })
   usingImageGeneration: boolean;
 
-  @Column('text', {
+  @Column("text", {
     default: null,
-    nullable: true
+    nullable: true,
   })
-  currentAudioAgent: 'transcriber' | 'summarizer' | null;
+  currentAudioAgent: "transcriber" | "summarizer" | null;
 
   @Column({
     default: "1024x1024",
@@ -105,7 +105,6 @@ export class User {
   })
   waitingForPromo: boolean;
 
-
   @Column("text", {
     nullable: true,
   })
@@ -150,15 +149,15 @@ export class User {
   })
   agent: AgentModel | null;
 
-  @Column('int', {
-    nullable: true
+  @Column("int", {
+    nullable: true,
   })
   agentId: number | null;
 
   @OneToMany(() => Dialog, (dialog) => dialog.user)
   dialogs: Dialog[];
 
-  @Column('int', {
+  @Column("int", {
     nullable: true,
   })
   currentDialogId: number | null;

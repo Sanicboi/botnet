@@ -58,6 +58,7 @@ export class DataController {
     this.bot.onMyData(this.myData.bind(this));
     this.bot.onDataCategory(this.dataCategory.bind(this));
     this.bot.onData(this.data.bind(this));
+    this.bot.onTakeFromData(this.takeFromData.bind(this));
   }
 
   private async myData(user: User) {
@@ -94,8 +95,8 @@ export class DataController {
   }
 
   public async resetData(user: User) {
-    user.dialogueData = '';
-    user.waitingForData = '';
+    user.dialogueData = "";
+    user.waitingForData = "";
     user.waitingForPromo = false;
 
     user.agentId = null;
@@ -107,15 +108,15 @@ export class DataController {
   }
 
   private async takeFromData(user: User) {
-    await this.bot.bot.sendMessage(+user.chatId, 'Выберите раздел данных:', {
+    await this.bot.bot.sendMessage(+user.chatId, "Выберите раздел данных:", {
       reply_markup: {
         inline_keyboard: [
-          Btn('Основные', 'take-main'),
-          Btn('Личностные', 'take-personal'),
-          Btn('Бизнес', 'take-business'),
-          Btn('Карьера', 'take-career')
-        ]
-      }
-    })
+          Btn("Основные", "take-main"),
+          Btn("Личностные", "take-personal"),
+          Btn("Бизнес", "take-business"),
+          Btn("Карьера", "take-career"),
+        ],
+      },
+    });
   }
 }

@@ -44,6 +44,10 @@ export class AgentController {
     this.bot.onVoiceInput(this.voiceInput.bind(this));
     this.bot.onDocInput(this.docInput.bind(this));
     this.bot.onImageInput(this.imageInput.bind(this));
+    this.bot.onGroups(this.groups.bind(this));
+    this.bot.onGroups2(this.groups2.bind(this));
+    this.bot.onAgents(this.agents.bind(this));
+    this.bot.onDataInput(this.dataInput.bind(this));
   }
 
   private async textInput(user: User, text: string) {
@@ -283,7 +287,7 @@ export class AgentController {
     }
     if (+group === 1) {
       result.push(Btn("Транскрибатор аудио", "audio"));
-      result.push(Btn("Суммаризатор аудио", "audiosum"))
+      result.push(Btn("Суммаризатор аудио", "audiosum"));
     }
     await this.bot.bot.sendMessage(+user.chatId, "Выберите сотрудника", {
       reply_markup: {

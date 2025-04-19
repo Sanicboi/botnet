@@ -73,7 +73,7 @@ export class Bot {
       };
     },
     relations: FindOptionsRelations<User> = {
-      agent: true
+      agent: true,
     },
   ): Promise<User> {
     const user = await manager.findOne(User, {
@@ -116,12 +116,12 @@ export class Bot {
     this.bot.onText(/\/neuro/, async (msg) => {
       const user = await this.getUser(msg);
       await f(user);
-    })
+    });
     this.cqListeners.push(async (q, user) => {
       if (q.data === "groups-1") {
         await f(user);
       }
-    })
+    });
   }
 
   public onGroups2(f: (user: User) => Promise<any>) {
@@ -129,7 +129,7 @@ export class Bot {
       if (q.data === "groups-2") {
         await f(user);
       }
-    })
+    });
   }
 
   public onAgents(f: (user: User, group: string) => Promise<any>) {
@@ -145,7 +145,7 @@ export class Bot {
       if (q.data?.startsWith("dialog-")) {
         await f(user, +q.data.substring(7));
       }
-    })
+    });
   }
 
   public onContinueDialog(f: (user: User, dialogId: number) => Promise<any>) {
@@ -153,7 +153,7 @@ export class Bot {
       if (q.data?.startsWith("continue-")) {
         await f(user, +q.data.substring(9));
       }
-    })
+    });
   }
 
   public onDeleteDialog(f: (user: User, dialogId: number) => Promise<any>) {
@@ -170,6 +170,22 @@ export class Bot {
   public onTextInput(f: (user: User, text: string) => Promise<any>) {
     this.freeTextListeners.push(async (msg, user) => {
       await f(user, msg.text!);
+    });
+  }
+
+  public onDataInput(f: (user: User, type: string) => Promise<any>) {
+    this.cqListeners.push(async (q, user) => {
+      if (q.data?.startsWith("take-")) {
+        await f(user, q.data.substring(5));
+      }
+    });
+  }
+
+  public onTakeFromData(f: (user: User) => Promise<any>) {
+    this.cqListeners.push(async (q, user) => {
+      if (q.data === "from-data") {
+        await f(user);
+      }
     });
   }
 
@@ -209,7 +225,10 @@ export class Bot {
 
   public onTranscribeSaved(f: (user: User, id: string) => Promise<any>) {
     this.cqListeners.push(async (q, user) => {
-      if (q.data?.startsWith("transcription-") && user.currentAudioAgent === 'transcriber') {
+      if (
+        q.data?.startsWith("transcription-") &&
+        user.currentAudioAgent === "transcriber"
+      ) {
         await f(user, q.data.substring(14));
       }
     });
@@ -217,7 +236,10 @@ export class Bot {
 
   public onSummarize(f: (user: User, id: string) => Promise<any>) {
     this.cqListeners.push(async (q, user) => {
-      if (q.data?.startsWith("transcription-") && user.currentAudioAgent === 'summarizer') {
+      if (
+        q.data?.startsWith("transcription-") &&
+        user.currentAudioAgent === "summarizer"
+      ) {
         await f(user, q.data.substring(14));
       }
     });
@@ -228,7 +250,7 @@ export class Bot {
       if (q.data === "audiosum") {
         await f(user);
       }
-    })
+    });
   }
 
   public onTranscriber(f: (user: User) => Promise<any>) {
@@ -236,12 +258,12 @@ export class Bot {
       if (q.data === "audio") {
         await f(user);
       }
-    })
+    });
   }
 
   public onTranscribeNonSaved(f: (user: User, url: string) => Promise<any>) {
     this.voiceListeners.push(async (msg, user) => {
-      if (user.currentAudioAgent === 'transcriber') {
+      if (user.currentAudioAgent === "transcriber") {
         const url = await this.bot.getFileLink(msg.voice!.file_id);
         await f(user, url);
       }
@@ -356,7 +378,7 @@ export class Bot {
       if (q.data === "agent-1") {
         await f(user);
       }
-    })
+    });
   }
 
   public onCopyWriterStyle(f: (user: User, style: string) => Promise<any>) {
@@ -364,7 +386,7 @@ export class Bot {
       if (q.data?.startsWith("textstyle-")) {
         await f(user, q.data.substring(10));
       }
-    })
+    });
   }
 
   public onCopyWriterTone(f: (user: User, tone: string) => Promise<any>) {
@@ -372,7 +394,7 @@ export class Bot {
       if (q.data?.startsWith("texttone-")) {
         await f(user, q.data.substring(9));
       }
-    })
+    });
   }
 
   public onOfferSizes(f: (user: User) => Promise<any>) {
@@ -380,7 +402,7 @@ export class Bot {
       if (q.data === "agent-2") {
         await f(user);
       }
-    })
+    });
   }
 
   public onOfferSize(f: (user: User, size: string) => Promise<any>) {
@@ -388,7 +410,7 @@ export class Bot {
       if (q.data?.startsWith("offersize-")) {
         await f(user, q.data.substring(10));
       }
-    })
+    });
   }
 
   public onOfferModel(f: (user: User, model: string) => Promise<any>) {
@@ -396,7 +418,7 @@ export class Bot {
       if (q.data?.startsWith("offermodel-")) {
         await f(user, q.data.substring(11));
       }
-    })
+    });
   }
 
   public onPostTypes(f: (user: User) => Promise<any>) {
@@ -404,7 +426,7 @@ export class Bot {
       if (q.data === "agent-2") {
         await f(user);
       }
-    })
+    });
   }
 
   public onPostType(f: (user: User, type: string) => Promise<any>) {
@@ -412,15 +434,17 @@ export class Bot {
       if (q.data?.startsWith("posttype-")) {
         await f(user, q.data.substring(9));
       }
-    })
+    });
   }
 
-  public onPostStyle(f: (user: User, style: string, msgId: number) => Promise<any>) {
+  public onPostStyle(
+    f: (user: User, style: string, msgId: number) => Promise<any>,
+  ) {
     this.cqListeners.push(async (q, user) => {
       if (q.data?.startsWith("poststyle-")) {
         await f(user, q.data.substring(10), q.message!.message_id);
       }
-    })
+    });
   }
 
   public onPostStylesConfirm(f: (user: User) => Promise<any>) {
@@ -428,7 +452,7 @@ export class Bot {
       if (q.data === "poststyles-confirm") {
         await f(user);
       }
-    })
+    });
   }
 
   public onPostStylesReject(f: (user: User) => Promise<any>) {
@@ -436,7 +460,7 @@ export class Bot {
       if (q.data === "poststyles-reject") {
         await f(user);
       }
-    })
+    });
   }
 
   public setListeners() {
