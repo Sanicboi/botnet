@@ -307,7 +307,7 @@ export class Bot {
 
   public onCopyWriterStyles(f: (user: User) => Promise<any>) {
     this.cqListeners.push(async (q, user) => {
-      if (q.data?.startsWith("agent-") && +q.data.substring(6) === 1) {
+      if (q.data === "agent-1") {
         await f(user);
       }
     })
@@ -325,6 +325,30 @@ export class Bot {
     this.cqListeners.push(async (q, user) => {
       if (q.data?.startsWith("texttone-")) {
         await f(user, q.data.substring(9));
+      }
+    })
+  }
+
+  public onOfferSizes(f: (user: User) => Promise<any>) {
+    this.cqListeners.push(async (q, user) => {
+      if (q.data === "agent-2") {
+        await f(user);
+      }
+    })
+  }
+
+  public onOfferSize(f: (user: User, size: string) => Promise<any>) {
+    this.cqListeners.push(async (q, user) => {
+      if (q.data?.startsWith("offersize-")) {
+        await f(user, q.data.substring(10));
+      }
+    })
+  }
+
+  public onOfferModel(f: (user: User, model: string) => Promise<any>) {
+    this.cqListeners.push(async (q, user) => {
+      if (q.data?.startsWith("offermodel-")) {
+        await f(user, q.data.substring(11));
       }
     })
   }

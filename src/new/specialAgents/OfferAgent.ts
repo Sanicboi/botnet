@@ -11,9 +11,16 @@ export class OfferAgent {
   constructor(
     private bot: Bot,
     private dialogController: DialogController,
-  ) {}
+  ) {
+    this.bot.onOfferSizes(this.sizes.bind(this));
+    this.bot.onOfferSize(this.size.bind(this));
+    this.bot.onOfferModel(this.model.bind(this));
+  }
 
-  public async sizes(user: User) {
+  private async sizes(user: User) {
+    user.agentId = 2;
+    user.agent!.id = 2;
+    await manager.save(user);
     await this.bot.bot.sendMessage(+user.chatId, `Выберите размер оффера`, {
       reply_markup: {
         inline_keyboard: [
