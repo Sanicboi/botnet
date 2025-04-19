@@ -15,6 +15,9 @@ import { AgentGroup } from "../entity/AgentGroup";
 import { InlineKeyboardButton } from "node-telegram-bot-api";
 import { Btn } from "../neuro/utils";
 import { AgentModel } from "../entity/AgentModel";
+import { CopyWriterAgent } from "./specialAgents/CopyWriterAgent";
+import { OfferAgent } from "./specialAgents/OfferAgent";
+import { PostAgent } from "./specialAgents/PostAgent";
 
 const manager = AppDataSource.manager;
 
@@ -27,6 +30,9 @@ const manager = AppDataSource.manager;
 export class AgentController {
   private imageAgent: ImageAgent;
   private audioAgent: AudioAgent;
+  private copyWriter: CopyWriterAgent;
+  private offerAgent: OfferAgent;
+  private postAgent: PostAgent;
 
   /**
    * Sets the listeners for the bot
@@ -40,6 +46,9 @@ export class AgentController {
   ) {
     this.imageAgent = new ImageAgent(bot);
     this.audioAgent = new AudioAgent(bot, outputController, balanceController);
+    this.copyWriter = new CopyWriterAgent(bot, this.dialogController);
+    this.postAgent = new PostAgent(bot, this.dialogController);
+    this.offerAgent = new OfferAgent(bot, dialogController);
     this.bot.onTextInput(this.textInput.bind(this));
     this.bot.onVoiceInput(this.voiceInput.bind(this));
     this.bot.onDocInput(this.docInput.bind(this));
