@@ -163,15 +163,39 @@ export class Bot {
 
   public onTranscribeSaved(f: (user: User, id: string) => Promise<any>) {
     this.cqListeners.push(async (q, user) => {
-      if (q.data?.startsWith("transcription-")) {
+      if (q.data?.startsWith("transcription-") && user.currentAudioAgent === 'transcriber') {
         await f(user, q.data.substring(14));
       }
     });
   }
 
+  public onSummarize(f: (user: User, id: string) => Promise<any>) {
+    this.cqListeners.push(async (q, user) => {
+      if (q.data?.startsWith("transcription-") && user.currentAudioAgent === 'summarizer') {
+        await f(user, q.data.substring(14));
+      }
+    });
+  }
+
+  public onSummarizer(f: (user: User) => Promise<any>) {
+    this.cqListeners.push(async (q, user) => {
+      if (q.data === "audiosum") {
+        await f(user);
+      }
+    })
+  }
+
+  public onTranscriber(f: (user: User) => Promise<any>) {
+    this.cqListeners.push(async (q, user) => {
+      if (q.data === "audio") {
+        await f(user);
+      }
+    })
+  }
+
   public onTranscribeNonSaved(f: (user: User, url: string) => Promise<any>) {
     this.voiceListeners.push(async (msg, user) => {
-      if (user.agentId === 0) {
+      if (user.currentAudioAgent === 'transcriber') {
         const url = await this.bot.getFileLink(msg.voice!.file_id);
         await f(user, url);
       }

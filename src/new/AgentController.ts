@@ -281,6 +281,10 @@ export class AgentController {
     for (const agent of agents) {
       result.push(Btn(agent.name, `agent-${agent.id}`));
     }
+    if (+group === 1) {
+      result.push(Btn("Транскрибатор аудио", "audio"));
+      result.push(Btn("Суммаризатор аудио", "audiosum"))
+    }
     await this.bot.bot.sendMessage(+user.chatId, "Выберите сотрудника", {
       reply_markup: {
         inline_keyboard: result,

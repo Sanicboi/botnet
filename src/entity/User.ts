@@ -43,6 +43,12 @@ export class User {
   })
   usingImageGeneration: boolean;
 
+  @Column('text', {
+    default: null,
+    nullable: true
+  })
+  currentAudioAgent: 'transcriber' | 'summarizer' | null;
+
   @Column({
     default: "1024x1024",
   })
@@ -99,21 +105,6 @@ export class User {
   })
   waitingForPromo: boolean;
 
-  @Column({
-    default: false,
-  })
-  firstCryptoResponse: boolean;
-
-  // @OneToMany(() => UserBot, (bot) => bot.user)
-  // bots: UserBot[];
-
-  // @OneToMany(() => Lead, (lead) => lead.user)
-  // leads: Lead[];
-
-  @Column({
-    default: 10,
-  })
-  perMailing: number;
 
   @Column("text", {
     nullable: true,

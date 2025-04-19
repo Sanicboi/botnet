@@ -101,6 +101,7 @@ export class DataController {
     user.agentId = null;
     user.agent = null;
     user.currentDialogId = null;
+    user.currentAudioAgent = null;
 
     await manager.save(user);
   }
