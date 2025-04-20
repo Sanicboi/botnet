@@ -22,6 +22,21 @@ AppDataSource.initialize()
     });
     const manager = AppDataSource.manager;
 
+    bot.setMyCommands([
+        {
+            command: 'start',
+            description: 'Запустить бота'
+        },
+        {
+            command: 'groups',
+            description: 'Посмотреть группы агентов'
+        },
+        {
+            command: 'reset',
+            description: 'Сбросить все изменения'
+        }
+    ]);
+
     bot.onText(/\/start/, async (msg) => {
       await bot.sendMessage(
         msg.chat.id,
