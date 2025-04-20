@@ -145,7 +145,7 @@ export class DialogController {
 
     await this.bot.bot.sendMessage(
       +user.chatId,
-      `Диалог #${dialog.id}:\n\nТема диалога: ${data}\nДата создания: ${dialog.createdAt}`,
+      `Диалог #${dialog.id}:\n\nТема диалога: ${data}\nДата создания: ${dialog.createdAt.toLocaleString('ru-RU')}`,
       {
         reply_markup: {
           inline_keyboard: [
