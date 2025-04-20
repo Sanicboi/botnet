@@ -103,6 +103,7 @@ export class DataController {
     user.agent = null;
     user.currentDialogId = null;
     user.currentAudioAgent = null;
+    user.usingImageGeneration = false;
 
     await manager.save(user);
   }

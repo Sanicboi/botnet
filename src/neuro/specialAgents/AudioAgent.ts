@@ -6,6 +6,7 @@ import { Bot } from "../Bot";
 import { Converter } from "../Converter";
 import { OutputController } from "../OutputController";
 import { Transcription } from "../Transcription";
+import { DataController } from "../DataController";
 
 const manager = AppDataSource.manager;
 
@@ -14,6 +15,7 @@ export class AudioAgent {
     private bot: Bot,
     private outputController: OutputController,
     private balanceController: BalanceController,
+    private dataController: DataController
   ) {
     bot.onTranscribeSaved(this.transcribeSaved.bind(this));
     bot.onTranscribeNonSaved(this.transcribeNonSaved.bind(this));
@@ -27,6 +29,7 @@ export class AudioAgent {
   private summarizerMessage: string = "";
 
   private async calculateCosts(user: User, url: string) {
+    await this.dataController.resetData(user);
     const transcription = new Transcription(false, url);
     await transcription.setup();
     const costs = await transcription.getCost();

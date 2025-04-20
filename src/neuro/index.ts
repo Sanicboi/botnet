@@ -24,13 +24,14 @@ AppDataSource.initialize().then(async () => {
   const staticController = new StaticController(bot);
   const refController = new RefController(bot);
   const dataController = new DataController(bot);
-  const dialogController = new DialogController(bot);
+  const dialogController = new DialogController(bot, dataController);
   const settingsController = new SettingsController(bot);
   const agentController = new AgentController(
     bot,
     balanceController,
     dialogController,
     outputController,
+    dataController
   );
 
   bot.setListeners();

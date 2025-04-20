@@ -17,6 +17,7 @@ import { CopyWriterAgent } from "./specialAgents/CopyWriterAgent";
 import { OfferAgent } from "./specialAgents/OfferAgent";
 import { PostAgent } from "./specialAgents/PostAgent";
 import { AgentModel } from "../entity/assistants/AgentModel";
+import { DataController } from "./DataController";
 
 const manager = AppDataSource.manager;
 
@@ -42,12 +43,13 @@ export class AgentController {
     private balanceController: BalanceController,
     private dialogController: DialogController,
     private outputController: OutputController,
+    private dataController: DataController
   ) {
-    this.imageAgent = new ImageAgent(bot);
-    this.audioAgent = new AudioAgent(bot, outputController, balanceController);
-    this.copyWriter = new CopyWriterAgent(bot, this.dialogController);
-    this.postAgent = new PostAgent(bot, this.dialogController);
-    this.offerAgent = new OfferAgent(bot, dialogController);
+    this.imageAgent = new ImageAgent(bot, dataController);
+    this.audioAgent = new AudioAgent(bot, outputController, balanceController, dataController);
+    this.copyWriter = new CopyWriterAgent(bot, this.dialogController, dataController);
+    this.postAgent = new PostAgent(bot, this.dialogController, this.dataController);
+    this.offerAgent = new OfferAgent(bot, dialogController, this.dataController);
     this.bot.onTextInput(this.textInput.bind(this));
     this.bot.onVoiceInput(this.voiceInput.bind(this));
     this.bot.onDocInput(this.docInput.bind(this));

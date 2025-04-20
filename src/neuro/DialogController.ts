@@ -6,6 +6,7 @@ import { Bot } from "./Bot";
 import { Btn } from "./utils";
 import { openai } from "../neuro";
 import { AgentModel } from "../entity/assistants/AgentModel";
+import { DataController } from "./DataController";
 
 const manager = AppDataSource.manager;
 
@@ -16,7 +17,7 @@ const manager = AppDataSource.manager;
  * - This class DOES count the tokens in a conversation
  */
 export class DialogController {
-  constructor(private bot: Bot) {
+  constructor(private bot: Bot, private dataController: DataController) {
     bot.onDialogs(this.dialogs.bind(this));
     bot.onCreateDialog(this.createDialog.bind(this));
     bot.onDeleteDialog(this.deleteDialog.bind(this));
@@ -50,8 +51,12 @@ export class DialogController {
   public async createDialog(
     user: User,
     agentId: number,
+    resetData: boolean = true,
     welcomeMessage?: string,
   ) {
+    if (resetData) {
+      await this.dataController.resetData(user);
+    }
     const agent = await manager.findOne(AgentModel, {
       where: {
         id: agentId,

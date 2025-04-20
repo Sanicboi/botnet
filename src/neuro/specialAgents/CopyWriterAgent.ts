@@ -4,6 +4,7 @@ import { Btn } from "../utils";
 import { Bot } from "../Bot";
 import { DialogController } from "../DialogController";
 import { AgentModel } from "../../entity/assistants/AgentModel";
+import { DataController } from "../DataController";
 
 const manager = AppDataSource.manager;
 
@@ -11,6 +12,7 @@ export class CopyWriterAgent {
   constructor(
     private bot: Bot,
     private dialogController: DialogController,
+    private dataController: DataController
   ) {
     this.bot.onCopyWriterStyles(this.styles.bind(this));
     this.bot.onCopyWriterStyle(this.style.bind(this));
@@ -18,6 +20,7 @@ export class CopyWriterAgent {
   }
 
   private async styles(user: User) {
+    await this.dataController.resetData(user);
     user.agentId = 1;
     user.agent = new AgentModel();
     user.agent.id = 1;
@@ -29,12 +32,12 @@ export class CopyWriterAgent {
     await this.bot.bot.sendMessage(+user.chatId, agent.firstMessage, {
       reply_markup: {
         inline_keyboard: [
-          Btn(`Официальный`, `textstyle-official`),
-          Btn(`Научный`, `textstyle-scientific`),
-          Btn(`Публицистический`, `textstyle-public`),
-          Btn(`Художественный`, `textstyle-fiction`),
-          Btn(`Разговорный`, `textstyle-informal`),
-          Btn(`Рекламный`, `textstyle-ad`),
+          Btn(`Официальный`, `textstyle-Официальный`),
+          Btn(`Научный`, `textstyle-Научный`),
+          Btn(`Публицистический`, `textstyle-Публицистический`),
+          Btn(`Художественный`, `textstyle-Художественный`),
+          Btn(`Разговорный`, `textstyle-Разговорный`),
+          Btn(`Рекламный`, `textstyle-Рекламный`),
         ],
       },
     });
@@ -69,6 +72,7 @@ export class CopyWriterAgent {
     await this.dialogController.createDialog(
       user,
       1,
+      false,
       `${user.dialogueData}\nОтлично, со стилем и тоном определились! 😉\n\nТеперь для создания текста мне необходимо получить от тебя вводную информацию:\n1)Тема\n2)Для кого создается текст  (студенты, инвесторы…)\n3)Размер текста по времени (5 мин; 10 мин; 30 мин)\n\nОтвет пришли мне в ответном сообщении!\nОжидаю информацию)😉`,
     ); // TODO: set agent id
   }

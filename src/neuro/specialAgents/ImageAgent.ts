@@ -3,11 +3,12 @@ import { User } from "../../entity/User";
 import { Btn } from "../utils";
 import { Agent } from "../Agent";
 import { Bot } from "../Bot";
+import { DataController } from "../DataController";
 
 const manager = AppDataSource.manager;
 
 export class ImageAgent {
-  constructor(private bot: Bot) {
+  constructor(private bot: Bot, private dataController: DataController) {
     this.bot.onEnterImage(this.enterImage.bind(this));
     this.bot.onSetResolution(this.setResolution.bind(this));
     this.bot.onGenerateImage(this.generateImage.bind(this));
@@ -19,6 +20,7 @@ export class ImageAgent {
   }
 
   private async enterImage(user: User) {
+    await this.dataController.resetData(user);
     await this.bot.bot.sendMessage(+user.chatId, "Выберите разрешение", {
       reply_markup: {
         inline_keyboard: [

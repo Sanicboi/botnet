@@ -3,6 +3,8 @@ import { User } from "../../entity/User";
 import { Btn } from "../utils";
 import { Bot } from "../Bot";
 import { DialogController } from "../DialogController";
+import { DataController } from "../DataController";
+import { AgentModel } from "../../entity/assistants/AgentModel";
 
 const manager = AppDataSource.manager;
 
@@ -10,6 +12,7 @@ export class PostAgent {
   constructor(
     private bot: Bot,
     private dialogController: DialogController,
+    private dataController: DataController
   ) {
     bot.onPostTypes(this.types.bind(this));
     bot.onPostType(this.type.bind(this));
@@ -19,8 +22,10 @@ export class PostAgent {
   }
 
   private async types(user: User) {
-    user.agentId = 2;
-    user.agent!.id = 2;
+    await this.dataController.resetData(user);
+    user.agentId = 3;
+    user.agent = new AgentModel();
+    user.agent.id = 3;
     await manager.save(user);
     await this.bot.bot.sendMessage(
       +user.chatId,
@@ -116,7 +121,8 @@ export class PostAgent {
   private async confirm(user: User) {
     await this.dialogController.createDialog(
       user,
-      2,
+      3,
+      false,
       `🚀Супер, со стилем и типом определились:\n${user.dialogueData}\nЧтобы предложить максимально релевантный текст, пришли мне вводные данные для написания поста:\n1)Тема поста \n2)Целевая аудитория (Для кого создается пост)\n3)Ключевые слова (Есть ли что-то, что ты хотел(а) бы затронуть в посте)\n4)Цель поста (Какая цель данного поста: Продажа продуктов бизнеса; сообщить новость…)\n\nИнформацию пришли мне в ответном сообщении) \nОжидаю информацию)😉`,
     );
   }

@@ -4,6 +4,7 @@ import { Btn } from "../utils";
 import { wait } from "../../utils/wait";
 import { Bot } from "../Bot";
 import { DialogController } from "../DialogController";
+import { DataController } from "../DataController";
 
 const manager = AppDataSource.manager;
 
@@ -11,6 +12,7 @@ export class OfferAgent {
   constructor(
     private bot: Bot,
     private dialogController: DialogController,
+    private dataController: DataController
   ) {
     this.bot.onOfferSizes(this.sizes.bind(this));
     this.bot.onOfferSize(this.size.bind(this));
@@ -18,6 +20,7 @@ export class OfferAgent {
   }
 
   private async sizes(user: User) {
+    await this.dataController.resetData(user);
     user.agentId = 2;
     user.agent!.id = 2;
     await manager.save(user);
@@ -63,6 +66,6 @@ export class OfferAgent {
       "Отлично, с моделью оффера определились.",
     );
     await wait(2);
-    await this.dialogController.createDialog(user, 2); // TODO: SET ID FOR THE AGENT
+    await this.dialogController.createDialog(user, 2, false); // TODO: SET ID FOR THE AGENT
   }
 }
