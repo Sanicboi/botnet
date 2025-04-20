@@ -43,7 +43,7 @@ export class Bot {
       {
         command: "data",
         description: "📝Данные о себе"
-      }
+      },
       {
         command: "neuro",
         description: "🧠Нейро-сотрудники",
