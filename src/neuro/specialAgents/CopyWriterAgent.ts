@@ -1,9 +1,9 @@
 import { AppDataSource } from "../../data-source";
-import { AgentModel } from "../../entity/AgentModel";
 import { User } from "../../entity/User";
-import { Btn } from "../../neuro/utils";
+import { Btn } from "../utils";
 import { Bot } from "../Bot";
 import { DialogController } from "../DialogController";
+import { AgentModel } from "../../entity/assistants/AgentModel";
 
 const manager = AppDataSource.manager;
 

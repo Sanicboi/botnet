@@ -1,6 +1,6 @@
 import { AppDataSource } from "../data-source";
 import { User } from "../entity/User";
-import { Btn } from "../neuro/utils";
+import { Btn } from "./utils";
 import { SupportedModels } from "../utils/Models";
 import { Bot } from "./Bot";
 

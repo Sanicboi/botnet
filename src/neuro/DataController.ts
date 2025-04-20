@@ -1,6 +1,6 @@
 import { AppDataSource } from "../data-source";
 import { User, UserDataType, UserDataTypeMapped } from "../entity/User";
-import { Btn } from "../neuro/utils";
+import { Btn } from "./utils";
 import { Bot } from "./Bot";
 
 const map = new Map<UserDataType, string>();

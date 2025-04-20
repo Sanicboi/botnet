@@ -3,9 +3,9 @@ import { AppDataSource } from "../data-source";
 import { Dialog } from "../entity/assistants/Dialog";
 import { User } from "../entity/User";
 import { Bot } from "./Bot";
-import { Btn } from "../neuro/utils";
-import { AgentModel } from "../entity/AgentModel";
+import { Btn } from "./utils";
 import { openai } from "../neuro";
+import { AgentModel } from "../entity/assistants/AgentModel";
 
 const manager = AppDataSource.manager;
 

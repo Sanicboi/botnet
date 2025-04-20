@@ -1,12 +1,12 @@
 import { ResponsesModel } from "openai/resources/shared";
 import { AppDataSource } from "../data-source";
-import { AgentModel } from "../entity/AgentModel";
 import { openai } from "../neuro";
 import OAI from "openai/resources";
 import axios, { AxiosResponse } from "axios";
 import path from "path";
 import { Transcription } from "./Transcription";
 import { DialogFile } from "../entity/assistants/DialogFile";
+import { AgentModel } from "../entity/assistants/AgentModel";
 
 const manager = AppDataSource.manager;
 

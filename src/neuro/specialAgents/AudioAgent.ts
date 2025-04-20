@@ -1,6 +1,6 @@
 import { AppDataSource } from "../../data-source";
 import { User } from "../../entity/User";
-import { Btn } from "../../neuro/utils";
+import { Btn } from "../utils";
 import { BalanceController } from "../BalanceController";
 import { Bot } from "../Bot";
 import { Converter } from "../Converter";

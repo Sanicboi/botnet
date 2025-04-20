@@ -1,10 +1,7 @@
 import "reflect-metadata";
 import { DataSource } from "typeorm";
 import { User } from "./entity/User";
-import { Assistant } from "./entity/assistants/Assistant";
-import { Action } from "./entity/assistants/Action";
 import { SupportRequest } from "./entity/SupportRequest";
-import { FileUpload } from "./entity/assistants/FileUpload";
 import { PromoCode } from "./entity/assistants/Promo";
 import { UserPromo } from "./entity/assistants/UserPromo";
 import { Channel } from "./entity/bots/Channel";
@@ -12,6 +9,8 @@ import { Post } from "./entity/bots/Post";
 import { Lead } from "./entity/bots/Lead";
 import { UserBot } from "./entity/bots/UserBot";
 import { AudioFile } from "./entity/assistants/AudioFile";
+import { AgentModel } from "./entity/assistants/AgentModel";
+import { AgentGroup } from "./entity/assistants/AgentGroup";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -23,11 +22,10 @@ export const AppDataSource = new DataSource({
   synchronize: true,
   logging: false,
   entities: [
+    AgentModel,
+    AgentGroup,
     User,
-    Assistant,
-    Action,
     SupportRequest,
-    FileUpload,
     PromoCode,
     UserPromo,
     Channel,

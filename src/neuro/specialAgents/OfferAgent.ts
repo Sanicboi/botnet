@@ -1,6 +1,6 @@
 import { AppDataSource } from "../../data-source";
 import { User } from "../../entity/User";
-import { Btn } from "../../neuro/utils";
+import { Btn } from "../utils";
 import { wait } from "../../utils/wait";
 import { Bot } from "../Bot";
 import { DialogController } from "../DialogController";

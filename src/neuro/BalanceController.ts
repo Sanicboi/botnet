@@ -4,7 +4,7 @@ import { SubType, User } from "../entity/User";
 import { SupportedModels } from "../utils/Models";
 import { Bot } from "./Bot";
 import { Converter } from "./Converter";
-import { Btn } from "../neuro/utils";
+import { Btn } from "./utils";
 import { ICreatePayment, YooCheckout } from "@a2seven/yoo-checkout";
 import { InlineKeyboardButton } from "node-telegram-bot-api";
 
