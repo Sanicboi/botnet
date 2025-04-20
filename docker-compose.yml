@@ -20,6 +20,11 @@ services:
     build: .
     command: npm run neuro
     env_file: .env
+  neuro-manager:
+    restart: always
+    build: .
+    command: npm run neuro-manager
+    env_file: .env
   # spambot:
   #   restart: always
   #   build: .

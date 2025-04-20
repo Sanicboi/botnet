@@ -58,6 +58,7 @@
     "mailer": "ts-node ./src/add/mailer.ts",
     "login": "ts-node ./src/add/login.ts",
     "quickProcess": "ts-node ./src/add/quickProcess.ts",
-    "add": "ts-node ./src/add.local.ts"
+    "add": "ts-node ./src/add.local.ts",
+    "neuro-manager": "ts-node ./src/neuro/manager.ts"
   }
 }
