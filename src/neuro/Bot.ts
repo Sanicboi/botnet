@@ -78,7 +78,6 @@ export class Bot {
       };
     },
     relations: FindOptionsRelations<User> = {
-      agent: true,
     },
   ): Promise<User> {
     console.log(qOrMsg);
