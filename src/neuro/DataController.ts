@@ -87,7 +87,7 @@ export class DataController {
 
   private async data(user: User, text: string) {
     const key: UserDataTypeMapped = (user.waitingForData +
-      "data") as UserDataTypeMapped;
+      "Data") as UserDataTypeMapped;
     user[key] = text;
     user.waitingForData = "";
     await manager.save(user);

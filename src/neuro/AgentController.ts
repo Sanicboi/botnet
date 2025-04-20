@@ -203,7 +203,7 @@ export class AgentController {
   }
 
   private async dataInput(user: User, type: string) {
-    const key: UserDataTypeMapped = (type + "data") as UserDataTypeMapped;
+    const key: UserDataTypeMapped = (type + "Data") as UserDataTypeMapped;
     const result = await this.balanceController.checkBalance(user);
     if (!result.exists) return;
     const agent = new Agent(user.agent!);
