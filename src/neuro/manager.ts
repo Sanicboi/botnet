@@ -13,7 +13,7 @@ let creatingNewAgent: number | null = null;
 let creatingNewGroup: boolean = false;
 let whiteList: number[] = [1391491967, 1292900617, 2074310819, 922521019];
 
-const STOP_WORD = "CANCEL";
+const STOP_WORD = "NO";
 
 AppDataSource.initialize()
   .then(async () => {
@@ -121,7 +121,7 @@ AppDataSource.initialize()
         changingName = agent.id;
         await bot.sendMessage(
           q.from.id,
-          `Введите новое имя агента ${agent.name} или введите "CANCEL", чтобы оставить прежнее`,
+          `Введите новое имя агента ${agent.name} или введите "NO", чтобы оставить прежнее`,
         );
       }
 
@@ -144,7 +144,7 @@ AppDataSource.initialize()
         changingGroupName = group.id;
         await bot.sendMessage(
           q.from.id,
-          `Введите новое имя группы ${group.name} или введите "CANCEL", чтобы оставить прежнее`,
+          `Введите новое имя группы ${group.name} или введите "NO", чтобы оставить прежнее`,
         );
       }
 
@@ -191,7 +191,7 @@ AppDataSource.initialize()
           changingFirstMsg = agent.id;
           await bot.sendMessage(
             msg.chat.id,
-            `Введите новое приветственное сообщение агента ${agent.name} или введите "CANCEL", чтобы оставить прежнее`,
+            `Введите новое приветственное сообщение агента ${agent.name} или введите "NO", чтобы оставить прежнее`,
           );
         } else if (changingFirstMsg) {
           const agent = await manager.findOne(AgentModel, {
@@ -212,7 +212,7 @@ AppDataSource.initialize()
           changingPrompt = agent.id;
           await bot.sendMessage(
             msg.chat.id,
-            `Введите новый промт агента ${agent.name} или введите "CANCEL", чтобы оставить прежний`,
+            `Введите новый промт агента ${agent.name} или введите "NO", чтобы оставить прежний`,
           );
         } else if (changingPrompt) {
           const agent = await manager.findOne(AgentModel, {
@@ -230,7 +230,7 @@ AppDataSource.initialize()
           changingTemp = agent.id;
           await bot.sendMessage(
             msg.chat.id,
-            `Введите новую температуру агента ${agent.name} или введите "CANCEL", чтобы оставить прежнюю. ТЕМПЕРАТУРА - ЧИСЛО ОТ 0 ДО 2`,
+            `Введите новую температуру агента ${agent.name} или введите "NO", чтобы оставить прежнюю. ТЕМПЕРАТУРА - ЧИСЛО ОТ 0 ДО 2`,
           );
         } else if (changingTemp) {
           const agent = await manager.findOne(AgentModel, {
