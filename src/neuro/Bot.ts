@@ -394,6 +394,7 @@ export class Bot {
   public onMyData(f: (user: User) => Promise<any>) {
     this.bot.onText(/\/data/, async (msg) => {
       const user = await this.getUser(msg);
+      await f(user);
     });
   }
 
