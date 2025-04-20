@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
 } from "typeorm";
 import { User } from "../User";
-import { AgentModel } from "../AgentModel";
+import { AgentModel } from "./AgentModel";
 import { DialogFile } from "./DialogFile";
 
 @Entity()

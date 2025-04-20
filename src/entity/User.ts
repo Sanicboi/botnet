@@ -6,10 +6,9 @@ import {
   OneToMany,
   PrimaryColumn,
 } from "typeorm";
-import OpenAI from "openai";
 import { UserPromo } from "./assistants/UserPromo";
 import { AudioFile } from "./assistants/AudioFile";
-import { AgentModel } from "./AgentModel";
+import { AgentModel } from "./assistants/AgentModel";
 import { Dialog } from "./assistants/Dialog";
 import { DialogFile } from "./assistants/DialogFile";
 import { SupportedModels } from "../utils/Models";

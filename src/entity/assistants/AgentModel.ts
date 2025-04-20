@@ -7,8 +7,8 @@ import {
   PrimaryGeneratedColumn,
 } from "typeorm";
 import { AgentGroup } from "./AgentGroup";
-import { User } from "./User";
-import { Dialog } from "./assistants/Dialog";
+import { User } from "../User";
+import { Dialog } from "./Dialog";
 
 @Entity()
 export class AgentModel {
