@@ -1,4 +1,3 @@
-import axios from "axios";
 import { AppDataSource } from "../data-source";
 import { Dialog } from "../entity/assistants/Dialog";
 import { User, UserDataTypeMapped } from "../entity/User";

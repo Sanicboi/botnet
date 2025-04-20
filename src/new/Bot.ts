@@ -544,6 +544,22 @@ export class Bot {
     });
   }
 
+  public onModel(f: (user: User, model: string) => Promise<any>) {
+    this.cqListeners.push(async (q, user) => {
+      if (q.data?.startsWith("model-")) {
+        await f(user, q.data.substring(6));
+      }
+    })
+  }
+
+  public onCount(f: (user: User) => Promise<any>) {
+    this.cqListeners.push(async (q, user) => {
+      if (q.data === "toggle-count") {
+        await f(user);
+      }
+    })
+  }
+
   public setListeners() {
     this.bot.on("callback_query", async (q) => {
       const user = await this.getUser(q);

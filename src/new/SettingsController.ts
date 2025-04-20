@@ -10,6 +10,8 @@ export class SettingsController {
   constructor(private bot: Bot) {
     this.bot.onSettings(this.settings.bind(this));
     this.bot.onSetting(this.setting.bind(this));
+    this.bot.onModel(this.model.bind(this));
+    this.bot.onCount(this.count.bind(this));
   }
 
   private async settings(user: User) {
