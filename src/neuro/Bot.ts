@@ -107,7 +107,7 @@ export class Bot {
 
   public onCreateDialog(f: (user: User, agentId: number) => Promise<any>) {
     this.cqListeners.push(async (q) => {
-      if (q.data?.startsWith("agent-")) {
+      if (q.data?.startsWith("agent-") && !specialIds.includes(+q.data.substring(6))) {
         const user = await this.getUser(q);
         if (!user) return;
         const agentId = +q.data.substring(6);
