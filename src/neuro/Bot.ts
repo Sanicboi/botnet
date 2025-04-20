@@ -78,9 +78,10 @@ export class Bot {
       };
     },
     relations: FindOptionsRelations<User> = {
+      agent: true
     },
   ): Promise<User> {
-    console.log(qOrMsg);
+    console.log(String(qOrMsg.from!.id));
     const user = await manager.findOne(User, {
       where: {
         chatId: String(qOrMsg.from!.id),
