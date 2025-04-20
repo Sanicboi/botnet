@@ -9,7 +9,7 @@ let changingPrompt: number | null = null;
 let changingFirstMsg: number | null = null;
 let changingTemp: number | null = null;
 let changingGroupName: number | null = null;
-let creatingNewAgent: boolean = false;
+let creatingNewAgent: number | null = null;
 let creatingNewGroup: boolean = false;
 let whiteList: number[] = [1391491967, 1292900617, 2074310819, 922521019];
 
@@ -63,7 +63,7 @@ AppDataSource.initialize()
       changingFirstMsg = null;
       changingGroupName = null;
       changingTemp = null;
-      creatingNewAgent = false;
+      creatingNewAgent = null;
       creatingNewGroup = false;
       await bot.sendMessage(msg.chat.id, "Сброс всех изменений");
     });
@@ -163,7 +163,7 @@ AppDataSource.initialize()
           where: { id: +groupId },
         });
         if (!group) return;
-        creatingNewAgent = true;
+        creatingNewAgent = +groupId;
         await bot.sendMessage(q.from.id, `Введите имя нового агента`);
       }
 
@@ -269,10 +269,15 @@ AppDataSource.initialize()
           changingGroupName = null;
           await bot.sendMessage(msg.chat.id, `Изменение группы завершено`);
         } else if (creatingNewAgent) {
-          creatingNewAgent = false;
           const agent = new AgentModel();
           agent.name = msg.text!;
+          agent.groupId = creatingNewAgent;
+          agent.group = new AgentGroup();
+          agent.group.id = creatingNewAgent;
           await manager.save(agent);
+          creatingNewAgent = null;
+
+          
           await bot.sendMessage(
             msg.chat.id,
             `Агент ${agent.name} создан. Теперь измените его данные`,
