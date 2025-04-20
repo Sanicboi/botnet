@@ -293,7 +293,7 @@ export class AgentController {
     for (const agent of agents) {
       result.push(Btn(agent.name, `agent-${agent.id}`));
     }
-    if (+group === 1) {
+    if (+group === 2) {
       result.push(Btn("Транскрибатор аудио", "audio"));
       result.push(Btn("Суммаризатор аудио", "audiosum"));
     }

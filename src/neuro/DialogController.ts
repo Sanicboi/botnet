@@ -59,6 +59,7 @@ export class DialogController {
     });
     if (!agent) return;
     const dialog = new Dialog();
+    dialog.agent = new AgentModel();
     dialog.agent.id = agentId;
     dialog.user = user;
     await manager.save(dialog);
