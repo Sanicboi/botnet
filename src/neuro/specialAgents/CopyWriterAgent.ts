@@ -19,7 +19,8 @@ export class CopyWriterAgent {
 
   private async styles(user: User) {
     user.agentId = 1;
-    user.agent!.id = 1;
+    user.agent = new AgentModel();
+    user.agent.id = 1;
     await manager.save(user);
     const agent = await manager.findOneBy(AgentModel, {
       id: user.agentId!,
