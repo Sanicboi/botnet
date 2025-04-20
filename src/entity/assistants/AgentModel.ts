@@ -24,10 +24,14 @@ export class AgentModel {
   @Column("text")
   firstMessage: string;
 
-  @Column("float")
+  @Column("float", {
+    default: 1
+  })
   temperature: number;
 
-  @Column("float")
+  @Column("float", {
+    nullable: true
+  })
   topP: number;
 
   @ManyToOne(() => AgentGroup, (group) => group.agents)
