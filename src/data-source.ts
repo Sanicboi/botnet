@@ -11,6 +11,8 @@ import { UserBot } from "./entity/bots/UserBot";
 import { AudioFile } from "./entity/assistants/AudioFile";
 import { AgentModel } from "./entity/assistants/AgentModel";
 import { AgentGroup } from "./entity/assistants/AgentGroup";
+import { Dialog } from "./entity/assistants/Dialog";
+import { DialogFile } from "./entity/assistants/DialogFile";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -33,6 +35,8 @@ export const AppDataSource = new DataSource({
     Lead,
     UserBot,
     AudioFile,
+    Dialog,
+    DialogFile
   ],
   migrations: [],
   subscribers: [],
