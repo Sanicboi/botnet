@@ -41,6 +41,10 @@ export class Bot {
         description: "✉️Диалоги",
       },
       {
+        command: "data",
+        description: "📝Данные о себе"
+      }
+      {
         command: "neuro",
         description: "🧠Нейро-сотрудники",
       },

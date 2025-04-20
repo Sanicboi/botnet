@@ -240,7 +240,7 @@ export class AgentController {
       },
     });
     let result: InlineKeyboardButton[][] = [];
-    result.push(Btn("Свободный режим", "agent-1"));
+    result.push(Btn("Свободный режим", "agent-3"));
     result.push(Btn("Дизайн и генерация картинок", "images"));
     for (const group of groups) {
       result.push(Btn(group.name, `group-${group.id}`));
