@@ -8,7 +8,10 @@ import { DataController } from "../DataController";
 const manager = AppDataSource.manager;
 
 export class ImageAgent {
-  constructor(private bot: Bot, private dataController: DataController) {
+  constructor(
+    private bot: Bot,
+    private dataController: DataController,
+  ) {
     this.bot.onEnterImage(this.enterImage.bind(this));
     this.bot.onSetResolution(this.setResolution.bind(this));
     this.bot.onGenerateImage(this.generateImage.bind(this));

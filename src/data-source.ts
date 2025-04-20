@@ -36,7 +36,7 @@ export const AppDataSource = new DataSource({
     UserBot,
     AudioFile,
     Dialog,
-    DialogFile
+    DialogFile,
   ],
   migrations: [],
   subscribers: [],

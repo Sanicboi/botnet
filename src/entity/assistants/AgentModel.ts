@@ -18,19 +18,23 @@ export class AgentModel {
   @Column()
   name: string;
 
-  @Column("text")
+  @Column("text", {
+    default: "",
+  })
   prompt: string;
 
-  @Column("text")
+  @Column("text", {
+    default: "",
+  })
   firstMessage: string;
 
   @Column("float", {
-    default: 1
+    default: 1,
   })
   temperature: number;
 
   @Column("float", {
-    nullable: true
+    nullable: true,
   })
   topP: number;
 

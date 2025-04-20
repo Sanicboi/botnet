@@ -12,7 +12,7 @@ export class OfferAgent {
   constructor(
     private bot: Bot,
     private dialogController: DialogController,
-    private dataController: DataController
+    private dataController: DataController,
   ) {
     this.bot.onOfferSizes(this.sizes.bind(this));
     this.bot.onOfferSize(this.size.bind(this));

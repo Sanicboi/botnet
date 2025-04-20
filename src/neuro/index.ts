@@ -31,7 +31,7 @@ AppDataSource.initialize().then(async () => {
     balanceController,
     dialogController,
     outputController,
-    dataController
+    dataController,
   );
 
   bot.setListeners();

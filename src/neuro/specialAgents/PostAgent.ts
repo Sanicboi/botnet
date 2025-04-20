@@ -12,7 +12,7 @@ export class PostAgent {
   constructor(
     private bot: Bot,
     private dialogController: DialogController,
-    private dataController: DataController
+    private dataController: DataController,
   ) {
     bot.onPostTypes(this.types.bind(this));
     bot.onPostType(this.type.bind(this));

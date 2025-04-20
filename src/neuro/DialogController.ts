@@ -17,7 +17,10 @@ const manager = AppDataSource.manager;
  * - This class DOES count the tokens in a conversation
  */
 export class DialogController {
-  constructor(private bot: Bot, private dataController: DataController) {
+  constructor(
+    private bot: Bot,
+    private dataController: DataController,
+  ) {
     bot.onDialogs(this.dialogs.bind(this));
     bot.onCreateDialog(this.createDialog.bind(this));
     bot.onDeleteDialog(this.deleteDialog.bind(this));

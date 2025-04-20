@@ -12,7 +12,7 @@ export class CopyWriterAgent {
   constructor(
     private bot: Bot,
     private dialogController: DialogController,
-    private dataController: DataController
+    private dataController: DataController,
   ) {
     this.bot.onCopyWriterStyles(this.styles.bind(this));
     this.bot.onCopyWriterStyle(this.style.bind(this));
