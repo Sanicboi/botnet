@@ -91,6 +91,7 @@ export class Bot {
     return user;
   }
 
+
   public onDialogs(f: (user: User) => Promise<any>) {
     this.bot.onText(/\/dialogs/, async (msg) => {
       const user = await this.getUser(msg, {
