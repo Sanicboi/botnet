@@ -3,6 +3,7 @@ import { User } from "../entity/User";
 import { AppDataSource } from "../data-source";
 import { FindOptionsRelations, RelationOptions } from "typeorm";
 import cron from "node-cron";
+import { Converter } from "./Converter";
 
 const specialIds: number[] = [1, 2, 3];
 
@@ -76,19 +77,42 @@ export class Bot {
       from?: {
         id: number;
       };
+      text?: string;
     },
     relations: FindOptionsRelations<User> = {
       agent: true
     },
   ): Promise<User> {
     console.log(String(qOrMsg.from!.id));
-    const user = await manager.findOne(User, {
+    let user = await manager.findOne(User, {
       where: {
         chatId: String(qOrMsg.from!.id),
       },
       relations,
     });
-    if (!user) throw new Error("User not found");
+    if (!user) {
+      if (!qOrMsg.text) throw new Error("User not found");
+      user = new User();
+      user.chatId = String(qOrMsg.from!.id);
+      const referralId = qOrMsg.text.split(" ")[1];
+      if (referralId) {
+        const creator = await manager.findOne(User, {
+          where: {
+            chatId: referralId,
+          }
+        });
+        if (creator) {
+          if (creator.inviteCount <= 29) {
+            creator.inviteCount++;
+            creator.addBalance += Converter.SMTRUB(7000);
+            await manager.save(creator);
+          }
+        }
+      }
+      await manager.save(user);
+
+      await this.bot.sendMessage(qOrMsg.from!.id, "Приветствую, дорогой друг!👋\n\nSmartComrade - это многофункциональная платформа с обученными нейро-сотрудниками разных направлений!\nЗдесь мы объединили лучшее из мира нейро-сетей в одном месте.\n\nСделай свою коммуникацию с нейро-сетями профессиональной вместе с нами)\n\nИ да, не нужны никакие зарубежные карты!))\n\nНе забудь забрать афигенные полезные материалы по нейро-сетям в нашем боте помощнике! @SC_NewsBot\nА также, будем рады видеть тебя в нашем канале: https://t.me/SmartComrade1");
+    };
     return user;
   }
 
