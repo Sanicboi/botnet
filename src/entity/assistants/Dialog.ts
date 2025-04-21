@@ -15,10 +15,10 @@ export class Dialog {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({
-    default: "",
+  @Column('text', {
+    default: null,
   })
-  lastMsgId: string;
+  lastMsgId: string | null;
 
   @Column({
     default: "",
