@@ -64,7 +64,7 @@ export class DataController {
   private async myData(user: User) {
     await this.bot.bot.sendMessage(
       +user.chatId,
-      "Здесь ты можешь заполнить информацию о себе, тем самым упростить пользование нейро-сотрудниками, так как они уже будут заранее обладать необходимой информацией. \nТем самым ты получаешь личную команду ассистентов, которые все знают о тебе и как следствие результаты использования станут еще конструктивнее и конкретнее!",
+      "Здесь ты можешь заполнить информацию о себе, тем самым упростить пользование нейро-сотрудниками, так как они уже будут заранее обладать необходимой информацией. \nИнформацию можно будет поменять в любой момент.",
       {
         reply_markup: {
           inline_keyboard: [
@@ -80,9 +80,16 @@ export class DataController {
 
   private async dataCategory(user: User, category: string) {
     const cat = category as UserDataType;
+    const mapped = cat + "Data" as UserDataTypeMapped;
     user.waitingForData = cat;
     await manager.save(user);
     await this.bot.bot.sendMessage(+user.chatId, map.get(cat)!);
+    if (user[mapped]) {
+      await this.bot.bot.sendMessage(
+        +user.chatId,
+        `Текущие данные: ${user[mapped]}`,
+      );
+    }
   }
 
   private async data(user: User, text: string) {
@@ -91,7 +98,7 @@ export class DataController {
     user[key] = text;
     user.waitingForData = "";
     await manager.save(user);
-    await this.bot.bot.sendMessage(+user.chatId, "Данные успешно заполнены");
+    await this.bot.bot.sendMessage(+user.chatId, "Данные успешно сохранены");
   }
 
   public async resetData(user: User) {
