@@ -83,7 +83,7 @@ export class DataController {
     const mapped = cat + "Data" as UserDataTypeMapped;
     user.waitingForData = cat;
     await manager.save(user);
-    await this.bot.bot.sendMessage(+user.chatId, map.get(cat)!);
+    await this.bot.bot.sendMessage(+user.chatId, map.get(cat)! + "\n\n\nИнформацию можно будет поменять в любой момент.");
     if (user[mapped]) {
       await this.bot.bot.sendMessage(
         +user.chatId,
