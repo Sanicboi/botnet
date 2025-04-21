@@ -256,7 +256,7 @@ export class Agent {
       store: true,
       top_p: this._model.topP,
       temperature: this._model.temperature,
-      max_output_tokens: input.maxTokens,
+      max_output_tokens: Math.round(input.maxTokens),
     });
   }
 }
