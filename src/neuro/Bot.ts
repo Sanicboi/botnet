@@ -190,19 +190,76 @@ export class Bot {
 
   public onContinueDialog(f: (user: User, dialogId: number) => Promise<any>) {
     this.cqListeners.push(async (q, user) => {
-      if (q.data?.startsWith("continue-")) {
-        await f(user, +q.data.substring(9));
+      if (q.data?.startsWith("continue-dialog-")) {
+        await f(user, +q.data.substring(16));
       }
     });
   }
 
   public onDeleteDialog(f: (user: User, dialogId: number) => Promise<any>) {
     this.cqListeners.push(async (q) => {
-      if (q.data?.startsWith("delete-")) {
+      if (q.data?.startsWith("delete-dialog-")) {
         const user = await this.getUser(q, {
           dialogs: true,
         });
-        await f(user, +q.data.substring(7));
+        await f(user, +q.data.substring(14));
+      }
+    });
+  }
+
+  public onFeaturedDialogs(f: (user: User) => Promise<any>) {
+    this.cqListeners.push(async (q, user) => {
+      if (q.data === "featured-dialogs") {
+        await f(user);
+      }
+    });
+  }
+
+  public onAllDialogs(f: (user: User) => Promise<any>) {
+    this.cqListeners.push(async (q, user) => {
+      if (q.data === "all-dialogs") {
+        await f(user);
+      }
+    });
+  }
+
+  public onRemoveFeaturedDialog(
+    f: (user: User, dialogId: number) => Promise<any>,
+  ) {
+    this.cqListeners.push(async (q, user) => {
+      if (q.data?.startsWith("remove-featured-")) {
+        await f(user, +q.data.substring(16));
+      }
+    });
+  }
+  public onMakeFeaturedDialog(
+    f: (user: User, dialogId: number) => Promise<any>,
+  ) {
+    this.cqListeners.push(async (q, user) => {
+      if (q.data?.startsWith("make-featured-")) {
+        await f(user, +q.data.substring(15));
+      }
+    });
+  }
+  public onDeleteAllDialogs(f: (user: User) => Promise<any>) {
+    this.cqListeners.push(async (q, user) => {
+      if (q.data === "delete-all-dialogs") {
+        await f(user);
+      }
+    });
+  }
+  public onDeleteFeaturedDialogs(f: (user: User) => Promise<any>) {
+    this.cqListeners.push(async (q, user) => {
+      if (q.data === "delete-featured-dialogs") {
+        await f(user);
+      }
+    }
+    );
+  }
+  public onExportFeaturedDialogs(f: (user: User) => Promise<any>) {
+    this.cqListeners.push(async (q, user) => {
+      if (q.data === "export-featured-dialogs") {
+        await f(user);
       }
     });
   }

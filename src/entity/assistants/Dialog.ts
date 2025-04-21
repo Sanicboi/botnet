@@ -23,7 +23,12 @@ export class Dialog {
   @Column({
     default: "",
   })
-  summarizedData: string;
+  firstMessage: string;
+
+  @Column({
+    default: 0
+  })
+  msgCount: number;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -36,4 +41,9 @@ export class Dialog {
 
   @OneToMany(() => DialogFile, (file) => file.dialog)
   files: DialogFile[];
+
+  @Column({
+    default: false,
+  })
+  featured: boolean;
 }

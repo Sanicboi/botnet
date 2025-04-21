@@ -83,6 +83,11 @@ export class AgentController {
     const agent = new Agent(user.agent!);
 
     let dialog: Dialog = this.dialogController.getUserCurrentDialog(user);
+    if (!dialog.firstMessage) {
+      dialog.firstMessage = text;
+    }
+    dialog.msgCount += 2;
+    await manager.save(dialog);
     await this.bot.bot.sendMessage(+user.chatId, 'Генерирую ответ...')
     const response = await agent.run(
       {
@@ -125,6 +130,11 @@ export class AgentController {
     check = await this.balanceController.checkBalance(user);
     const agent = new Agent(user.agent!);
     let dialog: Dialog = this.dialogController.getUserCurrentDialog(user);
+    if (!dialog.firstMessage) {
+      dialog.firstMessage = 'Голосовое сообщение';
+    }
+    dialog.msgCount += 2;
+    await manager.save(dialog);
     const response = await agent.run(
       {
         maxTokens: check.limit,
@@ -160,6 +170,11 @@ export class AgentController {
     const agent = new Agent(user.agent!);
 
     let dialog: Dialog = this.dialogController.getUserCurrentDialog(user);
+    if (!dialog.firstMessage) {
+      dialog.firstMessage = 'Документ';
+    }
+    dialog.msgCount += 2;
+    await manager.save(dialog);
     const response = await agent.run(
       {
         maxTokens: result.limit,
@@ -196,6 +211,11 @@ export class AgentController {
     const agent = new Agent(user.agent!);
 
     let dialog: Dialog = this.dialogController.getUserCurrentDialog(user);
+    if (!dialog.firstMessage) {
+      dialog.firstMessage = 'Изображение';
+    }
+    dialog.msgCount += 2;
+    await manager.save(dialog);
     const response = await agent.run(
       {
         maxTokens: result.limit,
@@ -231,6 +251,11 @@ export class AgentController {
     const agent = new Agent(user.agent!);
 
     let dialog: Dialog = this.dialogController.getUserCurrentDialog(user);
+    if (!dialog.firstMessage) {
+      dialog.firstMessage = user[key];
+    }
+    dialog.msgCount += 2;
+    await manager.save(dialog);
     const response = await agent.run(
       {
         maxTokens: result.limit,

@@ -26,28 +26,65 @@ export class DialogController {
     bot.onDeleteDialog(this.deleteDialog.bind(this));
     bot.onDialog(this.dialog.bind(this));
     bot.onContinueDialog(this.continueDialog.bind(this));
+    bot.onAllDialogs(this.allDialogs.bind(this));
+    bot.onFeaturedDialogs(this.featuredDialogs.bind(this));
+    bot.onRemoveFeaturedDialog(this.removeFeaturedDialog.bind(this));
+    bot.onMakeFeaturedDialog(this.makeFeaturedDialog.bind(this));
+    bot.onDeleteFeaturedDialogs(this.deleteFeaturedDialogs.bind(this));
+    bot.onDeleteAllDialogs(this.deleteAllDialogs.bind(this));
+    bot.onExportFeaturedDialogs(this.exportFeaturedDialogs.bind(this));
   }
 
   private async dialogs(user: User) {
+
+    if (user.dialogs.length === 0)
+      return await this.bot.bot.sendMessage(+user.chatId, `У Вас нет диалогов`);
+    await this.bot.bot.sendMessage(+user.chatId, `Здесь вы можете вернуться к ранее проведенным диалогам и коммуникации с ИИ агентами. Возвращение к диалогу, позволяет сохранить контекст коммуникации и продолжить суть диалога. `, {
+      reply_markup: {
+        inline_keyboard: [
+          Btn('Избранные диалоги', 'featured-dialogs'),
+          Btn('Остальные диалоги', 'all-dialogs'),
+        ],
+      },
+    });
+  }
+
+  private async featuredDialogs(user: User) {
+    const featuredDialogs = user.dialogs.filter((dialog) => dialog.featured);
+    if (featuredDialogs.length === 0) return await this.bot.bot.sendMessage(+user.chatId, `У Вас нет избранных диалогов`);
     let result: InlineKeyboardButton[][] = [];
-    for (const dialog of user.dialogs) {
-      result.push(
-        Btn(
-          `#${dialog.id}: ${dialog.agent.group.name} - ${dialog.agent.name}`.substring(
-            0,
-            50,
-          ) + "...",
-          `dialog-${dialog.id}`,
-        ),
-      );
+
+    for (const dialog of featuredDialogs) {
+      result.push(Btn(dialog.firstMessage || `Диалог #${dialog.id}`, `dialog-${dialog.id}`));
     }
 
-    if (result.length === 0)
-      return await this.bot.bot.sendMessage(+user.chatId, `У Вас нет диалогов`);
-    await this.bot.bot.sendMessage(+user.chatId, `Ваши диалоги: `, {
+    await this.bot.bot.sendMessage(+user.chatId, `💡Это ваши избранные диалоги!\nВы можете вернуться к любому из них или удалить диалог из избранного!`, {
       reply_markup: {
-        inline_keyboard: result,
-      },
+        inline_keyboard: [
+          ...result,
+          Btn('Удалить все избранные диалоги', 'delete-featured-dialogs'),
+          Btn('Экспорт избранных диалогов', 'export-featured-dialogs'),
+        ]
+      }
+    });
+  }
+
+  private async allDialogs(user: User) {
+    const allDialogs = user.dialogs.filter((dialog) => !dialog.featured);
+    if (allDialogs.length === 0) return await this.bot.bot.sendMessage(+user.chatId, `У Вас нет диалогов`);
+    let result: InlineKeyboardButton[][] = [];
+
+    for (const dialog of allDialogs) {
+      result.push(Btn(dialog.firstMessage || `Диалог #${dialog.id}`, `dialog-${dialog.id}`));
+    }
+
+    await this.bot.bot.sendMessage(+user.chatId, `💡Это ваши диалоги!\nВы можете вернуться к любому из них или удалить диалог!`, {
+      reply_markup: {
+        inline_keyboard: [
+          ...result,
+          Btn('Удалить все диалоги', 'delete-all-dialogs'),
+        ]
+      }
     });
   }
 
@@ -144,30 +181,156 @@ export class DialogController {
 
   private async dialog(user: User, dialogId: number) {
     const dialog = user.dialogs.find((el) => el.id === dialogId)!;
-    let data: string = "Нет данных";
-    if (dialog.lastMsgId) {
-      const summarized = await openai.responses.create({
-        instructions: "Ты - профессиональный суммаризатор",
-        input: "Определи тему диалога. В ответе напиши только тему.",
-        model: "gpt-4o-mini",
-        previous_response_id: dialog.lastMsgId,
-        store: false,
-      });
-      data = summarized.output_text;
-    }
+    if (dialog.featured) {
+      let lastMsg: string = 'Нет сообщений';
+      let summarized: string = 'Нет данных';
+      if (dialog.lastMsgId) {
+        const sum = await openai.responses.create({
+          model: "gpt-4o-mini",
+          input: 'кратко суммаризируй весь предыдущий диалог',
+          previous_response_id: dialog.lastMsgId,
+        });
+        
+        const res = await openai.responses.retrieve(dialog.lastMsgId);
+        lastMsg = res.output_text;
+        summarized = sum.output_text;
+      }
 
-    await this.bot.bot.sendMessage(
-      +user.chatId,
-      `Диалог #${dialog.id}:\n\nТема диалога: ${data}\nДата создания: ${dialog.createdAt.toLocaleString('ru-RU')}`,
-      {
+      await this.bot.bot.sendMessage(+user.chatId, `Избранный диалог #${dialog.id}:\n\n⤷ Количество сообщений: (сообщения по этому диалогу): ${dialog.msgCount}\n⤷ Режим чата: ${dialog.agent.group.name} - ${dialog.agent.name}\n⤷Дата начала: ${dialog.createdAt}\n\nСуммаризация: ${summarized}\n\n`, {
         reply_markup: {
           inline_keyboard: [
-            Btn(`Продолжить диалог`, `continue-${dialog.id}`),
-            Btn(`Удалить диалог`, `delete-${dialog.id}`),
+            Btn("Удалить диалог из избранного", `remove-featured-${dialog.id}`),
+            Btn("Удалить диалог", `delete-dialog-${dialog.id}`),
+            Btn("Вернуться к диалогу", `continue-dialog-${dialog.id}`),
           ],
-        },
+        }
+      });
+      
+
+
+    } else {
+      await this.bot.bot.sendMessage(+user.chatId, `Диалог #${dialog.id}:\n\n⤷ Количество сообщений: (сообщения по этому диалогу): ${dialog.msgCount}\n⤷ Режим чата: ${dialog.agent.group.name} - ${dialog.agent.name}\n⤷Дата начала: ${dialog.createdAt}\n\n`, {
+        reply_markup: {
+          inline_keyboard: [
+            Btn("Удалить диалог", `delete-dialog-${dialog.id}`),
+            Btn("Вернуться к диалогу", `continue-dialog-${dialog.id}`),
+            Btn("Сделать избранным", `make-featured-${dialog.id}`),
+          ],
+        }
+      });
+    }
+
+    
+  }
+
+  private async removeFeaturedDialog(user: User, dialogId: number) {
+    const dialog = await manager.findOne(Dialog, {
+      where: {
+        id: dialogId,
       },
-    );
+    });
+    if (!dialog) return;
+    dialog.featured = false;
+    await manager.save(dialog);
+    await this.bot.bot.sendMessage(+user.chatId, "Диалог удален из избранного", {
+      reply_markup: {
+        inline_keyboard: [
+          Btn("Назад", `dialog-${dialogId}`),
+        ]
+      }
+    });
+  }
+
+  private async makeFeaturedDialog(user: User, dialogId: number) {
+    const dialog = await manager.findOne(Dialog, {
+      where: {
+        id: dialogId,
+      },
+    });
+    if (!dialog) return;
+    dialog.featured = true;
+    await manager.save(dialog);
+    await this.bot.bot.sendMessage(+user.chatId, "Диалог добавлен в избранное", {
+      reply_markup: {
+        inline_keyboard: [
+          Btn("Назад", `dialog-${dialogId}`),
+        ]
+      }
+    });
+  }
+  private async deleteFeaturedDialogs(user: User) {
+    const featuredDialogs = user.dialogs.filter((dialog) => dialog.featured);
+    if (featuredDialogs.length === 0) return await this.bot.bot.sendMessage(+user.chatId, `У Вас нет избранных диалогов`);
+    for (const dialog of featuredDialogs) {
+      await this.deleteDialog(user, dialog.id);
+    }
+    await this.bot.bot.sendMessage(+user.chatId, "Все избранные диалоги удалены", {
+      reply_markup: {
+        inline_keyboard: [
+          Btn("Назад", `dialogs`),
+        ]
+      }
+    });
+  }
+  private async deleteAllDialogs(user: User) {
+    for (const dialog of user.dialogs.filter((dialog) => !dialog.featured)) {
+      await this.deleteDialog(user, dialog.id);
+    }
+    await this.bot.bot.sendMessage(+user.chatId, "Все диалоги удалены", {
+      reply_markup: {
+        inline_keyboard: [
+          Btn("Назад", `dialogs`),
+        ]
+      }
+    });
+  }
+
+  private async exportFeaturedDialogs(user: User) {
+    const featuredDialogs = user.dialogs.filter((dialog) => dialog.featured);
+    if (featuredDialogs.length === 0) return await this.bot.bot.sendMessage(+user.chatId, `У Вас нет избранных диалогов`);
+    let result: string = '';
+    for (const dialog of featuredDialogs) {
+      result += `#${dialog.id}\n\n\n`
+      let lastMsgId: string | null = null;
+      if (dialog.lastMsgId)  {
+        lastMsgId = dialog.lastMsgId;
+      }
+
+      while (lastMsgId) {
+        const res = await openai.responses.retrieve(lastMsgId);
+        const inputItems = await openai.responses.inputItems.list(res.id);
+        let currentStr: string = '';
+        for (const item of inputItems.data) {
+          currentStr += `Вы:\n`;
+          if (item.type === 'message' && item.role === 'user') {
+            for (const c of item.content) {
+              if (c.type === 'input_file') {
+                currentStr += `Файл ${c.file_id}\n`;
+              } else if (c.type === 'input_text') {
+                currentStr += `${c.text}\n`;
+              } else if (c.type === 'input_image') {
+                currentStr += `Изображение ${c.file_id}\n`;
+              }
+            }
+          }
+
+          currentStr +='\n';
+        }
+
+        result = currentStr + `${dialog.agent.name}: ${res.output_text}\n` + result;
+        lastMsgId = res.previous_response_id ?? null;
+      }
+
+      result += `---\n\n\n`;
+    }
+
+    await this.bot.bot.sendDocument(+user.chatId, Buffer.from(result), {
+      caption: 'Избранные диалоги',
+    }, {
+      contentType: 'text/plain',
+      filename: 'featured-dialogs.txt',
+    });
+    
   }
 
   private async continueDialog(user: User, dialogId: number) {
@@ -176,10 +339,16 @@ export class DialogController {
     user.agentId = dialog.agent.id;
     user.agent = dialog.agent;
     await manager.save(user);
+
     await this.bot.bot.sendMessage(
       +user.chatId,
       "Диалог успешно продолжен! Можете продолжать общение с ассистентом.",
     );
+
+    if (dialog.lastMsgId) {
+      const r = await openai.responses.retrieve(dialog.lastMsgId);
+      await this.bot.bot.sendMessage(+user.chatId, r.output_text);
+    }
   }
 
   public getUserCurrentDialog(user: User): Dialog {
