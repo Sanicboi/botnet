@@ -602,20 +602,30 @@ export class Bot {
 
   public setListeners() {
     this.bot.on("callback_query", async (q) => {
-      const user = await this.getUser(q);
-      for (const f of this.cqListeners) {
-        const result = await f(q, user);
-        if (result === true) break;
-      }
-    });
-    this.bot.onText(/./, async (msg) => {
-      if (msg.text && !msg.text.startsWith("/")) {
-        const user = await this.getUser(msg);
-        for (const f of this.freeTextListeners) {
-          const result = await f(msg, user);
+      try {
+        const user = await this.getUser(q);
+        for (const f of this.cqListeners) {
+          const result = await f(q, user);
           if (result === true) break;
         }
+      } catch (e) {
+        console.error(e);
       }
+
+    });
+    this.bot.onText(/./, async (msg) => {
+      try {
+        if (msg.text && !msg.text.startsWith("/")) {
+          const user = await this.getUser(msg);
+          for (const f of this.freeTextListeners) {
+            const result = await f(msg, user);
+            if (result === true) break;
+          }
+        }
+      } catch (e) {
+        console.error(e);
+      }
+
     });
     this.bot.on("voice", async (msg) => {
       if (!msg.voice) return;
