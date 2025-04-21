@@ -292,7 +292,7 @@ export class AgentController {
     for (const group of groups) {
       result.push(Btn(group.name, `group-${group.id}`));
     }
-    result.push(Btn("Предыдущая страница", "groups"));
+    result.push(Btn("Предыдущая страница", "groups-1"));
     await this.bot.bot.sendMessage(
       +user.chatId,
       "Выберите категорию сотрудников",
