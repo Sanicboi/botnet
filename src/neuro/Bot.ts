@@ -139,7 +139,7 @@ export class Bot {
 
   public onCreateDialog(f: (user: User, agentId: number) => Promise<any>) {
     this.cqListeners.push(async (q) => {
-      console.log(q.data);
+      console.log(q.data, !specialIds.includes(+q.data!.substring(6)));
       if (
         q.data?.startsWith("agent-") &&
         !specialIds.includes(+q.data.substring(6))
@@ -147,7 +147,6 @@ export class Bot {
         const user = await this.getUser(q);
         if (!user) return;
         const agentId = +q.data.substring(6);
-        if (!specialIds.includes(agentId)) return;
         await f(user, agentId);
       }
     });
