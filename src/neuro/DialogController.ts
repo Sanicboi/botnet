@@ -173,6 +173,7 @@ export class DialogController {
   }
 
   public getUserCurrentDialog(user: User): Dialog {
+    console.log(user.dialogs);
     const result = user.dialogs.find((el) => el.id === user.currentDialogId);
     if (!result) throw new Error("Dialog not found");
     return result;

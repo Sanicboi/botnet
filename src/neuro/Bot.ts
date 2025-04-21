@@ -86,7 +86,9 @@ export class Bot {
     },
     relations: FindOptionsRelations<User> = {
       agent: true,
-      dialogs: true
+      dialogs: {
+        agent: true
+      }
     },
   ): Promise<User> {
     console.log(String(qOrMsg.from!.id));
