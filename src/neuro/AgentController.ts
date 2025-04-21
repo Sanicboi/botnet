@@ -83,6 +83,7 @@ export class AgentController {
     const agent = new Agent(user.agent!);
 
     let dialog: Dialog = this.dialogController.getUserCurrentDialog(user);
+    await this.bot.bot.sendMessage(+user.chatId, 'Генерирую ответ...')
     const response = await agent.run(
       {
         maxTokens: result.limit,
