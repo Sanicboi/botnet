@@ -111,6 +111,7 @@ export class AgentController {
   }
 
   private async voiceInput(user: User, url: string) {
+    await this.bot.bot.sendMessage(+user.chatId, 'Генерирую ответ...')
     const transcription = new Transcription(false, url);
     await transcription.setup();
     const costs = await transcription.getCost();
@@ -153,6 +154,7 @@ export class AgentController {
   }
 
   private async docInput(user: User, url: string, caption?: string) {
+    await this.bot.bot.sendMessage(+user.chatId, 'Генерирую ответ...')
     const result = await this.balanceController.checkBalance(user);
     if (!result.exists) return;
     const agent = new Agent(user.agent!);
@@ -188,6 +190,7 @@ export class AgentController {
   }
 
   private async imageInput(user: User, url: string, caption?: string) {
+    await this.bot.bot.sendMessage(+user.chatId, 'Генерирую ответ...')
     const result = await this.balanceController.checkBalance(user);
     if (!result.exists) return;
     const agent = new Agent(user.agent!);
@@ -221,6 +224,7 @@ export class AgentController {
   }
 
   private async dataInput(user: User, type: string) {
+    await this.bot.bot.sendMessage(+user.chatId, 'Генерирую ответ...')
     const key: UserDataTypeMapped = (type + "Data") as UserDataTypeMapped;
     const result = await this.balanceController.checkBalance(user);
     if (!result.exists) return;
