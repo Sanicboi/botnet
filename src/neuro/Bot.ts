@@ -605,6 +605,9 @@ export class Bot {
   public setListeners() {
     this.bot.on("callback_query", async (q) => {
       try {
+        if (!q.data?.startsWith('ihavepaid-') && q.message) {
+          await this.bot.deleteMessage(q.from.id, q.message?.message_id);
+        }
         const user = await this.getUser(q);
         for (const f of this.cqListeners) {
           const result = await f(q, user);
