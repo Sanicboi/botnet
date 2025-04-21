@@ -139,6 +139,7 @@ export class Bot {
 
   public onCreateDialog(f: (user: User, agentId: number) => Promise<any>) {
     this.cqListeners.push(async (q) => {
+      console.log(q.data);
       if (
         q.data?.startsWith("agent-") &&
         !specialIds.includes(+q.data.substring(6))
