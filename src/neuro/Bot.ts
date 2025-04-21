@@ -286,6 +286,23 @@ export class Bot {
     });
   }
 
+  public onChangeData(
+    f: (user: User, category: string) => Promise<any>,
+  ) { 
+    this.cqListeners.push(async (q, user) => {
+      if (q.data?.startsWith("change-")) {
+        await f(user, q.data.substring(7));
+      }
+    });
+  }
+  public onLeaveData(f: (user: User) => Promise<any>) {
+    this.cqListeners.push(async (q, user) => {
+      if (q.data === "leave") {
+        await f(user);
+      }
+    });
+  }
+
   public onBuySubscription(f: (user: User) => Promise<any>) {
     this.cqListeners.push(async (q, user) => {
       if (q.data === "b-sub") {

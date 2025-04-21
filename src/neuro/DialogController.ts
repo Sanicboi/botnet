@@ -123,7 +123,7 @@ export class DialogController {
           inline_keyboard:
             user.currentAudioAgent == null &&
             ![1, 2, 3].includes(user.agentId!) &&
-            !user.usingImageGeneration
+            !user.usingImageGeneration && agent.examplePrompt
               ? [Btn("Взять из данных", "from-data")]
               : [],
         },

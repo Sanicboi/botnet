@@ -244,41 +244,11 @@ export class AgentController {
   }
 
   private async dataInput(user: User, type: string) {
-    await this.bot.bot.sendMessage(+user.chatId, 'Генерирую ответ...')
-    const key: UserDataTypeMapped = (type + "Data") as UserDataTypeMapped;
-    const result = await this.balanceController.checkBalance(user);
-    if (!result.exists) return;
-    const agent = new Agent(user.agent!);
-
-    let dialog: Dialog = this.dialogController.getUserCurrentDialog(user);
-    if (!dialog.firstMessage) {
-      dialog.firstMessage = user[key];
-    }
-    dialog.msgCount += 2;
-    await manager.save(dialog);
-    const response = await agent.run(
-      {
-        maxTokens: result.limit,
-        type: "text",
-        value: user[key],
-      },
-      user.model,
-    );
-
-    await this.balanceController.editBalance(
-      user,
-      response.usage!.total_tokens,
-    );
-    await this.dialogController.updateDialogLastMsg(dialog, response.id);
-    const converted = await this.outputController.convert(
-      response.output_text,
-      user.outputFormat,
-    );
-    await this.outputController.send(converted, user);
-    await this.outputController.sendTokenCount(
-      user,
-      response.usage!.total_tokens,
-    );
+    user.dialogueData = user[(type + "Data") as UserDataTypeMapped];
+    await manager.save(user);
+    await this.bot.bot.sendMessage(
+      +user.chatId,
+      "Данные взяты");
   }
 
   private async groups(user: User) {

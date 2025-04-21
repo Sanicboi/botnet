@@ -59,12 +59,14 @@ export class DataController {
     this.bot.onDataCategory(this.dataCategory.bind(this));
     this.bot.onData(this.data.bind(this));
     this.bot.onTakeFromData(this.takeFromData.bind(this));
+    this.bot.onChangeData(this.changeData.bind(this));
+    this.bot.onLeaveData(this.leaveData.bind(this));
   }
 
   private async myData(user: User) {
     await this.bot.bot.sendMessage(
       +user.chatId,
-      "Здесь ты можешь заполнить информацию о себе, тем самым упростить пользование нейро-сотрудниками, так как они уже будут заранее обладать необходимой информацией. \nИнформацию можно будет поменять в любой момент.",
+      "Здесь ты можешь заполнить информацию о себе, тем самым упростить пользование нейро-сотрудниками, так как они уже будут заранее обладать необходимой информацией. \nИнформацию можно будет поменять в любой момент.\n\nВыберите информацию, которую хотит заполнить/изменить",
       {
         reply_markup: {
           inline_keyboard: [
@@ -81,14 +83,24 @@ export class DataController {
   private async dataCategory(user: User, category: string) {
     const cat = category as UserDataType;
     const mapped = cat + "Data" as UserDataTypeMapped;
-    user.waitingForData = cat;
-    await manager.save(user);
-    await this.bot.bot.sendMessage(+user.chatId, map.get(cat)! + "\n\n\nИнформацию можно будет поменять в любой момент.");
+
     if (user[mapped]) {
       await this.bot.bot.sendMessage(
         +user.chatId,
-        `Текущие данные: ${user[mapped]}`,
+        `Текущие данные:\n ${user[mapped]}`,
+        {
+          reply_markup: {
+            inline_keyboard: [
+              Btn("Изменить", "change-" + cat),
+              Btn("Оставить", "leave"),
+            ],
+          },
+        },
       );
+    } else {
+      user.waitingForData = cat;
+    await manager.save(user);
+    await this.bot.bot.sendMessage(+user.chatId, map.get(cat)! + "\n\n\nИнформацию можно будет поменять в любой момент.");
     }
   }
 
@@ -126,5 +138,18 @@ export class DataController {
         ],
       },
     });
+  }
+
+  private async changeData(user: User, category: string) {
+    user.waitingForData = category as UserDataType;
+    await manager.save(user);
+    await this.bot.bot.sendMessage(
+      +user.chatId,
+      map.get(category as UserDataType)! + "\n\n\nИнформацию можно будет поменять в любой момент."
+    );
+  }
+
+  private async leaveData(user: User) {
+    await this.bot.bot.sendMessage(user.chatId, "Данные оставлены");;
   }
 }
