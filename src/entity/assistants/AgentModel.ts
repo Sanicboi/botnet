@@ -52,4 +52,9 @@ export class AgentModel {
 
   @Column()
   groupId: number;
+
+  @Column('text', {
+    nullable: true,
+  })
+  examplePrompt: string | null;
 }

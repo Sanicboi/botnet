@@ -110,6 +110,15 @@ export class DialogController {
         ],
       },
     });
+
+    if (agent.examplePrompt) {
+      await this.bot.bot.sendDocument(+user.chatId, Buffer.from(agent.examplePrompt), {
+        caption: 'Пример диалога с моделью',
+      }, {
+        contentType: 'text/plain',
+        filename: 'example.txt',
+      });
+    }
   }
 
   private async deleteDialog(user: User, dialogId: number) {
