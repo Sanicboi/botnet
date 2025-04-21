@@ -72,6 +72,9 @@ export class DialogController {
     dialog.user = user;
     await manager.save(dialog);
     user.currentDialogId = dialog.id;
+    user.agentId = agentId
+    user.agent = new AgentModel();
+    user.agent.id = agentId;
     await manager.save(user);
 
     await this.bot.bot.sendMessage(
