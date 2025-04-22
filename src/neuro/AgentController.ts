@@ -259,8 +259,8 @@ export class AgentController {
       },
     });
     let result: InlineKeyboardButton[][] = [];
-    result.push(Btn("Свободный режим", "agent-4"));
-    result.push(Btn("Дизайн и генерация картинок", "images"));
+    result.push(Btn("🤖Свободный режим", "agent-4"));
+    result.push(Btn("🖼️Дизайн и генерация картинок", "images"));
     for (const group of groups) {
       result.push(Btn(group.name, `group-${group.id}`));
     }
@@ -316,6 +316,7 @@ export class AgentController {
       result.push(Btn("Транскрибатор аудио", "audio"));
       result.push(Btn("Суммаризатор аудио", "audiosum"));
     }
+    result.push(Btn('Назад', 'groups'));
     await this.bot.bot.sendMessage(+user.chatId, "Выберите сотрудника", {
       reply_markup: {
         inline_keyboard: result,
