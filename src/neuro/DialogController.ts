@@ -291,34 +291,31 @@ export class DialogController {
     let result: string = '';
     for (const dialog of featuredDialogs) {
       result += `#${dialog.id}\n\n\n`
-      let lastMsgId: string | null = null;
-      if (dialog.lastMsgId)  {
-        lastMsgId = dialog.lastMsgId;
-      }
-
-      while (lastMsgId) {
-        const res = await openai.responses.retrieve(lastMsgId);
-        const inputItems = await openai.responses.inputItems.list(res.id);
-        let currentStr: string = '';
-        for (const item of inputItems.data) {
-          currentStr += `Вы:\n`;
-          if (item.type === 'message' && item.role === 'user') {
-            for (const c of item.content) {
-              if (c.type === 'input_file') {
-                currentStr += `Файл ${c.file_id}\n`;
-              } else if (c.type === 'input_text') {
-                currentStr += `${c.text}\n`;
-              } else if (c.type === 'input_image') {
-                currentStr += `Изображение ${c.file_id}\n`;
+      if (dialog.lastMsgId) {
+        const res = await openai.responses.retrieve(dialog.lastMsgId);
+        const input = await openai.responses.inputItems.list(dialog.lastMsgId);
+        for (const i of input.data) {
+          if (i.type === 'message') {
+            if (i.role === 'user') {
+              for (const c of i.content) {
+                if (c.type === 'input_text') {
+                  result += `Вы: ${c.text}\n`;
+                } else if (c.type === 'input_file') {
+                  result += `Вы: [Файл]\n`;
+                } else if (c.type === 'input_image') {
+                  result += `Вы: [Изображение]\n`;
+                }
+              }
+            } else if (i.role === 'assistant') {
+              for (const c of i.content) {
+                if (c.type === 'output_text') {
+                  result += `ИИ: ${c.text}\n`;
+                }
               }
             }
           }
-
-          currentStr +='\n';
         }
-
-        result = currentStr + `${dialog.agent.name}: ${res.output_text}\n` + result;
-        lastMsgId = res.previous_response_id ?? null;
+        result += `ИИ: ${res.output_text}\n`;
       }
 
       result += `---\n\n\n`;
