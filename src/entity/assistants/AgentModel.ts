@@ -38,7 +38,9 @@ export class AgentModel {
   })
   topP: number;
 
-  @ManyToOne(() => AgentGroup, (group) => group.agents)
+  @ManyToOne(() => AgentGroup, (group) => group.agents, {
+    onDelete: 'CASCADE'
+  })
   @JoinColumn({
     name: "groupId",
   })
