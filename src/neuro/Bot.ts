@@ -240,7 +240,7 @@ export class Bot {
   ) {
     this.cqListeners.push(async (q, user) => {
       if (q.data?.startsWith("make-featured-")) {
-        await f(user, +q.data.substring(15));
+        await f(user, +q.data.substring(14));
       }
     });
   }
