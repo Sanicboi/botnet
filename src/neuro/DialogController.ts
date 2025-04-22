@@ -43,7 +43,7 @@ export class DialogController {
       reply_markup: {
         inline_keyboard: [
           Btn('Избранные диалоги', 'featured-dialogs'),
-          Btn('Остальные диалоги', 'all-dialogs'),
+          Btn('Недавние диалоги', 'all-dialogs'),
         ],
       },
     });
@@ -55,7 +55,17 @@ export class DialogController {
     let result: InlineKeyboardButton[][] = [];
 
     for (const dialog of featuredDialogs) {
-      result.push(Btn(dialog.firstMessage || `Диалог #${dialog.id}`, `dialog-${dialog.id}`));
+      if (dialog.lastMsgId) {
+        const topic = await openai.responses.create({
+          model: "gpt-4o-mini",
+          input: 'дай тему предыдущего диалога',
+          previous_response_id: dialog.lastMsgId,
+          store: false,
+        });
+        result.push(Btn(topic.output_text, `dialog-${dialog.id}`));
+      } else {
+        result.push(Btn(`Диалог #${dialog.id}`, `dialog-${dialog.id}`));
+      }
     }
 
     await this.bot.bot.sendMessage(+user.chatId, `💡Это ваши избранные диалоги!\nВы можете вернуться к любому из них или удалить диалог из избранного!`, {
@@ -75,7 +85,18 @@ export class DialogController {
     let result: InlineKeyboardButton[][] = [];
 
     for (const dialog of allDialogs) {
-      result.push(Btn(dialog.firstMessage || `Диалог #${dialog.id}`, `dialog-${dialog.id}`));
+      if (dialog.lastMsgId) {
+        const topic = await openai.responses.create({
+          model: "gpt-4o-mini",
+          input: 'дай тему предыдущего диалога',
+          previous_response_id: dialog.lastMsgId,
+          store: false,
+        });
+        result.push(Btn(topic.output_text, `dialog-${dialog.id}`));
+      } else {
+        result.push(Btn(`Диалог #${dialog.id}`, `dialog-${dialog.id}`));
+      }
+
     }
 
     await this.bot.bot.sendMessage(+user.chatId, `💡Это ваши диалоги!\nВы можете вернуться к любому из них или удалить диалог!`, {
@@ -189,6 +210,7 @@ export class DialogController {
           model: "gpt-4o-mini",
           input: 'кратко суммаризируй весь предыдущий диалог',
           previous_response_id: dialog.lastMsgId,
+          store: false,
         });
         
         const res = await openai.responses.retrieve(dialog.lastMsgId);
@@ -196,7 +218,7 @@ export class DialogController {
         summarized = sum.output_text;
       }
 
-      await this.bot.bot.sendMessage(+user.chatId, `Избранный диалог #${dialog.id}:\n\n⤷ Количество сообщений: (сообщения по этому диалогу): ${dialog.msgCount}\n⤷ Режим чата: ${dialog.agent.group.name} - ${dialog.agent.name}\n⤷Дата начала: ${dialog.createdAt}\n\nСуммаризация: ${summarized}\n\n`, {
+      await this.bot.bot.sendMessage(+user.chatId, `Избранный диалог #${dialog.id}:\n\n⤷ Количество сообщений: (сообщения по этому диалогу): ${dialog.msgCount}\n⤷ Режим чата: ${dialog.agent.group.name} - ${dialog.agent.name}\n⤷Дата начала: ${dialog.createdAt.toLocaleDateString('ru')}\n\nСуммаризация: ${summarized}\n\n`, {
         reply_markup: {
           inline_keyboard: [
             Btn("Удалить диалог из избранного", `remove-featured-${dialog.id}`),
@@ -209,7 +231,7 @@ export class DialogController {
 
 
     } else {
-      await this.bot.bot.sendMessage(+user.chatId, `Диалог #${dialog.id}:\n\n⤷ Количество сообщений: (сообщения по этому диалогу): ${dialog.msgCount}\n⤷ Режим чата: ${dialog.agent.group.name} - ${dialog.agent.name}\n⤷Дата начала: ${dialog.createdAt}\n\n`, {
+      await this.bot.bot.sendMessage(+user.chatId, `Диалог #${dialog.id}:\n\n⤷ Количество сообщений: (сообщения по этому диалогу): ${dialog.msgCount}\n⤷ Режим чата: ${dialog.agent.group.name} - ${dialog.agent.name}\n⤷Дата начала: ${dialog.createdAt.toLocaleDateString('ru')}\n\n`, {
         reply_markup: {
           inline_keyboard: [
             Btn("Удалить диалог", `delete-dialog-${dialog.id}`),
