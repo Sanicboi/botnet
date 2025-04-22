@@ -88,7 +88,9 @@ export class Bot {
     relations: FindOptionsRelations<User> = {
       agent: true,
       dialogs: {
-        agent: true
+        agent: {
+          group: true,
+        }
       }
     },
   ): Promise<User> {
