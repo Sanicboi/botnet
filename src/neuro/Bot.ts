@@ -4,6 +4,7 @@ import { AppDataSource } from "../data-source";
 import { FindOptionsRelations, RelationOptions } from "typeorm";
 import cron from "node-cron";
 import { Converter } from "./Converter";
+import { wait } from "../utils/wait";
 
 const specialIds: number[] = [1, 2, 3];
 
@@ -679,9 +680,11 @@ export class Bot {
   public setListeners() {
     this.bot.on("callback_query", async (q) => {
       try {
+
         if (!q.data?.startsWith('ihavepaid-') && q.message) {
           await this.bot.deleteMessage(q.from.id, q.message?.message_id);
         }
+        await wait(0.5);
         const user = await this.getUser(q);
         for (const f of this.cqListeners) {
           const result = await f(q, user);
