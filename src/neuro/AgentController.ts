@@ -313,8 +313,8 @@ export class AgentController {
       result.push(Btn(agent.name, `agent-${agent.id}`));
     }
     if (+group === 6) {
-      result.push(Btn("Транскрибатор аудио", "audio"));
-      result.push(Btn("Суммаризатор аудио", "audiosum"));
+      result.push(Btn("🎧Транскрибатор аудио", "audio"));
+      result.push(Btn("📝Суммаризатор аудио", "audiosum"));
     }
     result.push(Btn('Назад', 'groups'));
     await this.bot.bot.sendMessage(+user.chatId, "Выберите сотрудника", {
