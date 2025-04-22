@@ -31,12 +31,8 @@ export class Bot {
     });
     this.bot.setMyCommands([
       {
-        command: "about",
-        description: "🤝О нас (SmartComrade)",
-      },
-      {
-        command: "help",
-        description: "🤖О боте (справка)",
+        command: "neuro",
+        description: "🧠Нейро-сотрудники",
       },
       {
         command: "dialogs",
@@ -44,11 +40,11 @@ export class Bot {
       },
       {
         command: "data",
-        description: "📝Данные о себе",
+        description: "📝Данные обо мне",
       },
       {
-        command: "neuro",
-        description: "🧠Нейро-сотрудники",
+        command: "settings",
+        description: "⚙️Настройки",
       },
       {
         command: "balance",
@@ -63,8 +59,12 @@ export class Bot {
         description: "🎁Бесплатные токены",
       },
       {
-        command: "settings",
-        description: "⚙️Настройки",
+        command: "about",
+        description: "🤝О нас (SmartComrade)",
+      },
+      {
+        command: "help",
+        description: "🤖О боте (справка)",
       },
       {
         command: "terms",

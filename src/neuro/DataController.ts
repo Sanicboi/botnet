@@ -2,6 +2,7 @@ import { AppDataSource } from "../data-source";
 import { User, UserDataType, UserDataTypeMapped } from "../entity/User";
 import { Btn } from "./utils";
 import { Bot } from "./Bot";
+import { wait } from "../utils/wait";
 
 const map = new Map<UserDataType, string>();
 map.set(
@@ -66,7 +67,7 @@ export class DataController {
   private async myData(user: User) {
     await this.bot.bot.sendMessage(
       +user.chatId,
-      "Здесь ты можешь заполнить информацию о себе, тем самым упростить пользование нейро-сотрудниками, так как они уже будут заранее обладать необходимой информацией. \nИнформацию можно будет поменять в любой момент.\n\nВыберите информацию, которую хотит заполнить/изменить",
+      "Здесь ты можешь заполнить информацию о себе, тем самым упростить пользование нейро-сотрудниками, так как они уже будут заранее обладать необходимой информацией. \nИнформацию можно будет поменять в любой момент.\n\nВыберите информацию, которую хотите заполнить/изменить",
       {
         reply_markup: {
           inline_keyboard: [
@@ -85,6 +86,8 @@ export class DataController {
     const mapped = cat + "Data" as UserDataTypeMapped;
 
     if (user[mapped]) {
+      await this.bot.bot.sendMessage(+user.chatId, map.get(cat)!);
+      await wait(0.25);
       await this.bot.bot.sendMessage(
         +user.chatId,
         `Текущие данные:\n ${user[mapped]}`,
@@ -124,20 +127,21 @@ export class DataController {
     user.currentAudioAgent = null;
     user.usingImageGeneration = false;
 
+
+
     await manager.save(user);
+
+    for (const d of user.dialogs) {
+      if (!d.firstMessage) {
+        await manager.remove(d);
+      }
+    }
   }
 
   private async takeFromData(user: User) {
-    await this.bot.bot.sendMessage(+user.chatId, "Выберите раздел данных:", {
-      reply_markup: {
-        inline_keyboard: [
-          Btn("Основные", "take-main"),
-          Btn("Личностные", "take-personal"),
-          Btn("Бизнес", "take-business"),
-          Btn("Карьера", "take-career"),
-        ],
-      },
-    });
+    user.dialogueData = user.mainData + '\n' + user.careerData + '\n' + user.personalData + '\n' + user.businessData + '\n';
+    await manager.save(user);
+    await this.bot.bot.sendMessage(+user.chatId, 'Данные заполнены!');
   }
 
   private async changeData(user: User, category: string) {

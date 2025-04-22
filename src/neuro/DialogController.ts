@@ -145,7 +145,7 @@ export class DialogController {
             user.currentAudioAgent == null &&
             ![1, 2, 3].includes(user.agentId!) &&
             !user.usingImageGeneration && agent.examplePrompt
-              ? [Btn("Взять из данных", "from-data")]
+              ? [Btn("Взять из 'Данные обо мне'", "from-data")]
               : [],
         },
       },

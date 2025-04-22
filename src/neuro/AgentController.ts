@@ -74,7 +74,6 @@ export class AgentController {
     this.bot.onGroups(this.groups.bind(this));
     this.bot.onGroups2(this.groups2.bind(this));
     this.bot.onAgents(this.agents.bind(this));
-    this.bot.onDataInput(this.dataInput.bind(this));
   }
 
   private async textInput(user: User, text: string) {
@@ -93,7 +92,7 @@ export class AgentController {
       {
         maxTokens: result.limit,
         type: "text",
-        value: text,
+        value: user.dialogueData + "\n\n\n" + text ,
         previousResponseId: dialog.lastMsgId ?? undefined,
       },
       user.model,
@@ -243,17 +242,9 @@ export class AgentController {
     );
   }
 
-  private async dataInput(user: User, type: string) {
-    user.dialogueData = user[(type + "Data") as UserDataTypeMapped];
-    await manager.save(user);
-    await this.bot.bot.sendMessage(
-      +user.chatId,
-      "Данные взяты");
-  }
-
   private async groups(user: User) {
     const groups = await manager.find(AgentGroup, {
-      take: 8,
+      take: 6,
       order: {
         name: "ASC",
       },
@@ -278,7 +269,7 @@ export class AgentController {
 
   private async groups2(user: User) {
     const groups = await manager.find(AgentGroup, {
-      skip: 8,
+      skip: 6,
       order: {
         name: "ASC",
       },
