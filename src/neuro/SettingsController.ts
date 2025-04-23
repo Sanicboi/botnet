@@ -51,7 +51,7 @@ export class SettingsController {
     if (setting === "model") {
       await this.bot.bot.sendMessage(
         +user.chatId,
-        `Выбранная модель: ${user.model}\nДоступные модели:`,
+        `Выбранная модель: ${user.model}\n${map.get(user.model)}\nДоступные модели:`,
         {
           reply_markup: {
             inline_keyboard: [
