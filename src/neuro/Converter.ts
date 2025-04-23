@@ -4,6 +4,8 @@ const modelToTokenCost: Map<SupportedModels, number> = new Map();
 modelToTokenCost.set("gpt-4o-mini", 0.0000006);
 modelToTokenCost.set("gpt-4o", 0.00001);
 modelToTokenCost.set("gpt-4-turbo", 0.00003);
+modelToTokenCost.set("gpt-4.1", 0.00008);
+modelToTokenCost.set("o4-mini", 0.0000044);
 
 export class Converter {
   public static SMTUSD(smt: number): number {

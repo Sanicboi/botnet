@@ -87,12 +87,12 @@ export class AgentController {
     }
     dialog.msgCount += 2;
     await manager.save(dialog);
-    await this.bot.bot.sendMessage(+user.chatId, 'Генерирую ответ...')
+    await this.bot.bot.sendMessage(+user.chatId, "Генерирую ответ...");
     const response = await agent.run(
       {
         maxTokens: result.limit,
         type: "text",
-        value: user.dialogueData + "\n\n\n" + text ,
+        value: user.dialogueData + "\n\n\n" + text,
         previousResponseId: dialog.lastMsgId ?? undefined,
       },
       user.model,
@@ -115,7 +115,7 @@ export class AgentController {
   }
 
   private async voiceInput(user: User, url: string) {
-    await this.bot.bot.sendMessage(+user.chatId, 'Генерирую ответ...')
+    await this.bot.bot.sendMessage(+user.chatId, "Генерирую ответ...");
     const transcription = new Transcription(false, url);
     await transcription.setup();
     const costs = await transcription.getCost();
@@ -130,7 +130,7 @@ export class AgentController {
     const agent = new Agent(user.agent!);
     let dialog: Dialog = this.dialogController.getUserCurrentDialog(user);
     if (!dialog.firstMessage) {
-      dialog.firstMessage = 'Голосовое сообщение';
+      dialog.firstMessage = "Голосовое сообщение";
     }
     dialog.msgCount += 2;
     await manager.save(dialog);
@@ -163,14 +163,14 @@ export class AgentController {
   }
 
   private async docInput(user: User, url: string, caption?: string) {
-    await this.bot.bot.sendMessage(+user.chatId, 'Генерирую ответ...')
+    await this.bot.bot.sendMessage(+user.chatId, "Генерирую ответ...");
     const result = await this.balanceController.checkBalance(user);
     if (!result.exists) return;
     const agent = new Agent(user.agent!);
 
     let dialog: Dialog = this.dialogController.getUserCurrentDialog(user);
     if (!dialog.firstMessage) {
-      dialog.firstMessage = 'Документ';
+      dialog.firstMessage = "Документ";
     }
     dialog.msgCount += 2;
     await manager.save(dialog);
@@ -204,14 +204,14 @@ export class AgentController {
   }
 
   private async imageInput(user: User, url: string, caption?: string) {
-    await this.bot.bot.sendMessage(+user.chatId, 'Генерирую ответ...')
+    await this.bot.bot.sendMessage(+user.chatId, "Генерирую ответ...");
     const result = await this.balanceController.checkBalance(user);
     if (!result.exists) return;
     const agent = new Agent(user.agent!);
 
     let dialog: Dialog = this.dialogController.getUserCurrentDialog(user);
     if (!dialog.firstMessage) {
-      dialog.firstMessage = 'Изображение';
+      dialog.firstMessage = "Изображение";
     }
     dialog.msgCount += 2;
     await manager.save(dialog);
@@ -307,7 +307,7 @@ export class AgentController {
       result.push(Btn("🎧Транскрибатор аудио", "audio"));
       result.push(Btn("📝Суммаризатор аудио", "audiosum"));
     }
-    result.push(Btn('Назад', 'groups'));
+    result.push(Btn("Назад", "groups"));
     await this.bot.bot.sendMessage(+user.chatId, "Выберите сотрудника", {
       reply_markup: {
         inline_keyboard: result,

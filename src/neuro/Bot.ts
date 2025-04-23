@@ -67,8 +67,6 @@ export class Bot {
         command: "ref",
         description: "🏅Реферальная программа",
       },
-
-
       {
         command: "terms",
         description: "📜Условия использования & политика",
@@ -77,7 +75,10 @@ export class Bot {
 
     this.bot.onText(/\/start/, async (msg) => {
       await this.getUser(msg);
-      await this.bot.sendMessage(msg.from!.id, "Приветствую, дорогой друг!👋\n\nSmartComrade - это многофункциональная платформа с обученными нейро-сотрудниками разных направлений!\nЗдесь мы объединили лучшее из мира нейро-сетей в одном месте.\n\nСделай свою коммуникацию с нейро-сетями профессиональной вместе с нами)\n\nИ да, не нужны никакие зарубежные карты!))\n\nНе забудь забрать афигенные полезные материалы по нейро-сетям в нашем боте помощнике! @SC_NewsBot\nА также, будем рады видеть тебя в нашем канале: https://t.me/SmartComrade1");
+      await this.bot.sendMessage(
+        msg.from!.id,
+        "Приветствую, дорогой друг!👋\n\nSmartComrade - это многофункциональная платформа с обученными нейро-сотрудниками разных направлений!\nЗдесь мы объединили лучшее из мира нейро-сетей в одном месте.\n\nСделай свою коммуникацию с нейро-сетями профессиональной вместе с нами)\n\nИ да, не нужны никакие зарубежные карты!))\n\nНе забудь забрать афигенные полезные материалы по нейро-сетям в нашем боте помощнике! @SC_NewsBot\nА также, будем рады видеть тебя в нашем канале: https://t.me/SmartComrade1",
+      );
     });
   }
 
@@ -93,8 +94,8 @@ export class Bot {
       dialogs: {
         agent: {
           group: true,
-        }
-      }
+        },
+      },
     },
   ): Promise<User> {
     console.log(String(qOrMsg.from!.id));
@@ -113,7 +114,7 @@ export class Bot {
         const creator = await manager.findOne(User, {
           where: {
             chatId: referralId,
-          }
+          },
         });
         if (creator) {
           if (creator.inviteCount <= 29) {
@@ -124,10 +125,9 @@ export class Bot {
         }
       }
       await manager.save(user);
-    };
+    }
     return user;
   }
-
 
   public onDialogs(f: (user: User) => Promise<any>) {
     this.bot.onText(/\/dialogs/, async (msg) => {
@@ -259,8 +259,7 @@ export class Bot {
       if (q.data === "delete-featured-dialogs") {
         await f(user);
       }
-    }
-    );
+    });
   }
   public onExportFeaturedDialogs(f: (user: User) => Promise<any>) {
     this.cqListeners.push(async (q, user) => {
@@ -292,9 +291,7 @@ export class Bot {
     });
   }
 
-  public onChangeData(
-    f: (user: User, category: string) => Promise<any>,
-  ) { 
+  public onChangeData(f: (user: User, category: string) => Promise<any>) {
     this.cqListeners.push(async (q, user) => {
       if (q.data?.startsWith("change-")) {
         await f(user, q.data.substring(7));
@@ -682,11 +679,22 @@ export class Bot {
     });
   }
 
+  public onFormat(f: (user: User, format: string) => Promise<any>) {
+    this.cqListeners.push(async (q, user) => {
+      if (q.data?.startsWith("format-")) {
+        await f(user, q.data.substring(7));
+      }
+    });
+  }
+
   public setListeners() {
     this.bot.on("callback_query", async (q) => {
       try {
-
-        if (!q.data?.startsWith('ihavepaid-') && q.message) {
+        if (
+          !q.data?.startsWith("ihavepaid-") &&
+          !q.data?.startsWith("model-") &&
+          q.message
+        ) {
           await this.bot.deleteMessage(q.from.id, q.message?.message_id);
         }
         await wait(0.5);
@@ -698,7 +706,6 @@ export class Bot {
       } catch (e) {
         console.error(e);
       }
-
     });
     this.bot.onText(/./, async (msg) => {
       try {
@@ -712,7 +719,6 @@ export class Bot {
       } catch (e) {
         console.error(e);
       }
-
     });
     this.bot.on("voice", async (msg) => {
       if (!msg.voice) return;

@@ -36,29 +36,36 @@ export class DialogController {
   }
 
   private async dialogs(user: User) {
-
     if (user.dialogs.length === 0)
       return await this.bot.bot.sendMessage(+user.chatId, `У Вас нет диалогов`);
-    await this.bot.bot.sendMessage(+user.chatId, `Здесь вы можете вернуться к ранее проведенным диалогам и коммуникации с ИИ агентами. Возвращение к диалогу, позволяет сохранить контекст коммуникации и продолжить суть диалога. `, {
-      reply_markup: {
-        inline_keyboard: [
-          Btn('Избранные диалоги', 'featured-dialogs'),
-          Btn('Недавние диалоги', 'all-dialogs'),
-        ],
+    await this.bot.bot.sendMessage(
+      +user.chatId,
+      `Здесь вы можете вернуться к ранее проведенным диалогам и коммуникации с ИИ агентами. Возвращение к диалогу, позволяет сохранить контекст коммуникации и продолжить суть диалога. `,
+      {
+        reply_markup: {
+          inline_keyboard: [
+            Btn("Избранные диалоги", "featured-dialogs"),
+            Btn("Недавние диалоги", "all-dialogs"),
+          ],
+        },
       },
-    });
+    );
   }
 
   private async featuredDialogs(user: User) {
     const featuredDialogs = user.dialogs.filter((dialog) => dialog.featured);
-    if (featuredDialogs.length === 0) return await this.bot.bot.sendMessage(+user.chatId, `У Вас нет избранных диалогов`);
+    if (featuredDialogs.length === 0)
+      return await this.bot.bot.sendMessage(
+        +user.chatId,
+        `У Вас нет избранных диалогов`,
+      );
     let result: InlineKeyboardButton[][] = [];
 
     for (const dialog of featuredDialogs) {
       if (dialog.lastMsgId) {
         const topic = await openai.responses.create({
           model: "gpt-4o-mini",
-          input: 'дай тему предыдущего диалога',
+          input: "дай тему предыдущего диалога",
           previous_response_id: dialog.lastMsgId,
           store: false,
         });
@@ -68,27 +75,32 @@ export class DialogController {
       }
     }
 
-    await this.bot.bot.sendMessage(+user.chatId, `💡Это ваши избранные диалоги!\nВы можете вернуться к любому из них или удалить диалог из избранного!`, {
-      reply_markup: {
-        inline_keyboard: [
-          ...result,
-          Btn('Удалить все избранные диалоги', 'delete-featured-dialogs'),
-          Btn('Экспорт избранных диалогов', 'export-featured-dialogs'),
-        ]
-      }
-    });
+    await this.bot.bot.sendMessage(
+      +user.chatId,
+      `💡Это ваши избранные диалоги!\nВы можете вернуться к любому из них или удалить диалог из избранного!`,
+      {
+        reply_markup: {
+          inline_keyboard: [
+            ...result,
+            Btn("Удалить все избранные диалоги", "delete-featured-dialogs"),
+            Btn("Экспорт избранных диалогов", "export-featured-dialogs"),
+          ],
+        },
+      },
+    );
   }
 
   private async allDialogs(user: User) {
     const allDialogs = user.dialogs.filter((dialog) => !dialog.featured);
-    if (allDialogs.length === 0) return await this.bot.bot.sendMessage(+user.chatId, `У Вас нет диалогов`);
+    if (allDialogs.length === 0)
+      return await this.bot.bot.sendMessage(+user.chatId, `У Вас нет диалогов`);
     let result: InlineKeyboardButton[][] = [];
 
     for (const dialog of allDialogs) {
       if (dialog.lastMsgId) {
         const topic = await openai.responses.create({
           model: "gpt-4o-mini",
-          input: 'дай тему предыдущего диалога',
+          input: "дай тему предыдущего диалога",
           previous_response_id: dialog.lastMsgId,
           store: false,
         });
@@ -96,17 +108,20 @@ export class DialogController {
       } else {
         result.push(Btn(`Диалог #${dialog.id}`, `dialog-${dialog.id}`));
       }
-
     }
 
-    await this.bot.bot.sendMessage(+user.chatId, `💡Это ваши диалоги!\nВы можете вернуться к любому из них или удалить диалог!`, {
-      reply_markup: {
-        inline_keyboard: [
-          ...result,
-          Btn('Удалить все диалоги', 'delete-all-dialogs'),
-        ]
-      }
-    });
+    await this.bot.bot.sendMessage(
+      +user.chatId,
+      `💡Это ваши диалоги!\nВы можете вернуться к любому из них или удалить диалог!`,
+      {
+        reply_markup: {
+          inline_keyboard: [
+            ...result,
+            Btn("Удалить все диалоги", "delete-all-dialogs"),
+          ],
+        },
+      },
+    );
   }
 
   public async createDialog(
@@ -130,7 +145,7 @@ export class DialogController {
     dialog.user = user;
     await manager.save(dialog);
     user.currentDialogId = dialog.id;
-    user.agentId = agentId
+    user.agentId = agentId;
     user.agent = new AgentModel();
     user.agent.id = agentId;
     user.dialogs.push(dialog);
@@ -144,7 +159,8 @@ export class DialogController {
           inline_keyboard:
             user.currentAudioAgent == null &&
             ![1, 2, 3].includes(user.agentId!) &&
-            !user.usingImageGeneration && agent.examplePrompt
+            !user.usingImageGeneration &&
+            agent.examplePrompt
               ? [Btn("Взять из 'Данные обо мне'", "from-data")]
               : [],
         },
@@ -154,28 +170,41 @@ export class DialogController {
       reply_markup: {
         inline_keyboard: [
           Btn(
-            `GPT 4 Omni mini ${user.model === "gpt-4o-mini" ? "✅" : "❌"}`,
+            `GPT 4 Omni mini ${user.model === "gpt-4o-mini" ? "✅" : ""}`,
             "model-gpt-4o-mini",
           ),
           Btn(
-            `GPT 4 Omni ${user.model === "gpt-4o" ? "✅" : "❌"}`,
+            `GPT 4 Omni ${user.model === "gpt-4o" ? "✅" : ""}`,
             "model-gpt-4o",
           ),
           Btn(
-            `GPT 4 Turbo ${user.model === "gpt-4-turbo" ? "✅" : "❌"}`,
+            `GPT 4 Turbo ${user.model === "gpt-4-turbo" ? "✅" : ""}`,
             "model-gpt-4-turbo",
+          ),
+          Btn(
+            `OpenAI o4 mini ${user.model === "o4-mini" ? "✅" : ""}`,
+            "model-o4-mini",
+          ),
+          Btn(
+            `GPT 4.1 ${user.model === "gpt-4.1" ? "✅" : ""}`,
+            "model-gpt-4.1",
           ),
         ],
       },
     });
 
     if (agent.examplePrompt) {
-      await this.bot.bot.sendDocument(+user.chatId, Buffer.from(agent.examplePrompt), {
-        caption: 'Пример диалога с моделью',
-      }, {
-        contentType: 'text/plain',
-        filename: 'example.txt',
-      });
+      await this.bot.bot.sendDocument(
+        +user.chatId,
+        Buffer.from(agent.examplePrompt),
+        {
+          caption: "Пример диалога с моделью",
+        },
+        {
+          contentType: "text/plain",
+          filename: "example.txt",
+        },
+      );
     }
   }
 
@@ -203,46 +232,52 @@ export class DialogController {
   private async dialog(user: User, dialogId: number) {
     const dialog = user.dialogs.find((el) => el.id === dialogId)!;
     if (dialog.featured) {
-      let lastMsg: string = 'Нет сообщений';
-      let summarized: string = 'Нет данных';
+      let lastMsg: string = "Нет сообщений";
+      let summarized: string = "Нет данных";
       if (dialog.lastMsgId) {
         const sum = await openai.responses.create({
           model: "gpt-4o-mini",
-          input: 'кратко суммаризируй весь предыдущий диалог',
+          input: "кратко суммаризируй весь предыдущий диалог",
           previous_response_id: dialog.lastMsgId,
           store: false,
         });
-        
+
         const res = await openai.responses.retrieve(dialog.lastMsgId);
         lastMsg = res.output_text;
         summarized = sum.output_text;
       }
 
-      await this.bot.bot.sendMessage(+user.chatId, `Избранный диалог #${dialog.id}:\n\n⤷ Количество сообщений: (сообщения по этому диалогу): ${dialog.msgCount}\n⤷ Режим чата: ${dialog.agent.group.name} - ${dialog.agent.name}\n⤷Дата начала: ${dialog.createdAt.toLocaleDateString('ru')}\n\nСуммаризация: ${summarized}\n\n`, {
-        reply_markup: {
-          inline_keyboard: [
-            Btn("Удалить диалог из избранного", `remove-featured-${dialog.id}`),
-            Btn("Удалить диалог", `delete-dialog-${dialog.id}`),
-            Btn("Вернуться к диалогу", `continue-dialog-${dialog.id}`),
-          ],
-        }
-      });
-      
-
-
+      await this.bot.bot.sendMessage(
+        +user.chatId,
+        `Избранный диалог #${dialog.id}:\n\n⤷ Количество сообщений: (сообщения по этому диалогу): ${dialog.msgCount}\n⤷ Режим чата: ${dialog.agent.group.name} - ${dialog.agent.name}\n⤷Дата начала: ${dialog.createdAt.toLocaleDateString("ru")}\n\nСуммаризация: ${summarized}\n\n`,
+        {
+          reply_markup: {
+            inline_keyboard: [
+              Btn(
+                "Удалить диалог из избранного",
+                `remove-featured-${dialog.id}`,
+              ),
+              Btn("Удалить диалог", `delete-dialog-${dialog.id}`),
+              Btn("Вернуться к диалогу", `continue-dialog-${dialog.id}`),
+            ],
+          },
+        },
+      );
     } else {
-      await this.bot.bot.sendMessage(+user.chatId, `Диалог #${dialog.id}:\n\n⤷ Количество сообщений: (сообщения по этому диалогу): ${dialog.msgCount}\n⤷ Режим чата: ${dialog.agent.group.name} - ${dialog.agent.name}\n⤷Дата начала: ${dialog.createdAt.toLocaleDateString('ru')}\n\n`, {
-        reply_markup: {
-          inline_keyboard: [
-            Btn("Удалить диалог", `delete-dialog-${dialog.id}`),
-            Btn("Вернуться к диалогу", `continue-dialog-${dialog.id}`),
-            Btn("Сделать избранным", `make-featured-${dialog.id}`),
-          ],
-        }
-      });
+      await this.bot.bot.sendMessage(
+        +user.chatId,
+        `Диалог #${dialog.id}:\n\n⤷ Количество сообщений: (сообщения по этому диалогу): ${dialog.msgCount}\n⤷ Режим чата: ${dialog.agent.group.name} - ${dialog.agent.name}\n⤷Дата начала: ${dialog.createdAt.toLocaleDateString("ru")}\n\n`,
+        {
+          reply_markup: {
+            inline_keyboard: [
+              Btn("Удалить диалог", `delete-dialog-${dialog.id}`),
+              Btn("Вернуться к диалогу", `continue-dialog-${dialog.id}`),
+              Btn("Сделать избранным", `make-featured-${dialog.id}`),
+            ],
+          },
+        },
+      );
     }
-
-    
   }
 
   private async removeFeaturedDialog(user: User, dialogId: number) {
@@ -254,13 +289,15 @@ export class DialogController {
     if (!dialog) return;
     dialog.featured = false;
     await manager.save(dialog);
-    await this.bot.bot.sendMessage(+user.chatId, "Диалог удален из избранного", {
-      reply_markup: {
-        inline_keyboard: [
-          Btn("Назад", `dialog-${dialogId}`),
-        ]
-      }
-    });
+    await this.bot.bot.sendMessage(
+      +user.chatId,
+      "Диалог удален из избранного",
+      {
+        reply_markup: {
+          inline_keyboard: [Btn("Назад", `dialog-${dialogId}`)],
+        },
+      },
+    );
   }
 
   private async makeFeaturedDialog(user: User, dialogId: number) {
@@ -272,27 +309,35 @@ export class DialogController {
     if (!dialog) return;
     dialog.featured = true;
     await manager.save(dialog);
-    await this.bot.bot.sendMessage(+user.chatId, "Диалог добавлен в избранное", {
-      reply_markup: {
-        inline_keyboard: [
-          Btn("Назад", `dialog-${dialogId}`),
-        ]
-      }
-    });
+    await this.bot.bot.sendMessage(
+      +user.chatId,
+      "Диалог добавлен в избранное",
+      {
+        reply_markup: {
+          inline_keyboard: [Btn("Назад", `dialog-${dialogId}`)],
+        },
+      },
+    );
   }
   private async deleteFeaturedDialogs(user: User) {
     const featuredDialogs = user.dialogs.filter((dialog) => dialog.featured);
-    if (featuredDialogs.length === 0) return await this.bot.bot.sendMessage(+user.chatId, `У Вас нет избранных диалогов`);
+    if (featuredDialogs.length === 0)
+      return await this.bot.bot.sendMessage(
+        +user.chatId,
+        `У Вас нет избранных диалогов`,
+      );
     for (const dialog of featuredDialogs) {
       await this.deleteDialog(user, dialog.id);
     }
-    await this.bot.bot.sendMessage(+user.chatId, "Все избранные диалоги удалены", {
-      reply_markup: {
-        inline_keyboard: [
-          Btn("Назад", `dialogs`),
-        ]
-      }
-    });
+    await this.bot.bot.sendMessage(
+      +user.chatId,
+      "Все избранные диалоги удалены",
+      {
+        reply_markup: {
+          inline_keyboard: [Btn("Назад", `dialogs`)],
+        },
+      },
+    );
   }
   private async deleteAllDialogs(user: User) {
     for (const dialog of user.dialogs.filter((dialog) => !dialog.featured)) {
@@ -300,37 +345,39 @@ export class DialogController {
     }
     await this.bot.bot.sendMessage(+user.chatId, "Все диалоги удалены", {
       reply_markup: {
-        inline_keyboard: [
-          Btn("Назад", `dialogs`),
-        ]
-      }
+        inline_keyboard: [Btn("Назад", `dialogs`)],
+      },
     });
   }
 
   private async exportFeaturedDialogs(user: User) {
     const featuredDialogs = user.dialogs.filter((dialog) => dialog.featured);
-    if (featuredDialogs.length === 0) return await this.bot.bot.sendMessage(+user.chatId, `У Вас нет избранных диалогов`);
-    let result: string = '';
+    if (featuredDialogs.length === 0)
+      return await this.bot.bot.sendMessage(
+        +user.chatId,
+        `У Вас нет избранных диалогов`,
+      );
+    let result: string = "";
     for (const dialog of featuredDialogs) {
-      result += `#${dialog.id}\n\n\n`
+      result += `#${dialog.id}\n\n\n`;
       if (dialog.lastMsgId) {
         const res = await openai.responses.retrieve(dialog.lastMsgId);
         const input = await openai.responses.inputItems.list(dialog.lastMsgId);
         for (const i of input.data) {
-          if (i.type === 'message') {
-            if (i.role === 'user') {
+          if (i.type === "message") {
+            if (i.role === "user") {
               for (const c of i.content) {
-                if (c.type === 'input_text') {
+                if (c.type === "input_text") {
                   result += `Вы: ${c.text}\n`;
-                } else if (c.type === 'input_file') {
+                } else if (c.type === "input_file") {
                   result += `Вы: [Файл]\n`;
-                } else if (c.type === 'input_image') {
+                } else if (c.type === "input_image") {
                   result += `Вы: [Изображение]\n`;
                 }
               }
-            } else if (i.role === 'assistant') {
+            } else if (i.role === "assistant") {
               for (const c of i.content) {
-                if (c.type === 'output_text') {
+                if (c.type === "output_text") {
                   result += `ИИ: ${c.text}\n`;
                 }
               }
@@ -343,13 +390,17 @@ export class DialogController {
       result += `---\n\n\n`;
     }
 
-    await this.bot.bot.sendDocument(+user.chatId, Buffer.from(result), {
-      caption: 'Избранные диалоги',
-    }, {
-      contentType: 'text/plain',
-      filename: 'featured-dialogs.txt',
-    });
-    
+    await this.bot.bot.sendDocument(
+      +user.chatId,
+      Buffer.from(result),
+      {
+        caption: "Избранные диалоги",
+      },
+      {
+        contentType: "text/plain",
+        filename: "featured-dialogs.txt",
+      },
+    );
   }
 
   private async continueDialog(user: User, dialogId: number) {

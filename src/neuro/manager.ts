@@ -23,18 +23,18 @@ AppDataSource.initialize()
     const manager = AppDataSource.manager;
 
     bot.setMyCommands([
-        {
-            command: 'start',
-            description: 'Запустить бота'
-        },
-        {
-            command: 'groups',
-            description: 'Посмотреть группы агентов'
-        },
-        {
-            command: 'reset',
-            description: 'Сбросить все изменения'
-        }
+      {
+        command: "start",
+        description: "Запустить бота",
+      },
+      {
+        command: "groups",
+        description: "Посмотреть группы агентов",
+      },
+      {
+        command: "reset",
+        description: "Сбросить все изменения",
+      },
     ]);
 
     bot.onText(/\/start/, async (msg) => {
@@ -277,7 +277,6 @@ AppDataSource.initialize()
           await manager.save(agent);
           creatingNewAgent = null;
 
-          
           await bot.sendMessage(
             msg.chat.id,
             `Агент ${agent.name} создан. Теперь измените его данные`,

@@ -39,7 +39,7 @@ export class AgentModel {
   topP: number;
 
   @ManyToOne(() => AgentGroup, (group) => group.agents, {
-    onDelete: 'CASCADE'
+    onDelete: "CASCADE",
   })
   @JoinColumn({
     name: "groupId",
@@ -55,7 +55,7 @@ export class AgentModel {
   @Column()
   groupId: number;
 
-  @Column('text', {
+  @Column("text", {
     nullable: true,
   })
   examplePrompt: string | null;

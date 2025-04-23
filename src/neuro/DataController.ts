@@ -83,7 +83,7 @@ export class DataController {
 
   private async dataCategory(user: User, category: string) {
     const cat = category as UserDataType;
-    const mapped = cat + "Data" as UserDataTypeMapped;
+    const mapped = (cat + "Data") as UserDataTypeMapped;
 
     if (user[mapped]) {
       await this.bot.bot.sendMessage(+user.chatId, map.get(cat)!);
@@ -102,8 +102,11 @@ export class DataController {
       );
     } else {
       user.waitingForData = cat;
-    await manager.save(user);
-    await this.bot.bot.sendMessage(+user.chatId, map.get(cat)! + "\n\n\nИнформацию можно будет поменять в любой момент.");
+      await manager.save(user);
+      await this.bot.bot.sendMessage(
+        +user.chatId,
+        map.get(cat)! + "\n\n\nИнформацию можно будет поменять в любой момент.",
+      );
     }
   }
 
@@ -127,8 +130,6 @@ export class DataController {
     user.currentAudioAgent = null;
     user.usingImageGeneration = false;
 
-
-
     await manager.save(user);
 
     for (const d of user.dialogs) {
@@ -139,9 +140,17 @@ export class DataController {
   }
 
   private async takeFromData(user: User) {
-    user.dialogueData = user.mainData + '\n' + user.careerData + '\n' + user.personalData + '\n' + user.businessData + '\n';
+    user.dialogueData =
+      user.mainData +
+      "\n" +
+      user.careerData +
+      "\n" +
+      user.personalData +
+      "\n" +
+      user.businessData +
+      "\n";
     await manager.save(user);
-    await this.bot.bot.sendMessage(+user.chatId, 'Данные заполнены!');
+    await this.bot.bot.sendMessage(+user.chatId, "Данные заполнены!");
   }
 
   private async changeData(user: User, category: string) {
@@ -149,11 +158,12 @@ export class DataController {
     await manager.save(user);
     await this.bot.bot.sendMessage(
       +user.chatId,
-      map.get(category as UserDataType)! + "\n\n\nИнформацию можно будет поменять в любой момент."
+      map.get(category as UserDataType)! +
+        "\n\n\nИнформацию можно будет поменять в любой момент.",
     );
   }
 
   private async leaveData(user: User) {
-    await this.bot.bot.sendMessage(user.chatId, "Данные оставлены");;
+    await this.bot.bot.sendMessage(user.chatId, "Данные оставлены");
   }
 }

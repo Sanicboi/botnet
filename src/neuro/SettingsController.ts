@@ -3,6 +3,26 @@ import { User } from "../entity/User";
 import { Btn } from "./utils";
 import { SupportedModels } from "../utils/Models";
 import { Bot } from "./Bot";
+import { OutputFormat } from "../utils/OutputFormat";
+
+let map: Map<string, string> = new Map();
+map.set(
+  "gpt-4o-mini",
+  "Уменьшенная версия GPT-4, оптимизированная для менее требовательных задач.",
+);
+map.set(
+  "gpt-4-turbo",
+  "Ускоренная версия GPT-4, предназначенная для быстрой работы в интерактивных приложениях.",
+);
+map.set(
+  "gpt-4o",
+  "Версия GPT-4, ориентированная на максимальное понимание контекста и мультизадачность.",
+);
+map.set("gpt-4.1", "Передовая модель GPT для сложных задач");
+map.set(
+  "o4-mini",
+  "Бюджетная версия OpenAI O4, заточенная под глубинное мышление.",
+);
 
 const manager = AppDataSource.manager;
 
@@ -12,6 +32,7 @@ export class SettingsController {
     this.bot.onSetting(this.setting.bind(this));
     this.bot.onModel(this.model.bind(this));
     this.bot.onCount(this.count.bind(this));
+    this.bot.onFormat(this.format.bind(this));
   }
 
   private async settings(user: User) {
@@ -20,6 +41,7 @@ export class SettingsController {
         inline_keyboard: [
           Btn("Изменить модель", "settings-model"),
           Btn("Подсчет токенов", "settings-count"),
+          Btn("Формат ответа", "settings-format"),
         ],
       },
     });
@@ -29,13 +51,15 @@ export class SettingsController {
     if (setting === "model") {
       await this.bot.bot.sendMessage(
         +user.chatId,
-        "[Подробнее о моделях](https://docs.google.com/document/d/1VkachN7pXjuVQ5ybHeZLoNLZ2hcXLAALbwIsDmXjtoc/edit)",
+        `Выбранная модель: ${user.model}\nДоступные модели:`,
         {
           reply_markup: {
             inline_keyboard: [
               Btn("GPT 4 Omni mini", "model-gpt-4o-mini"),
               Btn("GPT 4 Omni", "model-gpt-4o"),
               Btn("GPT 4 Turbo", "model-gpt-4-turbo"),
+              Btn("OpenAI o4 mini", "model-o4-mini"),
+              Btn("GPT 4.1", "model-gpt-4.1"),
               Btn("Назад", "settings"),
             ],
           },
@@ -57,6 +81,29 @@ export class SettingsController {
           },
         },
       );
+    } else if (setting === "format") {
+      await this.bot.bot.sendMessage(+user.chatId, `Выберите формат ответа:`, {
+        reply_markup: {
+          inline_keyboard: [
+            Btn(
+              `Стандартный (текст или документ html) ${user.outputFormat === "text" ? "✅" : ""}`,
+              "format-text",
+            ),
+            Btn(
+              `HTML ${user.outputFormat === "html" ? "✅" : ""}`,
+              "format-html",
+            ),
+            Btn(
+              `Документ Word ${user.outputFormat === "docx" ? "✅" : ""}`,
+              "format-docx",
+            ),
+            Btn(
+              `Аудио ${user.outputFormat === "audio" ? "✅" : ""}`,
+              "format-audio",
+            ),
+          ],
+        },
+      });
     }
   }
 
@@ -85,6 +132,21 @@ export class SettingsController {
             ),
             Btn("Назад", "settings"),
           ],
+        },
+      },
+    );
+  }
+
+  private async format(user: User, format: string) {
+    const f = format as OutputFormat;
+    user.outputFormat = f;
+    await manager.save(user);
+    await this.bot.bot.sendMessage(
+      +user.chatId,
+      `Формат ответа изменен на ${f}`,
+      {
+        reply_markup: {
+          inline_keyboard: [Btn("Назад", "settings")],
         },
       },
     );

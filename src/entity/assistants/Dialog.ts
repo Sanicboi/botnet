@@ -15,7 +15,7 @@ export class Dialog {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column('text', {
+  @Column("text", {
     default: null,
   })
   lastMsgId: string | null;
@@ -26,7 +26,7 @@ export class Dialog {
   firstMessage: string;
 
   @Column({
-    default: 0
+    default: 0,
   })
   msgCount: number;
 
