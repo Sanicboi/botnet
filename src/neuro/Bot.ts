@@ -3,8 +3,8 @@ import { User } from "../entity/User";
 import { AppDataSource } from "../data-source";
 import { FindOptionsRelations, RelationOptions } from "typeorm";
 import cron from "node-cron";
-import { Converter } from "./Converter";
 import { wait } from "../utils/wait";
+import { Converter } from "./bot/controllers/balance/Converter";
 
 const specialIds: number[] = [1, 2, 3];
 
@@ -87,6 +87,10 @@ export class Bot {
 
   public async addCQListener(listener: (q: CallbackQuery, user: User) => Promise<any>) {
     this.cqListeners.push(listener);
+  }
+
+  public async addFreeTextListener(listener: (msg: Message) => Promise<true | any>) {
+    this.freeTextListeners.push(listener);
   }
 
   public async getUser(

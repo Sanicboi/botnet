@@ -14,7 +14,14 @@ export class TextInputController implements IController {
     }
 
     public bind() {
-
+        this.bot.addFreeTextListener(async (msg) => {
+            const user = await this.bot.getUser(msg, {
+                model: true,
+                conversations: true,
+                agent: true
+            });
+            await this.onText(user, msg.text!);
+        })
     }
 
     
