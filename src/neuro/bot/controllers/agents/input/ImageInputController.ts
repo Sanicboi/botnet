@@ -6,17 +6,56 @@ import { BalanceController } from "../../balance/BalanceController";
 import { Converter } from "../../balance/Converter";
 import { OutputController } from "../output/OutputController";
 
-
+/**
+ * Контроллер ввода картинкой 
+ * 
+ * TODO: Не все модели обладают vision-ом. Надо подумать как реализовать проверку
+ */
 export class ImageInputController implements IController {
-    public bind() {}
+
+  /**
+   * привязка
+   */
+    public bind() {
+      this.bot.bot.on('photo', async (msg) => {
+        const user = await this.bot.getUser(msg, {
+          model: true,
+          agent: true,
+          conversations: true
+        });
+
+        if (!msg.photo || msg.photo.length === 0) return;
+
+
+        const photo = msg.photo.sort((a, b) => b.height * b.width - a.height * a.width)[0];
+
+        const url = await this.bot.bot.getFileLink(photo.file_id);
+
+        await this.onPhoto(user, url, msg.caption);
+
+      })
+    }
     
+    /**
+     * конструктор
+     * @param bot Бот
+     * @param balanceController контроллер баланса
+     * @param outputController контроллер вывода
+     */
       constructor(
         private bot: Bot,
         private balanceController: BalanceController,
         private outputController: OutputController
       ) {}
     
-      private async onDocument(user: User, url: string, caption?: string) {
+      /**
+       * Обработка фотографий
+       * @param user пользователь
+       * @param url адрес фото (из ТГ)
+       * @param caption подпись фото
+       * @returns ничего
+       */
+      private async onPhoto(user: User, url: string, caption?: string) {
         const limit = await this.balanceController.getLimit(user);
         if (!limit) return;
     

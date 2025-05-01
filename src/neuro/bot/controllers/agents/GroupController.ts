@@ -12,21 +12,21 @@ const manager = AppDataSource.manager;
 
 
 /**
- * This class manages the grouping of agents
+ * Занимается группировкой агентов
  */
 export class GroupController implements IController {
 
 
     /**
-     * Constructor
-     * @param bot Bot instance
+     * конструктор
+     * @param bot бот
      */
     constructor(private bot: Bot) {
 
     }
 
     /**
-     * Binds the controller to the bot
+     * привязка
      */
     public bind() {
         this.bot.bot.onText(/\/neuro/, async (msg) => {
@@ -43,9 +43,9 @@ export class GroupController implements IController {
     }
 
     /**
-     * Helper for mapping the groups to buttons
-     * @param groups Groups array
-     * @returns Buttons array
+     * Хэлпер
+     * @param groups Группы
+     * @returns Кнопки
      */
     private mapGroupsToButtons(groups: AgentGroup[]): InlineKeyboardButton[][] {
         return groups.map<InlineKeyboardButton[]>(el => Btn(el.name, `group-${el.id}`));
@@ -53,18 +53,18 @@ export class GroupController implements IController {
 
 
     /**
-     * Helper for mapping the agents to the buttons
-     * @param agents Agents array
-     * @returns Buttons array
+     * Хэлпер
+     * @param agents Агенты
+     * @returns Кнопки
      */
     private mapAgentsToButtons(agents: AgentModel[]): InlineKeyboardButton[][] {
         return agents.map<InlineKeyboardButton[]>(el => Btn(el.name, `agent-${el.id}`))
     }
 
     /**
-     * Helper to get the buttons of groups (1 or 2)
-     * @param number 1 or 2, even though typed as a number
-     * @returns Buttons array
+     * Хелпер
+     * @param number 1 или 2 (номер надгруппы)
+     * @returns кнопки
      */
     private async getGroupsButtons(number: number): Promise<InlineKeyboardButton[][]> {
         let result: InlineKeyboardButton[][] = [];
@@ -92,9 +92,9 @@ export class GroupController implements IController {
     }
 
     /**
-     * Handler for the groups events
-     * @param user User
-     * @param idx groups idx as a string
+     * Обработка надгрупп
+     * @param user пользователь
+     * @param idx индекс надгруппы (строка 1 или 2)
      */
     private async onGroups(chatId: number, idx: string) {
         await this.bot.bot.sendMessage(chatId, 'Выберите категорию сотрудников', {
@@ -105,9 +105,9 @@ export class GroupController implements IController {
     }
 
     /**
-     * Handler for the group events
-     * @param user User
-     * @param id group id as a string
+     * Обработка групп
+     * @param user пользователь
+     * @param id айди группы (строка)
      */
     private async onGroup(chatId: number, id: string) {
         const agents = await manager.find(AgentModel, {

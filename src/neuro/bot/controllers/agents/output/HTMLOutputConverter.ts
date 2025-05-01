@@ -3,15 +3,27 @@ import { User } from "../../../../../entity/User";
 import { api } from "../../../../apis/API";
 
 
-
+/**
+ * Конвертер текста в хтмл через гпт
+ */
 export class HTMLOutputConverter {
     
+
+    /**
+     * Пустой конструктор
+     */
     constructor() {
 
     }
 
 
-    public async convert(conversation: Conversation, user: User) {
+    /**
+     * Конвертация
+     * @param conversation Диалог
+     * @param user пользователь
+     * @returns результат конвертации (строка)
+     */
+    public async convert(conversation: Conversation, user: User): Promise<string> {
         const res = await api.run({
             api: 'openai',
             input: 'Преобразуй весь предыдущий диалог в отчет HTML (UTF-8). Сделай сайт красивым и созрани всю информацию.',

@@ -7,18 +7,45 @@ import { HTMLOutputConverter } from "./HTMLOutputConverter";
 //@ts-ignore
 import docx from 'html-to-docx';
 
+
+/**
+ * Контроллер вывода
+ * 
+ * отвечает за выбор формата вывода и за его применение к ответу ИИ
+ * TODO: добавить выбор формата ответа (был уже где-то) 
+ * TODO: может быть весь диалог не нужен, а нужно только последнее сообщение брать?
+ * TODO: это в предыдущей версии было. Нужно добавить, что, если в сообщении больше 4к слов и формат - текст, то оно автоматически конвертируется в хтмл
+ */
 export class OutputController implements IController {
 
+    /**
+     * Конвертер в хтмл
+     */
     private htmlConverter = new HTMLOutputConverter();
 
+
+    /**
+     * Конструктор
+     * @param bot бот 
+     */
     constructor(private bot: Bot) {
 
     }
 
+    /**
+     * Привязка
+     */
     public bind() {
 
     }
 
+    /**
+     * Метод конвертации и отправки результата
+     * @param data Вывод модели
+     * @param user Пользователь
+     * @param conversation Диалог. Нужен чтобы его представить в html, в случае с подобными форматами
+     * @returns ничего
+     */
     public async sendOutput(data: string, user: User, conversation: Conversation) {
         if (user.outputFormat === 'text') {
             return await this.bot.bot.sendMessage(+user.chatId, data);

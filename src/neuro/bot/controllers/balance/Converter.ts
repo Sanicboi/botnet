@@ -1,6 +1,14 @@
 import { AIModel } from "../../../../entity/AIModel";
 
 
+/**
+ * Конвертер валют
+ * USD - доллар
+ * RUB - рубль
+ * SMT - СмартТокен (полнейший развод если честно)
+ * TK - токен определенной модели
+ * Каждый метод имеет вид AB, переводит из A в B
+ */
 export class Converter {
   public static SMTUSD(smt: number): number {
     return this.RUBUSD(this.SMTRUB(smt));

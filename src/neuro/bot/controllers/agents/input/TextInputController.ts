@@ -7,12 +7,26 @@ import { Converter } from "../../balance/Converter";
 import { OutputController } from "../output/OutputController";
 
 
+
+
+/**
+ * Контролирует запуск ии-агента на текстовые вводные даннеы
+ */
 export class TextInputController implements IController {
 
+    /**
+     * Конструктор
+     * @param bot Бот
+     * @param balanceController Контроллер баланса 
+     * @param outputController Контроллер выхода
+     */
     constructor(private bot: Bot, private balanceController: BalanceController, private outputController: OutputController) {
 
     }
 
+    /**
+     * Привязка
+     */
     public bind() {
         this.bot.addFreeTextListener(async (msg) => {
             const user = await this.bot.getUser(msg, {
@@ -24,7 +38,12 @@ export class TextInputController implements IController {
         })
     }
 
-    
+    /**
+     * Собственно запуск модели на текстовые вводные данные
+     * @param user Пользователь
+     * @param text Текст сообщения
+     * @returns Ничего
+     */
     private async onText(user: User, text: string) {
 
         const limit = await this.balanceController.getLimit(user);
