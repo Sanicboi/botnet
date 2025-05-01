@@ -13,6 +13,8 @@ import { Dialog } from "./assistants/Dialog";
 import { DialogFile } from "./assistants/DialogFile";
 import { SupportedModels } from "../utils/Models";
 import { OutputFormat } from "../utils/OutputFormat";
+import { AIModel } from "./AIModel";
+import { Conversation } from "./Conversation";
 
 export type UserDataType = "main" | "personal" | "career" | "business";
 export type UserDataTypeMapped = `${UserDataType}Data`;
@@ -53,10 +55,6 @@ export class User {
   })
   imageRes: "1024x1024" | "1024x1792" | "1792x1024";
 
-  @Column({
-    default: "gpt-4o-mini",
-  })
-  model: SupportedModels;
 
   @Column({
     default: "none",
@@ -165,4 +163,12 @@ export class User {
     default: "text",
   })
   outputFormat: OutputFormat;
+
+  @ManyToOne(() => AIModel, (model) => model.users)
+  model: AIModel;
+
+  @ManyToOne(() => Conversation, (conversation) => conversation.user)
+  conversations: Conversation[];
+
+
 }

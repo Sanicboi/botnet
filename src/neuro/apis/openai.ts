@@ -1,0 +1,141 @@
+import OpenAI from "openai";
+import { IAgentsAPI, IResult, IRun } from "./AgentsAPI";
+import { FileUpload } from "../../entity/FileUpload";
+import { AppDataSource } from "../../data-source";
+import axios, { AxiosResponse } from "axios";
+import path from "path";
+
+const manager = AppDataSource.manager;
+
+export class OpenAIApi implements IAgentsAPI {
+
+    private openai: OpenAI = new OpenAI({
+        apiKey: process.env.OPENAI_KEYs
+    })
+
+    constructor() {
+
+    }
+
+
+    public async run(data: IRun): Promise<IResult> {
+        const input = await this.getInput(data);
+
+        const run = await this.openai.responses.create({
+            input,
+            model: data.model as OpenAI.AllModels,
+            max_output_tokens: data.maxTokens,
+            store: data.store,
+            previous_response_id: data.conversation ? data.conversation.apiId ?? undefined : undefined
+        });
+
+        return {
+            content: run.output_text,
+            conversationId: run.id,
+            tokens: run.usage!.total_tokens
+        }
+    };
+
+    public async createSpeech(text: string, voice: "alloy" | "ash" | "ballad" | "coral" | "echo" | "fable" | "onyx" | "nova" | "sage" | "shimmer" | "verse") {
+        const res = await this.openai.audio.speech.create({
+            input: text,
+            model: 'gpt-4o-mini-tts',
+            voice,
+        });
+        return res.arrayBuffer();
+    }
+    
+    private getDevMessage(data: IRun): OpenAI.Responses.ResponseInput {
+        return ((!data.conversation || !data.conversation.apiId) && data.instructions) ? [
+            {
+                role: 'developer',
+                type: 'message',
+                content: data.instructions
+            }
+        ] : [];
+    }
+
+    private async getInput(data: IRun): Promise<OpenAI.Responses.ResponseInput> {
+        if (data.type === 'text') return this.getTextInput(data);
+        if (data.type === 'image') return this.getImageInput(data);
+        return await this.getDocumentInput(data);
+    }
+
+    private getTextInput(data: IRun): OpenAI.Responses.ResponseInput {
+        const arr = this.getDevMessage(data)
+        arr.push({
+            role: 'user',
+            type: 'message',
+            content: data.input
+        });
+        return arr;
+    }
+
+    private async getDocumentInput(run: IRun): Promise<OpenAI.Responses.ResponseInput> {
+        if (!run.conversation) throw new Error("No conversation");
+        const {data}: AxiosResponse<Buffer> = await axios.get(run.input);
+        const upload = await this.openai.files.create({
+            file: new File([data], path.basename(run.input)),
+            purpose: 'user_data'
+        });
+        const f = new FileUpload();
+        f.id = upload.id;
+        f.storedIn = 'openai';
+        f.conversation = run.conversation;
+        f.extension = path.extname(run.input);
+        await manager.save(f);
+        run.conversation.files.push(f);
+
+        const arr = this.getDevMessage(run);
+        arr.push({
+            type: 'message',
+            role: 'user',
+            content: run.caption ? [
+                {
+                    type: 'input_file',
+                    file_id: f.id
+                },
+                {
+                    type: 'input_text',
+                    text: run.caption
+                }
+            ] : [
+                {
+                    type: 'input_file',
+                    file_id: f.id
+                }
+            ]
+        });
+        return arr;
+    }
+
+
+    private getImageInput(data: IRun): OpenAI.Responses.ResponseInput {
+        const arr = this.getDevMessage(data);
+        arr.push({
+            type: 'message',
+            role: 'user',
+            content: data.caption ? [
+                {
+                    type: 'input_image',
+                    image_url: data.input,
+                    detail: 'auto'
+                },
+                {
+                    type: 'input_text',
+                    text: data.caption
+                }
+            ] : [
+                {
+                    type: 'input_image',
+                    image_url: data.input,
+                    detail: 'auto'
+                }
+            ]
+        });
+        return arr;
+    }
+
+
+    
+}

@@ -9,6 +9,9 @@ import { wait } from "../utils/wait";
 const specialIds: number[] = [1, 2, 3];
 
 const manager = AppDataSource.manager;
+
+
+
 export class Bot {
   public readonly bot: TelegramBot;
 
@@ -82,7 +85,11 @@ export class Bot {
     });
   }
 
-  private async getUser(
+  public async addCQListener(listener: (q: CallbackQuery, user: User) => Promise<any>) {
+    this.cqListeners.push(listener);
+  }
+
+  public async getUser(
     qOrMsg: {
       from?: {
         id: number;

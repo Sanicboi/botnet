@@ -61,7 +61,7 @@ interface IInputData {
  * - After creation, the instance has to be initialized
  * - The class has one static method to facilitate image generation
  * - The agent class IS NOT RESPONSIBLE for managing conversation state, models and token counting - it is the consumer`s responsibility
- * - As for now, the class is dependent on OpenAI. In near future, it will be rebuilt to account for claude/mixtral
+ * - As for now, the class is dependent on OpenAI. In the near future, it will be rebuilt to account for claude/mixtral
  * - Handoffs are also in development - possibly even cross-platform
  * - The class only adds files to dialogs - nothing more
  */
