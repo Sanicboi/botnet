@@ -2,19 +2,17 @@ import { Column, Entity, ManyToOne, PrimaryColumn } from "typeorm";
 import { supportedAPIs } from "../neuro/apis/supportedModels";
 import { Conversation } from "./Conversation";
 
-
 @Entity()
 export class FileUpload {
+  @PrimaryColumn()
+  id: string;
 
-    @PrimaryColumn()
-    id: string;
+  @Column()
+  storedIn: supportedAPIs;
 
-    @Column()
-    storedIn: supportedAPIs;
-    
-    @Column()
-    extension: string;
+  @Column()
+  extension: string;
 
-    @ManyToOne(() => Conversation, (conversation) => conversation.files)
-    conversation: Conversation;
+  @ManyToOne(() => Conversation, (conversation) => conversation.files)
+  conversation: Conversation;
 }

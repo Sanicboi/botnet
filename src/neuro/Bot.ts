@@ -10,8 +10,6 @@ const specialIds: number[] = [1, 2, 3];
 
 const manager = AppDataSource.manager;
 
-
-
 export class Bot {
   public readonly bot: TelegramBot;
 
@@ -85,11 +83,15 @@ export class Bot {
     });
   }
 
-  public async addCQListener(listener: (q: CallbackQuery, user: User) => Promise<any>) {
+  public async addCQListener(
+    listener: (q: CallbackQuery, user: User) => Promise<any>,
+  ) {
     this.cqListeners.push(listener);
   }
 
-  public async addFreeTextListener(listener: (msg: Message) => Promise<true | any>) {
+  public async addFreeTextListener(
+    listener: (msg: Message) => Promise<true | any>,
+  ) {
     this.freeTextListeners.push(listener);
   }
 
@@ -535,24 +537,6 @@ export class Bot {
         await f(user, msg.text!);
         return true;
       }
-    });
-  }
-
-  public onAbout(f: (id: number) => Promise<any>) {
-    this.bot.onText(/\/about/, async (msg) => {
-      await f(msg.from!.id);
-    });
-  }
-
-  public onHelp(f: (id: number) => Promise<any>) {
-    this.bot.onText(/\/help/, async (msg) => {
-      await f(msg.from!.id);
-    });
-  }
-
-  public onTerms(f: (id: number) => Promise<any>) {
-    this.bot.onText(/\/terms/, async (msg) => {
-      await f(msg.from!.id);
     });
   }
 

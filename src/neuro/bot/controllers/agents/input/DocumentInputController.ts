@@ -5,26 +5,25 @@ import { IController } from "../../../Controller";
 import { BalanceController } from "../../balance/BalanceController";
 import { Converter } from "../../balance/Converter";
 import { OutputController } from "../output/OutputController";
-
+import { TokenCountingController } from "../TokenCountingController";
 
 /**
  * Контроллер ввода документом
  */
 export class DocumentInputController implements IController {
-    
   public bind() {
-    this.bot.bot.on('document', async (msg) => {
-        if (!msg.document) return;
-        const user = await this.bot.getUser(msg, {
-            conversations: true,
-            model: true,
-            agent: true
-        });
+    this.bot.bot.on("document", async (msg) => {
+      if (!msg.document) return;
+      const user = await this.bot.getUser(msg, {
+        conversations: true,
+        model: true,
+        agent: true,
+      });
 
-        const url = await this.bot.bot.getFileLink(msg.document.file_id);
+      const url = await this.bot.bot.getFileLink(msg.document.file_id);
 
-        await this.onDocument(user, url, msg.caption);
-    })
+      await this.onDocument(user, url, msg.caption);
+    });
   }
 
   /**
@@ -36,9 +35,8 @@ export class DocumentInputController implements IController {
   constructor(
     private bot: Bot,
     private balanceController: BalanceController,
-    private outputController: OutputController
+    private outputController: OutputController,
   ) {}
-
 
   /**
    * Обработка ввода документом
@@ -69,9 +67,14 @@ export class DocumentInputController implements IController {
 
     await this.balanceController.subtractCost(
       Converter.TKRUB(result.tokens, user.model),
-      user
+      user,
     );
 
-    await this.outputController.sendOutput(result.content, user, conv);
+    await this.outputController.sendOutput(
+      result.content,
+      user,
+      conv,
+      result.tokens,
+    );
   }
 }

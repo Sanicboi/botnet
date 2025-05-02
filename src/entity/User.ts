@@ -55,7 +55,6 @@ export class User {
   })
   imageRes: "1024x1024" | "1024x1792" | "1792x1024";
 
-
   @Column({
     default: "none",
   })
@@ -169,6 +168,4 @@ export class User {
 
   @ManyToOne(() => Conversation, (conversation) => conversation.user)
   conversations: Conversation[];
-
-
 }

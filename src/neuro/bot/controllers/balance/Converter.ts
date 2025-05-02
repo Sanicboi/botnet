@@ -1,6 +1,5 @@
 import { AIModel } from "../../../../entity/AIModel";
 
-
 /**
  * Конвертер валют
  * USD - доллар
@@ -62,11 +61,7 @@ export class Converter {
     return this.USDTK(this.RUBUSD(rub), model);
   }
 
-  public static TKTK(
-    tk1: number,
-    m1: AIModel,
-    m2: AIModel,
-  ): number {
+  public static TKTK(tk1: number, m1: AIModel, m2: AIModel): number {
     return this.USDTK(this.TKUSD(tk1, m1), m2);
   }
 }

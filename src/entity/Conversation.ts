@@ -1,32 +1,35 @@
-import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from "typeorm";
 import { FileUpload } from "./FileUpload";
 import { User } from "./User";
 import { supportedAPIs } from "../neuro/apis/supportedModels";
 
-
-
 @Entity()
 export class Conversation {
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @PrimaryGeneratedColumn()
-    id: number;
+  @Column({
+    default: "",
+  })
+  apiId: string;
 
-    @Column({
-        default: ''
-    })
-    apiId: string;
+  @Column()
+  api: supportedAPIs;
 
-    @Column()
-    api: supportedAPIs;
+  @Column({
+    default: true,
+  })
+  active: boolean;
 
-    @Column({
-        default: true
-    })
-    active: boolean;
+  @OneToMany(() => FileUpload, (file) => file.conversation)
+  files: FileUpload[];
 
-    @OneToMany(() => FileUpload, (file) => file.conversation)
-    files: FileUpload[];
-
-    @ManyToOne(() => User, (user) => user.conversations)
-    user: User;
+  @ManyToOne(() => User, (user) => user.conversations)
+  user: User;
 }

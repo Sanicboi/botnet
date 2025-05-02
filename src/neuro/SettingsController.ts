@@ -38,12 +38,15 @@ GPT-4 Omni
 - Цена: 🟢🟡🟡🟡🟡 (1)
   `,
 );
-map.set("gpt-4.1", `
+map.set(
+  "gpt-4.1",
+  `
   Передовая модель GPT для сложных задач
   - Ум: 🟢🟢🟢🟢🟢 (5)
   - Скорость: 🟢🟢🟢🟢🟡 (4)
   - Цена: 🟢🟢🟢🟡🟡 (3)
-  `);
+  `,
+);
 map.set(
   "o4-mini",
   `Бюджетная версия OpenAI O4, заточенная под глубинное мышление.
@@ -84,11 +87,26 @@ export class SettingsController {
         {
           reply_markup: {
             inline_keyboard: [
-              Btn(`GPT 4 Omni mini ${user.model === 'gpt-4o-mini' ? '✅' : ''}`, "model-gpt-4o-mini"),
-              Btn(`GPT 4 Omni ${user.model === 'gpt-4o' ? '✅' : ''}`, "model-gpt-4o"),
-              Btn(`GPT 4 Turbo ${user.model === 'gpt-4-turbo' ? '✅' : ''}`, "model-gpt-4-turbo"),
-              Btn(`OpenAI o4 mini ${user.model === 'o4-mini' ? '✅' : ''}`, "model-o4-mini"),
-              Btn(`GPT 4.1 ${user.model === 'gpt-4.1' ? '✅' : ''}`, "model-gpt-4.1"),
+              Btn(
+                `GPT 4 Omni mini ${user.model === "gpt-4o-mini" ? "✅" : ""}`,
+                "model-gpt-4o-mini",
+              ),
+              Btn(
+                `GPT 4 Omni ${user.model === "gpt-4o" ? "✅" : ""}`,
+                "model-gpt-4o",
+              ),
+              Btn(
+                `GPT 4 Turbo ${user.model === "gpt-4-turbo" ? "✅" : ""}`,
+                "model-gpt-4-turbo",
+              ),
+              Btn(
+                `OpenAI o4 mini ${user.model === "o4-mini" ? "✅" : ""}`,
+                "model-o4-mini",
+              ),
+              Btn(
+                `GPT 4.1 ${user.model === "gpt-4.1" ? "✅" : ""}`,
+                "model-gpt-4.1",
+              ),
               Btn("Назад", "settings"),
             ],
           },
