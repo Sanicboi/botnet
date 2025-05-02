@@ -27,6 +27,11 @@ export class Conversation {
   })
   active: boolean;
 
+  @Column({
+    default: false
+  })
+  featured: boolean;
+
   @OneToMany(() => FileUpload, (file) => file.conversation)
   files: FileUpload[];
 

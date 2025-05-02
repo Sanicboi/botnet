@@ -4,6 +4,7 @@ import { FileUpload } from "../../entity/FileUpload";
 import { AppDataSource } from "../../data-source";
 import axios, { AxiosResponse } from "axios";
 import path from "path";
+import { Conversation } from "../../entity/Conversation";
 
 const manager = AppDataSource.manager;
 
@@ -55,6 +56,16 @@ export class OpenAIApi implements IAgentsAPI {
       voice,
     });
     return res.arrayBuffer();
+  }
+
+  public async getConversationTopic(conversation: Conversation): Promise<string> {
+    const res = await this.openai.responses.create({
+      input: 'Дай тему предыдущего диалога',
+      previous_response_id: conversation.apiId,
+      model: 'gpt-4o-mini',
+      store: false
+    })
+    return res.output_text;
   }
 
   private getDevMessage(data: IRun): OpenAI.Responses.ResponseInput {

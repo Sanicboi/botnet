@@ -15,11 +15,9 @@ export class Bot {
 
   private cqListeners: ((
     q: CallbackQuery,
-    user: User,
   ) => Promise<true | any>)[] = [];
   private freeTextListeners: ((
     msg: Message,
-    user: User,
   ) => Promise<true | any>)[] = [];
   private voiceListeners: ((
     msg: Message,
@@ -84,7 +82,7 @@ export class Bot {
   }
 
   public async addCQListener(
-    listener: (q: CallbackQuery, user: User) => Promise<any>,
+    listener: (q: CallbackQuery) => Promise<any>,
   ) {
     this.cqListeners.push(listener);
   }
@@ -102,14 +100,7 @@ export class Bot {
       };
       text?: string;
     },
-    relations: FindOptionsRelations<User> = {
-      agent: true,
-      dialogs: {
-        agent: {
-          group: true,
-        },
-      },
-    },
+    relations: FindOptionsRelations<User> = {},
   ): Promise<User> {
     console.log(String(qOrMsg.from!.id));
     let user = await manager.findOne(User, {

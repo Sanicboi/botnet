@@ -26,7 +26,8 @@ export class GroupController implements IController {
     this.bot.bot.onText(/\/neuro/, async (msg) => {
       await this.onGroups(msg.from!.id, "1");
     });
-    this.bot.addCQListener(async (q, user) => {
+    this.bot.addCQListener(async (q) => {
+      const user = await this.bot.getUser(q);
       if (q.data?.startsWith("groups-")) {
         await this.onGroups(+user.chatId, q.data.substring(7));
       }
