@@ -138,6 +138,10 @@ export class OpenAIApi implements IAgentsAPI {
     return arr;
   }
 
+  public async deleteFile(id: string) {
+    await this.openai.files.del(id);
+  }
+
   private getImageInput(data: IRun): OpenAI.Responses.ResponseInput {
     const arr = this.getDevMessage(data);
     arr.push({

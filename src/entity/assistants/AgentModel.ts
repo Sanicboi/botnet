@@ -9,6 +9,7 @@ import {
 import { AgentGroup } from "./AgentGroup";
 import { User } from "../User";
 import { Dialog } from "./Dialog";
+import { Conversation } from "../Conversation";
 
 @Entity()
 export class AgentModel {
@@ -49,8 +50,8 @@ export class AgentModel {
   @OneToMany(() => User, (user) => user.agent)
   users: User[];
 
-  @OneToMany(() => Dialog, (dialog) => dialog.agent)
-  dialogs: Dialog[];
+  @OneToMany(() => Conversation, (conversation) => conversation.agent)
+  conversations: Conversation[];
 
   @Column()
   groupId: number;

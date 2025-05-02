@@ -18,6 +18,11 @@ class API {
     if (user.model.api === 'openai') return await this.openai.getConversationTopic(conversation);
     throw new Error("API not found");
   }
+
+  public async deleteFile(id: string, api: supportedAPIs) {
+    if (api === 'openai') return await this.openai.deleteFile(id);
+    throw new Error("Api not found");
+  }
 }
 
 export const api = new API();
