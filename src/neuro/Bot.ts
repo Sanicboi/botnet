@@ -137,201 +137,7 @@ export class Bot {
     });
   }
 
-  public onGenerateImage(f: (user: User, text: string) => Promise<any>) {
-    this.freeTextListeners.push(async (msg, user) => {
-      if (user.usingImageGeneration) {
-        await f(user, msg.text!);
-        return true;
-      }
-    });
-  }
 
-  public onEnterImage(f: (user: User) => Promise<any>) {
-    this.cqListeners.push(async (q, user) => {
-      if (q.data === "images") {
-        await f(user);
-      }
-    });
-  }
-
-  public onSetResolution(f: (user: User, res: string) => Promise<any>) {
-    this.cqListeners.push(async (q, user) => {
-      if (q.data?.startsWith("res-")) {
-        await f(user, q.data.substring(4));
-      }
-    });
-  }
-
-  public onCalculateCosts(f: (user: User, url: string) => Promise<any>) {
-    this.bot.on("audio", async (msg) => {
-      if (!msg.audio) return;
-      const user = await this.getUser(msg);
-      const url = await this.bot.getFileLink(msg.audio.file_id);
-      await f(user, url);
-    });
-  }
-
-  public onTranscribeSaved(f: (user: User, id: string) => Promise<any>) {
-    this.cqListeners.push(async (q, user) => {
-      if (
-        q.data?.startsWith("transcription-") &&
-        user.currentAudioAgent === "transcriber"
-      ) {
-        await f(user, q.data.substring(14));
-      }
-    });
-  }
-
-  public onSummarize(f: (user: User, id: string) => Promise<any>) {
-    this.cqListeners.push(async (q, user) => {
-      if (
-        q.data?.startsWith("transcription-") &&
-        user.currentAudioAgent === "summarizer"
-      ) {
-        await f(user, q.data.substring(14));
-      }
-    });
-  }
-
-  public onSummarizer(f: (user: User) => Promise<any>) {
-    this.cqListeners.push(async (q, user) => {
-      if (q.data === "audiosum") {
-        await f(user);
-      }
-    });
-  }
-
-  public onTranscriber(f: (user: User) => Promise<any>) {
-    this.cqListeners.push(async (q, user) => {
-      if (q.data === "audio") {
-        await f(user);
-      }
-    });
-  }
-
-  public onTranscribeNonSaved(f: (user: User, url: string) => Promise<any>) {
-    this.voiceListeners.push(async (msg, user) => {
-      if (user.currentAudioAgent === "transcriber") {
-        const url = await this.bot.getFileLink(msg.voice!.file_id);
-        await f(user, url);
-      }
-    });
-  }
-
-  public onVoiceInput(f: (user: User, url: string) => Promise<any>) {
-    this.voiceListeners.push(async (msg, user) => {
-      if (user.agentId !== 0) {
-        const url = await this.bot.getFileLink(msg.voice!.file_id);
-        await f(user, url);
-      }
-    });
-  }
-
-  public onCopyWriterStyle(f: (user: User, style: string) => Promise<any>) {
-    this.cqListeners.push(async (q, user) => {
-      if (q.data?.startsWith("textstyle-")) {
-        await f(user, q.data.substring(10));
-      }
-    });
-  }
-
-  public onCopyWriterTone(f: (user: User, tone: string) => Promise<any>) {
-    this.cqListeners.push(async (q, user) => {
-      if (q.data?.startsWith("texttone-")) {
-        await f(user, q.data.substring(9));
-      }
-    });
-  }
-
-  public onOfferSizes(f: (user: User) => Promise<any>) {
-    this.cqListeners.push(async (q, user) => {
-      if (q.data === "agent-2") {
-        await f(user);
-      }
-    });
-  }
-
-  public onOfferSize(f: (user: User, size: string) => Promise<any>) {
-    this.cqListeners.push(async (q, user) => {
-      if (q.data?.startsWith("offersize-")) {
-        await f(user, q.data.substring(10));
-      }
-    });
-  }
-
-  public onOfferModel(f: (user: User, model: string) => Promise<any>) {
-    this.cqListeners.push(async (q, user) => {
-      if (q.data?.startsWith("offermodel-")) {
-        await f(user, q.data.substring(11));
-      }
-    });
-  }
-
-  public onPostTypes(f: (user: User) => Promise<any>) {
-    this.cqListeners.push(async (q, user) => {
-      if (q.data === "agent-2") {
-        await f(user);
-      }
-    });
-  }
-
-  public onPostType(f: (user: User, type: string) => Promise<any>) {
-    this.cqListeners.push(async (q, user) => {
-      if (q.data?.startsWith("posttype-")) {
-        await f(user, q.data.substring(9));
-      }
-    });
-  }
-
-  public onPostStyle(
-    f: (user: User, style: string, msgId: number) => Promise<any>,
-  ) {
-    this.cqListeners.push(async (q, user) => {
-      if (q.data?.startsWith("poststyle-")) {
-        await f(user, q.data.substring(10), q.message!.message_id);
-      }
-    });
-  }
-
-  public onPostStylesConfirm(f: (user: User) => Promise<any>) {
-    this.cqListeners.push(async (q, user) => {
-      if (q.data === "poststyles-confirm") {
-        await f(user);
-      }
-    });
-  }
-
-  public onPostStylesReject(f: (user: User) => Promise<any>) {
-    this.cqListeners.push(async (q, user) => {
-      if (q.data === "poststyles-reject") {
-        await f(user);
-      }
-    });
-  }
-
-  public onModel(f: (user: User, model: string) => Promise<any>) {
-    this.cqListeners.push(async (q, user) => {
-      if (q.data?.startsWith("model-")) {
-        await f(user, q.data.substring(6));
-      }
-    });
-  }
-
-  public onCount(f: (user: User) => Promise<any>) {
-    this.cqListeners.push(async (q, user) => {
-      if (q.data === "toggle-count") {
-        await f(user);
-      }
-    });
-  }
-
-  public onFormat(f: (user: User, format: string) => Promise<any>) {
-    this.cqListeners.push(async (q, user) => {
-      if (q.data?.startsWith("format-")) {
-        await f(user, q.data.substring(7));
-      }
-    });
-  }
 
   public setListeners() {
     this.bot.on("callback_query", async (q) => {
@@ -344,9 +150,8 @@ export class Bot {
           await this.bot.deleteMessage(q.from.id, q.message?.message_id);
         }
         await wait(0.5);
-        const user = await this.getUser(q);
         for (const f of this.cqListeners) {
-          const result = await f(q, user);
+          const result = await f(q);
           if (result === true) break;
         }
       } catch (e) {
@@ -356,9 +161,8 @@ export class Bot {
     this.bot.onText(/./, async (msg) => {
       try {
         if (msg.text && !msg.text.startsWith("/")) {
-          const user = await this.getUser(msg);
           for (const f of this.freeTextListeners) {
-            const result = await f(msg, user);
+            const result = await f(msg);
             if (result === true) break;
           }
         }
