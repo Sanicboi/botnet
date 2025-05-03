@@ -58,13 +58,15 @@ export class OpenAIApi implements IAgentsAPI {
     return res.arrayBuffer();
   }
 
-  public async getConversationTopic(conversation: Conversation): Promise<string> {
+  public async getConversationTopic(
+    conversation: Conversation,
+  ): Promise<string> {
     const res = await this.openai.responses.create({
-      input: 'Дай тему предыдущего диалога',
+      input: "Дай тему предыдущего диалога",
       previous_response_id: conversation.apiId,
-      model: 'gpt-4o-mini',
-      store: false
-    })
+      model: "gpt-4o-mini",
+      store: false,
+    });
     return res.output_text;
   }
 
@@ -140,6 +142,73 @@ export class OpenAIApi implements IAgentsAPI {
 
   public async deleteFile(id: string) {
     await this.openai.files.del(id);
+  }
+
+  public async getConversation(id: string): Promise<
+    {
+      role: "user" | "assistant";
+      content: string;
+    }[]
+  > {
+    const res = await this.openai.responses.retrieve(id);
+    const inputs = await this.openai.responses.inputItems.list(id);
+    let result: {
+      role: "user" | "assistant";
+      content: string;
+    }[] = [];
+
+    for (const input of inputs.data) {
+      if (input.type === "message") {
+        if (input.role === "assistant") {
+          result.push({
+            role: "assistant",
+            content: this.assistantContentToString(input.content),
+          });
+        } else if (input.role === "user") {
+          result.push({
+            role: "user",
+            content: this.userContentToString(input.content),
+          });
+        }
+      }
+    }
+    result.push({
+      role: "assistant",
+      content: res.output_text,
+    });
+
+    return result;
+  }
+
+  private assistantContentToString(
+    content: (
+      | OpenAI.Responses.ResponseOutputText
+      | OpenAI.Responses.ResponseOutputRefusal
+    )[],
+  ): string {
+    let result = "";
+    for (const c of content) {
+      if (c.type === "output_text") {
+        result += c.text + "\n";
+      }
+    }
+    return result;
+  }
+
+  private userContentToString(
+    content: OpenAI.Responses.ResponseInputMessageContentList,
+  ) {
+    let result = "";
+    for (const c of content) {
+      if (c.type === "input_file") {
+        result += "[Файл]\n";
+      } else if (c.type === "input_image") {
+        result += "[Картинка]\n";
+      } else {
+        result += c.text + "\n";
+      }
+    }
+    return result;
   }
 
   private getImageInput(data: IRun): OpenAI.Responses.ResponseInput {

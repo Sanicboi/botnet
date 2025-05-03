@@ -26,8 +26,8 @@ export class ModelController implements IController {
   public bind() {
     this.bot.addCQListener(async (q) => {
       const user = await this.bot.getUser(q, {
-        model: true
-      })
+        model: true,
+      });
       if (q.data?.startsWith("api-")) {
         await this.onSelectAPI(user, q.data.substring(4), false);
       }

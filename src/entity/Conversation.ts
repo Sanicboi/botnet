@@ -30,7 +30,7 @@ export class Conversation {
   active: boolean;
 
   @Column({
-    default: false
+    default: false,
   })
   featured: boolean;
 
@@ -41,10 +41,9 @@ export class Conversation {
   files: FileUpload[];
 
   @Column({
-    default: 0
+    default: 0,
   })
   msgCount: number;
-
 
   @ManyToOne(() => AgentModel, (agent) => agent.conversations)
   agent: AgentModel;

@@ -14,14 +14,31 @@ class API {
     throw new Error("API not found");
   }
 
-  public async conversationTopic(user: User, conversation: Conversation): Promise<string> {
-    if (user.model.api === 'openai') return await this.openai.getConversationTopic(conversation);
+  public async conversationTopic(
+    user: User,
+    conversation: Conversation,
+  ): Promise<string> {
+    if (user.model.api === "openai")
+      return await this.openai.getConversationTopic(conversation);
     throw new Error("API not found");
   }
 
   public async deleteFile(id: string, api: supportedAPIs) {
-    if (api === 'openai') return await this.openai.deleteFile(id);
+    if (api === "openai") return await this.openai.deleteFile(id);
     throw new Error("Api not found");
+  }
+
+  public async getConversation(
+    id: string,
+    api: supportedAPIs,
+  ): Promise<
+    {
+      role: "user" | "assistant";
+      content: string;
+    }[]
+  > {
+    if (api === "openai") return await this.openai.getConversation(id);
+    throw new Error("API not found");
   }
 }
 

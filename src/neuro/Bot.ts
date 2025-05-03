@@ -13,12 +13,8 @@ const manager = AppDataSource.manager;
 export class Bot {
   public readonly bot: TelegramBot;
 
-  private cqListeners: ((
-    q: CallbackQuery,
-  ) => Promise<true | any>)[] = [];
-  private freeTextListeners: ((
-    msg: Message,
-  ) => Promise<true | any>)[] = [];
+  private cqListeners: ((q: CallbackQuery) => Promise<true | any>)[] = [];
+  private freeTextListeners: ((msg: Message) => Promise<true | any>)[] = [];
   private voiceListeners: ((
     msg: Message,
     user: User,
@@ -81,9 +77,7 @@ export class Bot {
     });
   }
 
-  public async addCQListener(
-    listener: (q: CallbackQuery) => Promise<any>,
-  ) {
+  public async addCQListener(listener: (q: CallbackQuery) => Promise<any>) {
     this.cqListeners.push(listener);
   }
 
