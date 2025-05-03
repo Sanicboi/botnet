@@ -229,6 +229,7 @@ export class ConversationController implements IController {
   }
 
   private async onContinueConversation(user: User, id: number) {
+    await this.markAllAsInactive(user);
     const conversation = user.conversations.find((el) => el.id === id);
     if (!conversation) return;
     user.agent = conversation.agent;

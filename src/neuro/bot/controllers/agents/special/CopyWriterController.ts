@@ -6,6 +6,7 @@ import { Bot } from "../../../../Bot";
 import { Btn } from "../../../../utils";
 import { IController } from "../../../Controller";
 import { ConversationController } from "../conversations/ConversationController";
+import { DataController } from "../DataController";
 import { ModelController } from "../ModelController";
 
 const manager = AppDataSource.manager;
@@ -25,11 +26,13 @@ export class CopyWriterController implements IController {
     private bot: Bot,
     private modelController: ModelController,
     private conversationController: ConversationController,
+    private dataController: DataController,
   ) {}
 
   public bind() {}
 
   private async onStyles(user: User) {
+    await this.dataController.resetData(user);
     user.agent = new AgentModel();
     user.agent.id = this._id;
 

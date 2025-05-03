@@ -8,6 +8,7 @@ import { IController } from "../../../Controller";
 import { ModelController } from "../ModelController";
 import { Conversation } from "../../../../../entity/Conversation";
 import { ConversationController } from "../conversations/ConversationController";
+import { DataController } from "../DataController";
 
 const manager = AppDataSource.manager;
 
@@ -21,11 +22,13 @@ export class PostCreatorController implements IController {
     private bot: Bot,
     private modelController: ModelController,
     private conversationController: ConversationController,
+    private dataController: DataController,
   ) {}
 
   public bind() {}
 
   private async onTypes(user: User) {
+    await this.dataController.resetData(user);
     user.agent = new AgentModel();
     user.agent.id = this._id;
 

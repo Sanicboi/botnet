@@ -7,6 +7,8 @@ import { Btn } from "../../../utils";
 import { IController } from "../../Controller";
 import { BalanceController } from "../balance/BalanceController";
 import { ConversationController } from "./conversations/ConversationController";
+import { DataController } from "./DataController";
+import { GroupController } from "./GroupController";
 import { InputController } from "./InputController";
 import { ModelController } from "./ModelController";
 import { OutputController } from "./output/OutputController";
@@ -31,25 +33,31 @@ export class AgentController implements IController {
   private balanceController: BalanceController;
   private tokenCountingController: TokenCountingController;
   private outputController: OutputController;
+  private groupController: GroupController;
   private inputController: InputController;
+  private dataController: DataController;
 
   constructor(private bot: Bot) {
+    this.dataController = new DataController(this.bot);
     this.modelController = new ModelController(this.bot);
     this.conversationController = new ConversationController(this.bot);
     this.copyWriterController = new CopyWriterController(
       this.bot,
       this.modelController,
       this.conversationController,
+      this.dataController,
     );
     this.postCreatorController = new PostCreatorController(
       this.bot,
       this.modelController,
       this.conversationController,
+      this.dataController,
     );
     this.offerCreatorController = new OfferCreatorController(
       this.bot,
       this.modelController,
       this.conversationController,
+      this.dataController,
     );
     this.balanceController = new BalanceController(this.bot);
     this.tokenCountingController = new TokenCountingController(this.bot);
@@ -57,6 +65,8 @@ export class AgentController implements IController {
       this.bot,
       this.tokenCountingController,
     );
+    this.groupController = new GroupController(this.bot);
+
     this.inputController = new InputController(
       this.bot,
       this.balanceController,
@@ -71,9 +81,22 @@ export class AgentController implements IController {
     this.offerCreatorController.bind();
     this.postCreatorController.bind();
     this.tokenCountingController.bind();
+    this.groupController.bind();
+
+    this.bot.addCQListener(async (q) => {
+      if (q.data?.startsWith("agent-")) {
+        const user = await this.bot.getUser(q, {
+          conversations: true,
+          agent: true,
+        });
+        await this.onStartConversation(user, +q.data.substring(6));
+      }
+    });
+
+    this.inputController.bind();
   }
 
-  private async startConversation(user: User, agentId: number) {
+  private async onStartConversation(user: User, agentId: number) {
     if (agentId <= 3) return; // это обработают другие контроллеры
 
     await this.conversationController.markAllAsInactive(user);
@@ -95,7 +118,7 @@ export class AgentController implements IController {
     await this.bot.bot.sendMessage(+user.chatId, agent.firstMessage, {
       reply_markup: {
         inline_keyboard: agent.examplePrompt
-          ? [Btn('Взять информацию из раздела "Обо мне"', "take-data")]
+          ? [Btn('Взять информацию из раздела "Обо мне"', "from-data")]
           : [],
       },
     });

@@ -33,6 +33,7 @@ export class TextInputController implements IController {
         agent: true,
       });
       await this.onText(user, msg.text!);
+      return true;
     });
   }
 
