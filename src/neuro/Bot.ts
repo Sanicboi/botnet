@@ -227,42 +227,6 @@ export class Bot {
     });
   }
 
-  public onFreeTokens(f: (user: User) => Promise<any>) {
-    this.bot.onText(/\/free/, async (msg) => {
-      const user = await this.getUser(msg);
-      await f(user);
-    });
-  }
-
-  public onPromoCode(f: (user: User, promo: string) => Promise<any>) {
-    this.freeTextListeners.push(async (msg, user) => {
-      if (user.waitingForPromo) {
-        await f(user, msg.text!);
-        return true;
-      }
-    });
-  }
-
-  public onBalance(f: (user: User) => Promise<any>) {
-    this.bot.onText(/\/balance/, async (msg) => {
-      const user = await this.getUser(msg);
-      await f(user);
-    });
-    this.cqListeners.push(async (q, user) => {
-      if (q.data === "balance") {
-        await f(user);
-      }
-    });
-  }
-
-  public onCopyWriterStyles(f: (user: User) => Promise<any>) {
-    this.cqListeners.push(async (q, user) => {
-      if (q.data === "agent-1") {
-        await f(user);
-      }
-    });
-  }
-
   public onCopyWriterStyle(f: (user: User, style: string) => Promise<any>) {
     this.cqListeners.push(async (q, user) => {
       if (q.data?.startsWith("textstyle-")) {

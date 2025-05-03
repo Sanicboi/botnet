@@ -25,7 +25,40 @@ export class PostCreatorController implements IController {
     private dataController: DataController,
   ) {}
 
-  public bind() {}
+  public bind() {
+    this.bot.addCQListener(async (q) => {
+      if (q.data === "agent-3") {
+        const user = await this.bot.getUser(q, {
+          conversations: true,
+          agent: true,
+        });
+        await this.onTypes(user);
+      }
+
+      if (q.data?.startsWith("posttype-")) {
+        const user = await this.bot.getUser(q);
+        await this.onType(user, q.data.substring(9));
+      }
+
+      if (q.data?.startsWith("poststyle-")) {
+        const user = await this.bot.getUser(q);
+        await this.onStyle(user, q.data.substring(10), q.message!.message_id);
+      }
+
+      if (q.data === "poststyles-confirm") {
+        const user = await this.bot.getUser(q, {
+          conversations: true,
+          agent: true,
+        });
+        await this.onConfirmStyles(user);
+      }
+
+      if (q.data === "poststyles-reject") {
+        const user = await this.bot.getUser(q);
+        await this.onRejectStyles(user);
+      }
+    });
+  }
 
   private async onTypes(user: User) {
     await this.dataController.resetData(user);

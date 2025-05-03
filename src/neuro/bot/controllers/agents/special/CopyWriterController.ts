@@ -29,7 +29,30 @@ export class CopyWriterController implements IController {
     private dataController: DataController,
   ) {}
 
-  public bind() {}
+  public bind() {
+    this.bot.addCQListener(async (q) => {
+      if (q.data === "agent-1") {
+        const user = await this.bot.getUser(q, {
+          conversations: true,
+          agent: true,
+        });
+        await this.onStyles(user);
+      }
+
+      if (q.data?.startsWith("textstyle-")) {
+        const user = await this.bot.getUser(q);
+        await this.onStyle(user, q.data.substring(10));
+      }
+
+      if (q.data?.startsWith("texttone-")) {
+        const user = await this.bot.getUser(q, {
+          conversations: true,
+          agent: true,
+        });
+        await this.onTone(user, q.data.substring(9));
+      }
+    });
+  }
 
   private async onStyles(user: User) {
     await this.dataController.resetData(user);

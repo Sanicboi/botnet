@@ -26,7 +26,30 @@ export class OfferCreatorController implements IController {
     private dataController: DataController,
   ) {}
 
-  public bind() {}
+  public bind() {
+    this.bot.addCQListener(async (q) => {
+      if (q.data === "agent-2") {
+        const user = await this.bot.getUser(q, {
+          conversations: true,
+          agent: true,
+        });
+        await this.onSizes(user);
+      }
+
+      if (q.data?.startsWith("offersize-")) {
+        const user = await this.bot.getUser(q);
+        await this.onSize(user, q.data.substring(10));
+      }
+
+      if (q.data?.startsWith("offermodel-")) {
+        const user = await this.bot.getUser(q, {
+          conversations: true,
+          agent: true,
+        });
+        await this.onModel(user, q.data.substring(11));
+      }
+    });
+  }
 
   private async onSizes(user: User) {
     await this.dataController.resetData(user);
