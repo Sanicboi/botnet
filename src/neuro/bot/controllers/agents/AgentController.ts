@@ -5,11 +5,15 @@ import { User } from "../../../../entity/User";
 import { Bot } from "../../../Bot";
 import { Btn } from "../../../utils";
 import { IController } from "../../Controller";
+import { BalanceController } from "../balance/BalanceController";
 import { ConversationController } from "./conversations/ConversationController";
+import { InputController } from "./InputController";
 import { ModelController } from "./ModelController";
+import { OutputController } from "./output/OutputController";
 import { CopyWriterController } from "./special/CopyWriterController";
 import { OfferCreatorController } from "./special/OfferCreatorController";
 import { PostCreatorController } from "./special/PostCreatorController";
+import { TokenCountingController } from "./TokenCountingController";
 
 const manager = AppDataSource.manager;
 
@@ -24,6 +28,10 @@ export class AgentController implements IController {
   private postCreatorController: PostCreatorController;
   private modelController: ModelController;
   private conversationController: ConversationController;
+  private balanceController: BalanceController;
+  private tokenCountingController: TokenCountingController;
+  private outputController: OutputController;
+  private inputController: InputController;
 
   constructor(private bot: Bot) {
     this.modelController = new ModelController(this.bot);
@@ -43,6 +51,17 @@ export class AgentController implements IController {
       this.modelController,
       this.conversationController,
     );
+    this.balanceController = new BalanceController(this.bot);
+    this.tokenCountingController = new TokenCountingController(this.bot);
+    this.outputController = new OutputController(
+      this.bot,
+      this.tokenCountingController,
+    );
+    this.inputController = new InputController(
+      this.bot,
+      this.balanceController,
+      this.outputController,
+    );
   }
 
   public bind() {
@@ -51,6 +70,7 @@ export class AgentController implements IController {
     this.copyWriterController.bind();
     this.offerCreatorController.bind();
     this.postCreatorController.bind();
+    this.tokenCountingController.bind();
   }
 
   private async startConversation(user: User, agentId: number) {
