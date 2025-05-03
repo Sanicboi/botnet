@@ -7,6 +7,7 @@ import { Btn } from "../../../../utils";
 import { IController } from "../../../Controller";
 import { ModelController } from "../ModelController";
 import { Conversation } from "../../../../../entity/Conversation";
+import { ConversationController } from "../conversations/ConversationController";
 
 const manager = AppDataSource.manager;
 
@@ -19,6 +20,7 @@ export class PostCreatorController implements IController {
   constructor(
     private bot: Bot,
     private modelController: ModelController,
+    private conversationController: ConversationController,
   ) {}
 
   public bind() {}
@@ -93,6 +95,7 @@ export class PostCreatorController implements IController {
   }
 
   private async onConfirmStyles(user: User) {
+    await this.conversationController.markAllAsInactive(user);
     const conversation = new Conversation();
     conversation.agent = user.agent!;
     conversation.user = user;

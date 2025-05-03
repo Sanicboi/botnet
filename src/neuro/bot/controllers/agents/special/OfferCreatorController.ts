@@ -5,6 +5,7 @@ import { User } from "../../../../../entity/User";
 import { Bot } from "../../../../Bot";
 import { Btn } from "../../../../utils";
 import { IController } from "../../../Controller";
+import { ConversationController } from "../conversations/ConversationController";
 import { ModelController } from "../ModelController";
 
 const manager = AppDataSource.manager;
@@ -20,6 +21,7 @@ export class OfferCreatorController implements IController {
   constructor(
     private bot: Bot,
     private modelController: ModelController,
+    private conversationController: ConversationController,
   ) {}
 
   public bind() {}
@@ -62,6 +64,8 @@ export class OfferCreatorController implements IController {
   private async onModel(user: User, model: string) {
     user.dialogueData += `Модель оффера: ${model}\n`;
     await manager.save(user);
+
+    await this.conversationController.markAllAsInactive(user);
     await this.bot.bot.sendMessage(+user.chatId, this._thirdMessage);
 
     const conversation = new Conversation();

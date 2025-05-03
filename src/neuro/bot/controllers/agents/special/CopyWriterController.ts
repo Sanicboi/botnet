@@ -5,6 +5,7 @@ import { User } from "../../../../../entity/User";
 import { Bot } from "../../../../Bot";
 import { Btn } from "../../../../utils";
 import { IController } from "../../../Controller";
+import { ConversationController } from "../conversations/ConversationController";
 import { ModelController } from "../ModelController";
 
 const manager = AppDataSource.manager;
@@ -23,6 +24,7 @@ export class CopyWriterController implements IController {
   constructor(
     private bot: Bot,
     private modelController: ModelController,
+    private conversationController: ConversationController,
   ) {}
 
   public bind() {}
@@ -79,6 +81,8 @@ export class CopyWriterController implements IController {
   private async onTone(user: User, tone: string) {
     user.dialogueData += `Тон текста: ${tone}\n`;
     await manager.save(user);
+
+    await this.conversationController.markAllAsInactive(user);
 
     const conversation = new Conversation();
     conversation.agent = user.agent!;

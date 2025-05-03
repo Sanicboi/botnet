@@ -300,4 +300,13 @@ export class ConversationController implements IController {
       },
     );
   }
+
+  public async markAllAsInactive(user: User) {
+    for (const c of user.conversations) {
+      if (c.active) {
+        c.active = false;
+        await manager.save(c);
+      }
+    }
+  }
 }
