@@ -76,6 +76,7 @@ export class AgentController implements IController {
 
   public bind() {
     this.modelController.bind();
+    this.dataController.bind();
     this.conversationController.bind();
     this.copyWriterController.bind();
     this.offerCreatorController.bind();

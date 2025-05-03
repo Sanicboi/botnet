@@ -63,12 +63,44 @@ export class DataController implements IController {
   constructor(private bot: Bot) {}
 
   public bind() {
+    this.bot.bot.onText(/\/data/, async (msg) => {
+        const user = await this.bot.getUser(msg);
+        await this.onMyData(user);
+    })
     this.bot.addCQListener(async (q) => {
       if (q.data === "from-data") {
         const user = await this.bot.getUser(q);
         await this.onTakeFromData(user);
       }
+
+      if (q.data?.startsWith('data-')) {
+        const user = await this.bot.getUser(q);
+        await this.onDataCategory(user, q.data.substring(5));
+      }
+
+      if (q.data === 'data') {
+        const user = await this.bot.getUser(q);
+        await this.onMyData(user);
+      }
+
+      if (q.data === 'leave') {
+        const user = await this.bot.getUser(q);
+        await this.onLeaveData(user);
+      }
+
+      if (q.data?.startsWith('change-')) {
+        const user = await this.bot.getUser(q);
+        await this.onChangeData(user, q.data.substring(7));
+      }
+
     });
+
+    this.bot.addFreeTextListener(async (msg) => {
+        const user = await this.bot.getUser(msg);
+        if (user.waitingForData) {
+            await this.onData(user, msg.text!);
+        }
+    })
   }
 
   private async onTakeFromData(user: User) {
