@@ -62,7 +62,47 @@ export class BalanceController implements IController {
   /**
    * Привязка
    */
-  public bind() {}
+  public bind() {
+    this.bot.bot.onText(/\/balance/, async (msg) => {
+      const user = await this.bot.getUser(msg);
+      await this.onBalance(user);
+    });
+
+    this.bot.addCQListener(async (q) => {
+      const user = await this.bot.getUser(q);
+      if (q.data === "b-sub") {
+        await this.onBuySubscription(user);
+      }
+
+      if (q.data === "b-tokens") {
+        await this.onBuyTokens(user);
+      }
+
+      if (q.data === "balance") {
+        await this.onBalance(user);
+      }
+
+      if (q.data?.startsWith("sub-")) {
+        await this.onSubType(user, q.data.substring(4));
+      }
+
+      if (q.data?.startsWith("tokens-")) {
+        await this.onTokensType(user, +q.data.substring(7));
+      }
+
+      if (q.data?.startsWith("ihavepaid")) {
+        await this.onIHavePaid(user, q.data, q.message!.message_id);
+      }
+
+      if (q.data === "cancel-sub") {
+        await this.onCancelSub(user);
+      }
+    });
+
+    this.bot.onUpdateTokens(async (user) => {
+      await this.updateTokens(user);
+    });
+  }
 
   /**
    * Метод получения максимального количества токенов для генерации или отправки сообщения об их отсутствии
@@ -132,6 +172,26 @@ export class BalanceController implements IController {
               "Exclusive |135.000 токенов/день| (3490₽/мес)",
               "sub-exclusive",
             ),
+            Btn("Назад", "balance"),
+          ],
+        },
+      },
+    );
+  }
+
+  private async onBuyTokens(user: User) {
+    await this.bot.bot.sendMessage(
+      +user.chatId,
+      "👇Выберите комплект токенов:",
+      {
+        reply_markup: {
+          inline_keyboard: [
+            Btn("10.000 токенов - 99₽", "tokens-10000"),
+            Btn("30.000 токенов - 255₽ (15% выгоды)", "tokens-30000"),
+            Btn("100.000 токенов - 690₽ (21% выгоды)", "tokens-100000"),
+            Btn("200.000 токенов - 1490₽ (26% выгоды)", "tokens-200000"),
+            Btn("500.000 токенов - 3525₽ (30% выгоды)", "tokens-500000"),
+            Btn("1.000.000 токенов - 4990₽ (50% выгоды)", "tokens-1000000"),
             Btn("Назад", "balance"),
           ],
         },

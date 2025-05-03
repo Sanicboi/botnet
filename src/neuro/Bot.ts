@@ -127,99 +127,12 @@ export class Bot {
     return user;
   }
 
-  public onChangeData(f: (user: User, category: string) => Promise<any>) {
-    this.cqListeners.push(async (q, user) => {
-      if (q.data?.startsWith("change-")) {
-        await f(user, q.data.substring(7));
-      }
-    });
-  }
-  public onLeaveData(f: (user: User) => Promise<any>) {
-    this.cqListeners.push(async (q, user) => {
-      if (q.data === "leave") {
-        await f(user);
-      }
-    });
-  }
-
-  public onBuySubscription(f: (user: User) => Promise<any>) {
-    this.cqListeners.push(async (q, user) => {
-      if (q.data === "b-sub") {
-        await f(user);
-      }
-    });
-  }
-
-  public onBuyTokens(f: (user: User) => Promise<any>) {
-    this.cqListeners.push(async (q, user) => {
-      if (q.data === "b-tokens") {
-        await f(user);
-      }
-    });
-  }
-
-  public onSubType(f: (user: User, type: string) => Promise<any>) {
-    this.cqListeners.push(async (q, user) => {
-      if (q.data?.startsWith("sub-")) {
-        await f(user, q.data.substring(4));
-      }
-    });
-  }
-
-  public onTokensType(f: (user: User, amount: number) => Promise<any>) {
-    this.cqListeners.push(async (q, user) => {
-      if (q.data?.startsWith("tokens-")) {
-        await f(user, +q.data.substring(7));
-      }
-    });
-  }
-
-  public onIHavePaid(
-    f: (user: User, data: string, msgId: number) => Promise<any>,
-  ) {
-    this.cqListeners.push(async (q, user) => {
-      if (q.data?.startsWith("ihavepaid-")) {
-        await f(user, q.data.substring(10), q.message!.message_id);
-      }
-    });
-  }
-
   public onUpdateTokens(f: (user: User) => Promise<any>) {
     cron.schedule("0 0 * * *", async () => {
       const users = await manager.find(User);
 
       for (const user of users) {
         await f(user);
-      }
-    });
-  }
-
-  public onCancelSub(f: (user: User) => Promise<any>) {
-    this.cqListeners.push(async (q, user) => {
-      if (q.data === "cancel-sub") {
-        await f(user);
-      }
-    });
-  }
-
-  public onRef(f: (user: User) => Promise<any>) {
-    this.bot.onText(/\/ref/, async (msg) => {
-      const user = await this.getUser(msg);
-      await f(user);
-    });
-  }
-
-  public onSettings(f: (user: User) => Promise<any>) {
-    this.bot.onText(/\/settings/, async (msg) => {
-      const user = await this.getUser(msg);
-      await f(user);
-    });
-  }
-
-  public onSetting(f: (user: User, setting: string) => Promise<any>) {
-    this.cqListeners.push(async (q, user) => {
-      if (q.data?.startsWith("settings-")) {
-        await f(user, q.data.substring(9));
       }
     });
   }
@@ -310,55 +223,6 @@ export class Bot {
       if (user.agentId !== 0) {
         const url = await this.bot.getFileLink(msg.voice!.file_id);
         await f(user, url);
-      }
-    });
-  }
-
-  public onDocInput(
-    f: (user: User, url: string, caption?: string) => Promise<any>,
-  ) {
-    this.bot.on("document", async (msg) => {
-      if (!msg.document) return;
-      const user = await this.getUser(msg);
-      const url = await this.bot.getFileLink(msg.document.file_id);
-      await f(user, url, msg.caption);
-    });
-  }
-
-  public onImageInput(
-    f: (user: User, url: string, caption?: string) => Promise<any>,
-  ) {
-    this.bot.on("photo", async (msg) => {
-      if (!msg.photo) return;
-      const user = await this.getUser(msg);
-      const url = await this.bot.getFileLink(
-        msg.photo.sort((a, b) => b.height * b.width - a.height * a.width)[0]!
-          .file_id,
-      );
-      await f(user, url, msg.caption);
-    });
-  }
-
-  public onMyData(f: (user: User) => Promise<any>) {
-    this.bot.onText(/\/data/, async (msg) => {
-      const user = await this.getUser(msg);
-      await f(user);
-    });
-  }
-
-  public onDataCategory(f: (user: User, category: string) => Promise<any>) {
-    this.cqListeners.push(async (q, user) => {
-      if (q.data?.startsWith("data-")) {
-        await f(user, q.data.substring(5));
-      }
-    });
-  }
-
-  public onData(f: (user: User, data: string) => Promise<any>) {
-    this.freeTextListeners.push(async (msg, user) => {
-      if (user.waitingForData !== "") {
-        await f(user, msg.text!);
-        return true;
       }
     });
   }

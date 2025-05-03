@@ -6,7 +6,12 @@ import { IController } from "../Controller";
 export class ReferralController implements IController {
   constructor(private bot: Bot) {}
 
-  public bind() {}
+  public bind() {
+    this.bot.bot.onText(/\/ref/, async (msg) => {
+      const user = await this.bot.getUser(msg);
+      await this.onRef(user);
+    });
+  }
 
   private async onRef(user: User) {
     if (user.inviteCount >= 30)

@@ -1,12 +1,17 @@
+import { AppDataSource } from "../../../../../data-source";
 import { Conversation } from "../../../../../entity/Conversation";
 import { User } from "../../../../../entity/User";
+import { OutputFormat } from "../../../../../utils/OutputFormat";
 import { api } from "../../../../apis/API";
 import { Bot } from "../../../../Bot";
+import { Btn } from "../../../../utils";
 import { IController } from "../../../Controller";
 import { TokenCountingController } from "../TokenCountingController";
 import { HTMLOutputConverter } from "./HTMLOutputConverter";
 //@ts-ignore
 import docx from "html-to-docx";
+
+const manager = AppDataSource.manager;
 
 /**
  * Контроллер вывода
@@ -34,7 +39,19 @@ export class OutputController implements IController {
   /**
    * Привязка
    */
-  public bind() {}
+  public bind() {
+    this.bot.addCQListener(async (q) => {
+      if (q.data === "settings-format") {
+        const user = await this.bot.getUser(q);
+        await this.onFormats(user);
+      }
+
+      if (q.data?.startsWith("format-")) {
+        const user = await this.bot.getUser(q);
+        await this.onFormat(user, q.data.substring(7));
+      }
+    });
+  }
 
   /**
    * Метод конвертации и отправки результата
@@ -103,5 +120,45 @@ export class OutputController implements IController {
       );
     }
     await this.tokenCountingController.sendTokenCount(user, tokens);
+  }
+
+  private async onFormats(user: User) {
+    await this.bot.bot.sendMessage(+user.chatId, `Выберите формат ответа:`, {
+      reply_markup: {
+        inline_keyboard: [
+          Btn(
+            `Стандартный (текст или документ html) ${user.outputFormat === "text" ? "✅" : ""}`,
+            "format-text",
+          ),
+          Btn(
+            `HTML ${user.outputFormat === "html" ? "✅" : ""}`,
+            "format-html",
+          ),
+          Btn(
+            `Документ Word ${user.outputFormat === "docx" ? "✅" : ""}`,
+            "format-docx",
+          ),
+          Btn(
+            `Аудио ${user.outputFormat === "audio" ? "✅" : ""}`,
+            "format-audio",
+          ),
+        ],
+      },
+    });
+  }
+
+  private async onFormat(user: User, format: string) {
+    const f = format as OutputFormat;
+    user.outputFormat = f;
+    await manager.save(user);
+    await this.bot.bot.sendMessage(
+      +user.chatId,
+      `Формат ответа изменен на ${f}`,
+      {
+        reply_markup: {
+          inline_keyboard: [Btn("Назад", "settings")],
+        },
+      },
+    );
   }
 }
