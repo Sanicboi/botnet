@@ -11,7 +11,6 @@ import { AudioFile } from "./assistants/AudioFile";
 import { AgentModel } from "./assistants/AgentModel";
 import { Dialog } from "./assistants/Dialog";
 import { DialogFile } from "./assistants/DialogFile";
-import { SupportedModels } from "../utils/Models";
 import { OutputFormat } from "../utils/OutputFormat";
 import { AIModel } from "./AIModel";
 import { Conversation } from "./Conversation";
@@ -25,19 +24,6 @@ export class User {
   @PrimaryColumn()
   chatId: string;
 
-  @Column({ default: "n" })
-  qt: "n" | "s" | "l" | "d" | "a" | "o";
-
-  @Column({
-    type: "text",
-    nullable: true,
-  })
-  threadId: string | null;
-
-  @Column({
-    default: false,
-  })
-  usingVoice: boolean;
 
   @Column({
     default: false,
@@ -75,18 +61,12 @@ export class User {
   })
   leftForToday: number; // subscription Rubles left for today
 
-  @Column({
-    default: "",
-  })
-  name: string;
 
   @Column({
     default: false,
   })
   countTokens: boolean;
 
-  @OneToMany(() => DialogFile, (file) => file.user)
-  files: DialogFile[];
 
   @Column({
     default: 0,
@@ -140,23 +120,8 @@ export class User {
   careerData: string;
 
   @ManyToOne(() => AgentModel, (agent) => agent.users)
-  @JoinColumn({
-    name: "agentId",
-  })
   agent: AgentModel | null;
 
-  @Column("int", {
-    nullable: true,
-  })
-  agentId: number | null;
-
-  @OneToMany(() => Dialog, (dialog) => dialog.user)
-  dialogs: Dialog[];
-
-  @Column("int", {
-    nullable: true,
-  })
-  currentDialogId: number | null;
 
   @Column({
     default: "text",
