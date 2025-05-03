@@ -83,4 +83,16 @@ export class ModelController implements IController {
       // TODO
     }
   }
+
+  public async sendSelectAPI(to: number) {
+    await this.bot.bot.sendMessage(
+      to,
+      "Выберите платформу нейросети для генерации",
+      {
+        reply_markup: {
+          inline_keyboard: [Btn("OpenAI", "api-openai")],
+        },
+      },
+    );
+  }
 }
