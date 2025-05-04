@@ -19,9 +19,6 @@ export class AudioFile {
   user: User;
 
   @Column()
-  userId: string;
-
-  @Column()
   extension: string;
 
   @Column("text", {
