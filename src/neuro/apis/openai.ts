@@ -239,22 +239,23 @@ export class OpenAIApi implements IAgentsAPI {
     return arr;
   }
 
-  public async transcribeVoice(urlOrBuffer: string | Buffer, name: string): Promise<string> {
+  public async transcribeVoice(
+    urlOrBuffer: string | Buffer,
+    name: string,
+  ): Promise<string> {
     let data: Buffer;
-    if (typeof urlOrBuffer === 'string') {
-      const res : AxiosResponse<Buffer> = await axios.get(urlOrBuffer, {
-        responseType: 'arraybuffer'
+    if (typeof urlOrBuffer === "string") {
+      const res: AxiosResponse<Buffer> = await axios.get(urlOrBuffer, {
+        responseType: "arraybuffer",
       });
       data = res.data;
     } else {
       data = urlOrBuffer;
     }
 
-
-
     const r = await this.openai.audio.transcriptions.create({
       file: new File([data], name),
-      model: 'gpt-4o-mini-transcribe',
+      model: "gpt-4o-mini-transcribe",
     });
     return r.text;
   }
@@ -262,9 +263,9 @@ export class OpenAIApi implements IAgentsAPI {
   public async summarizeText(input: string): Promise<string> {
     const res = await this.openai.responses.create({
       input: input,
-      instructions: 'Суммаризируй данный тебе текст',
+      instructions: "Суммаризируй данный тебе текст",
       store: false,
-      model: 'gpt-4o-mini',
+      model: "gpt-4o-mini",
     });
     return res.output_text;
   }

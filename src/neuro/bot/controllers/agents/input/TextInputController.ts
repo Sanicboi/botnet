@@ -52,7 +52,7 @@ export class TextInputController implements IController {
 
     const result = await api.run({
       api: user.model.api,
-      input: text,
+      input: text + "\n\nДополнительные данные: " + user.dialogueData,
       model: user.model.id,
       type: "text",
       conversation: conv,

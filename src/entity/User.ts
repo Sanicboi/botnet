@@ -1,16 +1,7 @@
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  OneToMany,
-  PrimaryColumn,
-} from "typeorm";
+import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
 import { UserPromo } from "./assistants/UserPromo";
 import { AudioFile } from "./assistants/AudioFile";
 import { AgentModel } from "./assistants/AgentModel";
-import { Dialog } from "./assistants/Dialog";
-import { DialogFile } from "./assistants/DialogFile";
 import { OutputFormat } from "../utils/OutputFormat";
 import { AIModel } from "./AIModel";
 import { Conversation } from "./Conversation";
@@ -23,7 +14,6 @@ export type SubType = "none" | "lite" | "pro" | "premium" | "exclusive";
 export class User {
   @PrimaryColumn()
   chatId: string;
-
 
   @Column({
     default: false,
@@ -61,12 +51,10 @@ export class User {
   })
   leftForToday: number; // subscription Rubles left for today
 
-
   @Column({
     default: false,
   })
   countTokens: boolean;
-
 
   @Column({
     default: 0,
@@ -121,7 +109,6 @@ export class User {
 
   @ManyToOne(() => AgentModel, (agent) => agent.users)
   agent: AgentModel | null;
-
 
   @Column({
     default: "text",

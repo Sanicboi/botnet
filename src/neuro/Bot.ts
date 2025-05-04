@@ -137,8 +137,6 @@ export class Bot {
     });
   }
 
-
-
   public setListeners() {
     this.bot.on("callback_query", async (q) => {
       try {

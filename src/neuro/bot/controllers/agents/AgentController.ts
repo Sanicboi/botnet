@@ -16,6 +16,7 @@ import { CopyWriterController } from "./special/CopyWriterController";
 import { OfferCreatorController } from "./special/OfferCreatorController";
 import { PostCreatorController } from "./special/PostCreatorController";
 import { TokenCountingController } from "./TokenCountingController";
+import { TranscriptionController } from "./TranscriptionController";
 
 const manager = AppDataSource.manager;
 
@@ -36,10 +37,12 @@ export class AgentController implements IController {
   private groupController: GroupController;
   private inputController: InputController;
   private dataController: DataController;
+  private transcriptionController: TranscriptionController;
 
   constructor(private bot: Bot) {
     this.dataController = new DataController(this.bot);
     this.modelController = new ModelController(this.bot);
+    this.transcriptionController = new TranscriptionController(this.bot);
     this.conversationController = new ConversationController(this.bot);
     this.copyWriterController = new CopyWriterController(
       this.bot,
@@ -71,10 +74,12 @@ export class AgentController implements IController {
       this.bot,
       this.balanceController,
       this.outputController,
+      this.transcriptionController,
     );
   }
 
   public bind() {
+    this.transcriptionController.bind();
     this.modelController.bind();
     this.dataController.bind();
     this.conversationController.bind();

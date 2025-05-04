@@ -4,7 +4,9 @@ import { BalanceController } from "../balance/BalanceController";
 import { DocumentInputController } from "./input/DocumentInputController";
 import { ImageInputController } from "./input/ImageInputController";
 import { TextInputController } from "./input/TextInputController";
+import { VoiceInputController } from "./input/VoiceInputController";
 import { OutputController } from "./output/OutputController";
+import { TranscriptionController } from "./TranscriptionController";
 
 /**
  * This controller combines all the controllers in the "input" folder
@@ -13,10 +15,12 @@ export class InputController implements IController {
   private text: TextInputController;
   private image: ImageInputController;
   private document: DocumentInputController;
+  private voice: VoiceInputController;
   constructor(
     private bot: Bot,
     private balanceController: BalanceController,
     private outputController: OutputController,
+    private transcriptionCOntroller: TranscriptionController,
   ) {
     this.text = new TextInputController(
       bot,
@@ -33,11 +37,18 @@ export class InputController implements IController {
       balanceController,
       outputController,
     );
+    this.voice = new VoiceInputController(
+      this.bot,
+      this.balanceController,
+      this.outputController,
+      this.transcriptionCOntroller,
+    );
   }
 
   public bind() {
     this.image.bind();
     this.document.bind();
+    this.voice.bind();
     this.text.bind();
   }
 }
