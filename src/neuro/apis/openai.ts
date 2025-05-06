@@ -269,4 +269,17 @@ export class OpenAIApi implements IAgentsAPI {
     });
     return res.output_text;
   }
+
+  public async generateImage(
+    prompt: string,
+    res: "1024x1024" | "1024x1792" | "1792x1024",
+  ): Promise<string> {
+    const result = await this.openai.images.generate({
+      prompt,
+      model: "dall-e-3",
+      quality: "standard",
+      size: res,
+    });
+    return result.data[0].url!;
+  }
 }

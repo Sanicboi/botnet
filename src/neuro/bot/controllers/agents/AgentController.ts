@@ -42,7 +42,10 @@ export class AgentController implements IController {
   constructor(private bot: Bot) {
     this.dataController = new DataController(this.bot);
     this.modelController = new ModelController(this.bot);
-    this.transcriptionController = new TranscriptionController(this.bot);
+    this.transcriptionController = new TranscriptionController(
+      this.bot,
+      this.dataController,
+    );
     this.conversationController = new ConversationController(this.bot);
     this.copyWriterController = new CopyWriterController(
       this.bot,

@@ -140,6 +140,12 @@ export class TranscriptionController implements IController {
       );
     }
   }
+
+  /**
+   * TODO: тут надо сделать параллелизм
+   * @param p путь к файлу
+   * @returns буферы
+   */
   private async splitAudio(p: string): Promise<Buffer[]> {
     let chunks: Buffer[] = [];
     let stream = new Writable({
