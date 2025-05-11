@@ -168,9 +168,7 @@ export class DataController implements IController {
     user.waitingForData = "";
     user.waitingForPromo = false;
 
-    user.agentId = null;
     user.agent = null;
-    user.currentDialogId = null;
     user.currentAudioAgent = null;
     user.usingImageGeneration = false;
 

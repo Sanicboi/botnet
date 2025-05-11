@@ -26,7 +26,26 @@ export class TranscriptionController implements IController {
   private transcriberMessage: string = "";
   private summarizerMessage: string = "";
 
-  public bind() {}
+  public bind() {
+    this.bot.addCQListener(async (q) => {
+      if (q.data === "audio" || q.data === "audiosum") {
+        const user = await this.bot.getUser(q, {
+          conversations: true,
+          agent: true,
+        });
+        await this.onAudioAgent(
+          user,
+          q.data === "audio" ? "transcriber" : "summarizer",
+        );
+      }
+    });
+
+    this.bot.bot.on("audio", async (msg) => {
+      if (!msg.audio) return;
+      const user = await this.bot.getUser(msg);
+      await this.onCalculateCosts(user, msg.audio.file_id, msg.caption);
+    });
+  }
 
   public async getVoiceInput(msg: Message): Promise<string> {
     if (!msg.voice) throw new Error("No voice message");
