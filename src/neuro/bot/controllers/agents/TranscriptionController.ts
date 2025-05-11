@@ -38,6 +38,17 @@ export class TranscriptionController implements IController {
           q.data === "audio" ? "transcriber" : "summarizer",
         );
       }
+
+      if (q.data?.startsWith("transcription-")) {
+        if (q.data.startsWith("transcription-reject-")) {
+          const user = await this.bot.getUser(q);
+          await this.onRejectTranscribe(user, q.data.substring(21));
+        } else {
+          // transcription-confirm-
+          const user = await this.bot.getUser(q);
+          await this.onConfirmTranscribe(user, q.data.substring(22));
+        }
+      }
     });
 
     this.bot.bot.on("audio", async (msg) => {
@@ -99,14 +110,27 @@ export class TranscriptionController implements IController {
       {
         reply_markup: {
           inline_keyboard: [
-            Btn("Да", `transcription-${audio.id}`),
-            Btn("Нет", "transcription-no"),
+            Btn("Да", `transcription-confirm-${audio.id}`),
+            Btn("Нет", `transcription-reject-${audio.id}`),
           ],
         },
       },
     );
   }
 
+  private async onRejectTranscribe(user: User, id: string) {
+    const audio = await manager.findOneBy(AudioFile, {
+      id,
+      user,
+    });
+
+    if (!audio) return;
+    await fs.promises.rm(
+      path.join(process.cwd(), "audio", audio.id + audio.extension),
+    );
+    await manager.remove(audio);
+    await this.bot.bot.sendMessage(user.chatId, "Транскрибация отменена");
+  }
   private async onConfirmTranscribe(user: User, id: string) {
     const audio = await manager.findOneBy(AudioFile, {
       id,
