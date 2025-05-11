@@ -20,7 +20,7 @@ export class InputController implements IController {
     private bot: Bot,
     private balanceController: BalanceController,
     private outputController: OutputController,
-    private transcriptionCOntroller: TranscriptionController,
+    private transcriptionController: TranscriptionController,
   ) {
     this.text = new TextInputController(
       bot,
@@ -41,7 +41,7 @@ export class InputController implements IController {
       this.bot,
       this.balanceController,
       this.outputController,
-      this.transcriptionCOntroller,
+      this.transcriptionController,
     );
   }
 
