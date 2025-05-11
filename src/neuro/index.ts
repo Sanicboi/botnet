@@ -16,11 +16,11 @@ AppDataSource.initialize().then(async () => {
 
   
   let controllers: IController[] = [
-    new AgentController(bot),
     new BalanceController(bot),
     new StaticController(bot),
     new PromoController(bot),
-    new ReferralController(bot)
+    new ReferralController(bot),
+    new AgentController(bot),
   ];
 
   for (const controller of controllers) {
