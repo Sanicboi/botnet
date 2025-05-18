@@ -14,7 +14,6 @@ export const openai = new OpenAI({
 AppDataSource.initialize().then(async () => {
   const bot = new Bot();
 
-  
   let controllers: IController[] = [
     new BalanceController(bot),
     new StaticController(bot),
