@@ -1,7 +1,7 @@
-import { Bot } from "../Bot";
-import { QueryButton } from "./buttons";
-import { Keyboard } from "./keyboard";
-import { IView } from "./view";
+import { Bot } from "../../Bot";
+import { QueryButton } from "../buttons";
+import { Keyboard } from "../keyboard";
+import { IView } from "../view";
 
 export class SettingsView implements IView {
   private readonly _text: string = "Настройки ⚙️";

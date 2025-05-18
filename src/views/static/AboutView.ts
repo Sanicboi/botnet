@@ -1,9 +1,9 @@
-import { Bot } from "../Bot";
-import { ViewError } from "../errors/ViewError";
-import { diskTextStorage } from "../storage";
-import { UrlButton } from "./buttons";
-import { Keyboard } from "./keyboard";
-import { IView } from "./view";
+import { Bot } from "../../Bot";
+import { ViewError } from "../../errors/ViewError";
+import { diskTextStorage } from "../../storage";
+import { UrlButton } from "../buttons";
+import { Keyboard } from "../keyboard";
+import { IView } from "../view";
 
 export class AboutView implements IView {
   private readonly _keyboard = new Keyboard([
