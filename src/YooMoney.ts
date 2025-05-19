@@ -2,68 +2,84 @@ import { ICreatePayment, YooCheckout } from "@a2seven/yoo-checkout";
 import { EnvError } from "./errors/EnvError";
 import { PaymentError } from "./errors/PaymentError";
 
-
 export type PaymentData = {
-    url: string;
-    id: string;
-}
+  url: string;
+  id: string;
+};
 
+export type PaymentInfo = {
+  userId: number;
+  amount: number;
+};
 
 export class YooMoney {
+  private readonly _checkout: YooCheckout;
 
+  private constructor() {
+    if (!process.env.YOOKASSA_KEY) throw new EnvError("YOOKASSA_KEY");
+    if (!process.env.YOOKASSA_SHOP_ID) throw new EnvError("YOOKASSA_SHOP_ID");
 
-    private readonly _checkout: YooCheckout;
+    this._checkout = new YooCheckout({
+      shopId: process.env.YOOKASSA_SHOP_ID,
+      secretKey: process.env.YOOKASSA_KEY,
+    });
+  }
 
-    private constructor() {
-        if (!process.env.YOOKASSA_KEY) throw new EnvError("YOOKASSA_KEY");
-        if (!process.env.YOOKASSA_SHOP_ID) throw new EnvError("YOOKASSA_SHOP_ID");
+  private static _instance?: YooMoney;
 
-        this._checkout = new YooCheckout({
-            shopId: process.env.YOOKASSA_SHOP_ID,
-            secretKey: process.env.YOOKASSA_KEY
-        });
+  public static get s_Instance(): YooMoney {
+    if (!this._instance) {
+      this._instance = new YooMoney();
     }
 
-    private static _instance?: YooMoney;
+    return this._instance;
+  }
 
-    public static get s_Instance(): YooMoney {
-        if (!this._instance) {
-            this._instance = new YooMoney();
-        }
+  public async createPayment(
+    amount: number,
+    description: string,
+    customerId: number,
+    save: boolean = false,
+    paymentMethod?: string,
+  ): Promise<PaymentData> {
+    const payment: ICreatePayment = {
+      amount: {
+        currency: "RUB",
+        value: `${amount}.00`,
+      },
+      save_payment_method: save,
+      capture: true,
+      confirmation: {
+        type: "redirect",
+        return_url: "https://t.me/NComrades_bot",
+      },
+      description,
+      payment_method_id: paymentMethod,
+      merchant_customer_id: String(customerId),
+    };
 
-        return this._instance;
-    }
+    const result = await this._checkout.createPayment(payment);
 
-    public async createPayment(amount: number, description: string, customerId: number, save: boolean = false, paymentMethod?: string): Promise<PaymentData> {
-        const payment: ICreatePayment = {
-            amount: {
-                currency: "RUB",
-                value: `${amount}.00`
-            },
-            save_payment_method: save,
-            capture: true,
-            confirmation: {
-                type: "redirect",
-                return_url: "https://t.me/NComrades_bot"
-            },
-            description,
-            payment_method_id: paymentMethod,
-            merchant_customer_id: String(customerId)
-        };
+    if (!result.confirmation.confirmation_url)
+      throw new PaymentError("No confirmation URL");
 
-        const result = await this._checkout.createPayment(payment);
+    return {
+      id: result.id,
+      url: result.confirmation.confirmation_url,
+    };
+  }
 
-        if (!result.confirmation.confirmation_url) throw new PaymentError("No confirmation URL")
+  public async getPayment(id: string): Promise<PaymentInfo> {
+    const result = await this._checkout.getPayment(id);
 
-        return {
-            id: result.id,
-            url: result.confirmation.confirmation_url
-        }
-    }
+    if (result.status !== "succeeded")
+      throw new PaymentError("Payment not succeeded");
+    if (!result.merchant_customer_id)
+      throw new PaymentError("Merchant customer id is null");
 
-
-    public async getPayment(id: string) {
-        
-    }
-
+    return {
+      amount: +result.amount.value,
+      userId: +result.merchant_customer_id,
+    };
+  }
 }
