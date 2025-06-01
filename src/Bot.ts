@@ -32,6 +32,7 @@ export class Bot {
     return this._instance;
   }
 
+
   public async sendText(
     to: number,
     text: string,
@@ -51,6 +52,10 @@ export class Bot {
     }
 
     await this._tgBot.sendMessage(to, text, options);
+  }
+
+  public async getUrl(fileId: string): Promise<string> {
+    return await this._tgBot.getFileLink(fileId); 
   }
 
   public async sendPhoto(

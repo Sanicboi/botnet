@@ -12,5 +12,8 @@
     "strict": true,
     "strictPropertyInitialization": false,
     "rootDir": "src"
-  }
+  },
+  "exclude": [
+    "vitest.config.ts"
+  ]
 }

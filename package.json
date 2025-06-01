@@ -11,7 +11,8 @@
     "@types/uuid": "^10.0.0",
     "prettier": "^3.3.3",
     "ts-node": "10.9.1",
-    "typescript": "^5.6.3"
+    "typescript": "^5.6.3",
+    "vitest": "^3.1.4"
   },
   "dependencies": {
     "@a2seven/yoo-checkout": "^1.1.4",
@@ -42,6 +43,8 @@
     "login": "ts-node ./src/add/login.ts",
     "quickProcess": "ts-node ./src/add/quickProcess.ts",
     "add": "ts-node ./src/add.local.ts",
-    "neuro-manager": "ts-node ./src/neuro/manager.ts"
+    "neuro-manager": "ts-node ./src/neuro/manager.ts",
+    "test": "vitest",
+    "coverage": "vitest run --coverage"
   }
 }
